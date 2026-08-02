@@ -8,83 +8,39 @@ GitHub Pages: https://branch10480.github.io/knowledge/
 
 ### P0（基盤）✅
 - [x] リポジトリ作成 (`branch10480/knowledge`、公開)
-- [x] GitHub Pages 有効化 (gh-pages ブランチ)
-- [x] ローカルモデル (deepseek-v4-flash) デフォルト化
-- [x] Telegram ゲートウェイ設定 (通知専用チャネル)
-- [x] cron ジョブ作成 (毎日 9:00 JST、配信: signal+telegram)
-- [x] 初回収集・push 完了 (12 エントリ)
-- [x] .lastrun 方式による差分収集
-- [x] XSS 対策・URL検証・日付フォーマット検証
-- [x] entries.json 正本 + build.py レンダリング方式に移行
-- [x] add_entries.py (JSON 追記 → 自動ビルド)
-- [x] update_html.py 削除
+- [x] gh-pagesブランチ初期化 + GitHub Pages有効化
+- [x] `entries.json` 正本 + `build.py` ビルド方式
+- [x] `add_entries.py` エントリ追記スクリプト
 
-### P1（品質・UX）✅
-- [x] README.md 作成 (構成・運用ドキュメント)
-- [x] 検索ボックス (全文検索、リアルタイム)
-- [x] タグフィルター (クリックで絞り込み、複数選択可)
-- [x] 結果表示 (ヒット数 / 全件)
-- [x] アクセシビリティ改善 (<main>、aria-label、role="button"、aria-pressed)
-- [x] ライトモード対応 (prefers-color-scheme: light)
-- [x] CSS 改善 (タグホバー・アクティブ状態)
-- [x] template.html 分離 (テンプレートとロジックの分離)
+### P1（検索・フィルター・アクセシビリティ）✅
+- [x] リアルタイム検索
+- [x] タグフィルター
+- [x] ARIA属性対応
+- [x] ライトモード対応
+- [x] template.html 分離
+- [x] README.md
 
-### P2（拡張機能）✅
-- [x] RSS/Atom フィード (`feed.xml`)
-- [x] 月別アーカイブページ (`archive/YYYY-MM.html`)
-- [x] 個別エントリページ (`entry/slug.html`)
-- [x] エントリ内に「関連エントリ」表示 (共通タグでマッチ)
-- [x] index.html にアーカイブナビ (JS 自動生成)
-- [x] feed.xml への `<link rel="alternate">` タグ追加
+### P2（個別ページ・アーカイブ・RSS）✅
+- [x] Atom フィード (`feed.xml`)
+- [x] 個別エントリページ (`entry/<slug>.html`)
+- [x] 月別アーカイブ (`archive/YYYY-MM.html`)
+- [x] 関連エントリ表示
+- [x] アーカイブナビ
 
-### P3（運用改善）✅
-- [x] GitHub Actions ワークフロー作成 (`.github/workflows/build.yml`)
-- [x] README に Actions の説明を追加
-- [x] main ブランチ push → gh-pages 自動ビルド・デプロイの仕組み構築
+### P3（CI/CD）✅
+- [x] GitHub Actions ワークフロー (`.github/workflows/build.yml`)
+- [x] README に Actions 説明追加
 
-## 現状のファイル構成
+### デザイン刷新 ✅
+- [x] Toshi Design System v0.7.0 準拠に全ページ改修
+  - `globalnav`（sticky ヘッダー）
+  - `hero`（見出しエリア）
+  - `entry-card`（カード型エントリ表示）
+  - `tag-pill`（ピル型タグ）
+  - CSS トークン完全準拠 (--bg, --tint, --sh-1 など)
+  - UDEV Gothic 35LG フォント
+  - color-scheme / prefers-color-scheme / localStorage テーマ切替
 
-```
-knowledge/
-├── entries.json      ← 正本 (12 エントリ)
-├── build.py          ← ビルドスクリプト (RSS/個別ページ/アーカイブ生成)
-├── template.html     ← HTML テンプレート (CSS+JS:検索・フィルター・アーカイブ)
-├── add_entries.py    ← 追記 + 自動ビルド
-├── index.html        ← 生成物
-├── feed.xml          ← Atom フィード
-├── README.md         ← ドキュメント (Actions 説明付き)
-├── entry/            ← 個別エントリページ (build.py で自動生成)
-│   └── *.html
-├── archive/          ← 月別アーカイブ (build.py で自動生成)
-│   └── YYYY-MM.html
-└── .lastrun          ← cron 最終実行時刻
-```
+## 次フェーズ
 
-## 運用中
-- **cron ジョブ**: `Knowledge収集` (ID: `317dac27c6f8`)
-  - スケジュール: `0 9 * * *` (毎日 9:00 JST)
-  - 配信: signal + telegram
-  - モデル: デフォルト (deepseek-v4-flash)
-- **GitHub Actions**: `.github/workflows/build.yml`
-  - トリガー: main push / 毎日 9:00 JST / 手動実行
-  - 処理: build.py → gh-pages push → Pages デプロイ
-
-## 再開方法
-```bash
-cd ~/ghq/github.com/branch10480/knowledge
-git status  # 最新状態確認
-```
-
-### 手動エントリ追加
-```bash
-echo '[{"date":"YYYY-MM-DD","title":"...","tags":["tag"],"content":"markdown","source":"https://..."}]' | python3 add_entries.py
-git add entries.json index.html feed.xml entry/ archive/
-git commit -m "knowledge: 手動追記"
-git push origin gh-pages
-```
-
-### ビルドのみ
-```bash
-python3 build.py
-# → index.html, feed.xml, entry/*.html, archive/YYYY-MM.html を生成
-```
+P4: GitHub Actions の main→gh-pages ビルド連携完了確認 + cronジョブのbuild.py対応
