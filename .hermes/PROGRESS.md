@@ -29,13 +29,15 @@ GitHub Pages: https://branch10480.github.io/knowledge/
 - [x] CSS 改善 (タグホバー・アクティブ状態)
 - [x] template.html 分離 (テンプレートとロジックの分離)
 
-## 未着手
+### P2（拡張機能）✅
+- [x] RSS/Atom フィード (`feed.xml`)
+- [x] 月別アーカイブページ (`archive/YYYY-MM.html`)
+- [x] 個別エントリページ (`entry/slug.html`)
+- [x] エントリ内に「関連エントリ」表示 (共通タグでマッチ)
+- [x] index.html にアーカイブナビ (JS 自動生成)
+- [x] feed.xml への `<link rel="alternate">` タグ追加
 
-### P2（拡張機能）
-- [ ] 個別エントリページ（/entry/YYYY-MM-DD-slug.html）
-- [ ] 月別アーカイブページ
-- [ ] RSS/Atom フィード
-- [ ] エントリ内の関連リンク表示
+## 未着手
 
 ### P3（運用改善）
 - [ ] GitHub Actions で main → gh-pages ビルド自動化
@@ -46,11 +48,16 @@ GitHub Pages: https://branch10480.github.io/knowledge/
 ```
 knowledge/
 ├── entries.json      ← 正本 (12 エントリ)
-├── build.py          ← ビルドスクリプト
-├── template.html     ← HTML テンプレート (CSS+JS)
+├── build.py          ← ビルドスクリプト (RSS/個別ページ/アーカイブ生成)
+├── template.html     ← HTML テンプレート (CSS+JS:検索・フィルター・アーカイブ)
 ├── add_entries.py    ← 追記 + 自動ビルド
-├── index.html        ← 生成物 (204 行)
+├── index.html        ← 生成物
+├── feed.xml          ← Atom フィード
 ├── README.md         ← ドキュメント
+├── entry/            ← 個別エントリページ (build.py で自動生成)
+│   └── *.html
+├── archive/          ← 月別アーカイブ (build.py で自動生成)
+│   └── YYYY-MM.html
 └── .lastrun          ← cron 最終実行時刻
 ```
 
@@ -70,7 +77,7 @@ git status  # 最新状態確認
 ### 手動エントリ追加
 ```bash
 echo '[{"date":"YYYY-MM-DD","title":"...","tags":["tag"],"content":"markdown","source":"https://..."}]' | python3 add_entries.py
-git add entries.json index.html
+git add entries.json index.html feed.xml entry/ archive/
 git commit -m "knowledge: 手動追記"
 git push origin gh-pages
 ```
@@ -78,9 +85,9 @@ git push origin gh-pages
 ### ビルドのみ
 ```bash
 python3 build.py
+# → index.html, feed.xml, entry/*.html, archive/YYYY-MM.html を生成
 ```
 
-### P2 作業開始時
-- 個別ページ: template.html にエントリリンク追加 + build.py で /entry/ 生成
-- RSS: build.py にフィード生成追加
-- Actions: .github/workflows/ に YAML 追加
+### P3 作業開始時
+- Actions: `.github/workflows/build.yml` に YAML 追加
+- `main` ブランチにコード管理、push で gh-pages 自動ビルド

@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Knowledge</title>
+<link rel="alternate" type="application/atom+xml" title="Knowledge Atom Feed" href="feed.xml">
 <style>
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Noto Sans JP', sans-serif;
@@ -59,6 +60,9 @@ a { color: #8888ff; }
 <h1 aria-label="Knowledge">📚 Knowledge</h1>
 <p class="date">最終更新: __TODAY__</p>
 <p>情報収集・勉強メモを蓄積していく知識ベースです。</p>
+<nav aria-label="アーカイブ" style="margin-bottom: 12px;">
+<span id="archive-links"></span>
+</nav>
 <nav aria-label="フィルター">
 <input type="search" id="search-box" placeholder="エントリを検索..." aria-label="エントリを検索">
 <div id="tag-filters"></div>
@@ -104,6 +108,24 @@ __ENTRIES__
     RC.textContent = c + ' / ' + D.length + ' 件';
   }
   S.addEventListener('input', F); F();
+
+  // Archive links
+  var AL = document.getElementById('archive-links');
+  if (AL) {
+    var archives = {};
+    D.forEach(function(d){
+      var dt = d.querySelector('.date').textContent.trim().split(' ')[0];
+      var ym = dt.substring(0,7);
+      archives[ym] = true;
+    });
+    Object.keys(archives).sort().reverse().forEach(function(ym){
+      var a = document.createElement('a');
+      a.href = 'archive/' + ym + '.html';
+      a.textContent = ym;
+      a.style.cssText = 'color:#888;text-decoration:none;margin-right:8px;font-size:0.9em;';
+      AL.appendChild(a);
+    });
+  }
 })();
 </script>
 </body>

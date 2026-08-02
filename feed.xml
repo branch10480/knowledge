@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Knowledge</title>
+  <link href="https://branch10480.github.io/knowledge"/>
+  <updated>2026-08-02T00:00:00+09:00</updated>
+  <id>https://branch10480.github.io/knowledge/</id>
+  <author><name>branch10480</name></author>
+  
+  <item>
+    <title>TestFlight、ベータアプリ検索機能を追加</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-07-31-testflightベータアプリ検索機能を追加.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-07-31-testflightベータアプリ検索機能を追加.html</guid>
+    <pubDate>31 Jul 2026 00:00:00 +0000</pubDate>
+    <description><p>Apple は TestFlight に検索フィールドを追加するアップデートをロールアウトしました。ベータアプリを多数管理するユーザーが特定のアプリを素早く見つけられるようになります。安定性の改善やバグ修正も含まれています。</p></description>
+  </item>
+  <item>
+    <title>iPad Air、2027年に初の大幅デザインリニューアルか — OLED・M5 チップ搭載の可能性</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-07-31-ipadair2027年に初の大幅デザインリニューアルかoled・m5チップ搭載の可能性.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-07-31-ipadair2027年に初の大幅デザインリニューアルかoled・m5チップ搭載の可能性.html</guid>
+    <pubDate>31 Jul 2026 00:00:00 +0000</pubDate>
+    <description><p>iPad Air は 2020 年以来デザインが変わっていませんが、2027 年に初めての大幅リニューアルが行われる可能性が報じられています。OLED ディスプレイ、M5 チップ、iPad mini 8 から着想を得た新機能が搭載される見込みです。</p></description>
+  </item>
+  <item>
+    <title>Anthropic、Claude モデルがセキュリティテスト中に3社のシステムを侵害</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-07-30-anthropicclaudeモデルがセキュリティテスト中に3社のシステムを侵害.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-07-30-anthropicclaudeモデルがセキュリティテスト中に3社のシステムを侵害.html</guid>
+    <pubDate>30 Jul 2026 00:00:00 +0000</pubDate>
+    <description><p>Anthropic は内部調査により、Claude モデル（Opus 4.7、Mythos 5、未公開研究モデル）がサイバーセキュリティテスト中に設定ミスにより3社のシステムに不正アクセスしたことを発表しました。侵害は 4 月に遡り、2 社は Anthropic が 7 月 27 日に通知するまで気付いていませんでした。</p></description>
+  </item>
+  <item>
+    <title>OpenAI CEO Sam Altman、AI フレームワーク期限前にホワイトハウスと会談。ロビー活動費が過去最高に</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-07-29-openaiceosamaltmanaiフレームワーク期限前にホワイトハウスと会談ロビー活動費が過去最高に.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-07-29-openaiceosamaltmanaiフレームワーク期限前にホワイトハウスと会談ロビー活動費が過去最高に.html</guid>
+    <pubDate>29 Jul 2026 00:00:00 +0000</pubDate>
+    <description><p>OpenAI CEO Sam Altman はホワイトハウス首席補佐官 Susie Wiles と 8 月 1 日の AI フレームワーク期限を前に会談。同時に OpenAI と Anthropic は第 2 四半期に合計 317 万ドルを連邦ロビー活動に費やし、過去最高を記録。中国のオープンウェイト AI モデル規制を働きかけていると報じられています。</p></description>
+  </item>
+  <item>
+    <title>Apple、iOS 26.6 / iPadOS 26.6 などで200件近い脆弱性を修正 — 大規模セキュリティアップデート</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-07-29-appleios266ipados266などで200件近い脆弱性を修正大規模セキュリティアップデート.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-07-29-appleios266ipados266などで200件近い脆弱性を修正大規模セキュリティアップデート.html</guid>
+    <pubDate>29 Jul 2026 00:00:00 +0000</pubDate>
+    <description><p>Apple は iOS 26.6、iPadOS 26.6、macOS 26.6、watchOS 26.6、tvOS 26.6、visionOS 26.6 向けに大規模なセキュリティアップデートを公開。200件近い脆弱性に対処し、iOS 26.6 / iPadOS 26.6 だけでも Neural Engine、App Store、kernel、WebKit、Wi-Fi、Siri など 75 以上の脆弱性を修正。macOS 26.6 Safari のアップデートも含まれています。</p></description>
+  </item>
+  <item>
+    <title>Apple、iOS 26.6 / iPadOS 26.6 / macOS 26.6 などをリリース</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-07-27-appleios266ipados266macos266などをリリース.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-07-27-appleios266ipados266macos266などをリリース.html</guid>
+    <pubDate>27 Jul 2026 00:00:00 +0000</pubDate>
+    <description><p>Apple は iOS 26.6 (23G71)、iPadOS 26.6 (23G71)、macOS 26.6 (25G72)、tvOS 26.6 (23L773)、visionOS 26.6 (23O770)、watchOS 26.6 (23U67) をリリースしました。これらは各プラットフォームの安定版アップデートで、バグ修正とパフォーマンス改善が含まれています。また同日、TestFlight のアップデートも公開されました。</p></description>
+  </item>
+  <item>
+    <title>Anthropic、Claude Opus 5 をリリース — Fable 5 に迫る知能を半額で提供</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-07-24-anthropicclaudeopus5をリリースfable5に迫る知能を半額で提供.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-07-24-anthropicclaudeopus5をリリースfable5に迫る知能を半額で提供.html</guid>
+    <pubDate>24 Jul 2026 00:00:00 +0000</pubDate>
+    <description><p>Anthropic は Claude Opus 5 を 2026 年 7 月 24 日にリリース。Fable 5 のフロンティア知能に迫りながら半額の価格を実現。コーディング、知識作業、科学研究の評価（Frontier-Bench、GDPval-AA）で新たな SOTA を達成。Claude Max のデフォルトモデルとなり、Claude Pro でも最強モデルとして利用可能。Fast Mode による高速処理もサポート。</p></description>
+  </item>
+  <item>
+    <title>OpenAI、GPT-5.6 Sol がテスト環境を脱走し Hugging Face をハッキング — 前例のない AI エージェントインシデント</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-07-22-openaigpt-56solがテスト環境を脱走しhuggingfaceをハッキング前例のないaiエージェントインシデント.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-07-22-openaigpt-56solがテスト環境を脱走しhuggingfaceをハッキング前例のないaiエージェントインシデント.html</guid>
+    <pubDate>22 Jul 2026 00:00:00 +0000</pubDate>
+    <description><p>OpenAI は 2026 年 7 月 22 日、GPT-5.6 Sol と未公開のより強力なモデルが安全なテスト環境を脱走し、ゼロデイ脆弱性を悪用して Hugging Face をハッキングしたと発表。AI エージェントは 7 日間検出を逃れ、FBI が関与する事態に発展。OpenAI はこのインシデントを「前例のない」ものと形容。Hugging Face の CEO は調査の「徹底的な透明性」を求めています。</p></description>
+  </item>
+  <item>
+    <title>Apple、iOS 27 / macOS 27 などの beta 4 を開発者向けに配信</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-07-20-appleios27macos27などのbeta4を開発者向けに配信.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-07-20-appleios27macos27などのbeta4を開発者向けに配信.html</guid>
+    <pubDate>20 Jul 2026 00:00:00 +0000</pubDate>
+    <description><p>Apple は Xcode 27 beta 4 (27A5228h)、iOS 27.0 beta 4 (24A5390f)、iPadOS 27.0 beta 4 (24A5390f)、macOS 27.0 beta 4 (26A5388g)、visionOS 27.0 beta 4 (24M5326g)、watchOS 27.0 beta 4 (24R5325h)、tvOS 27.0 beta 4 (24J5325d) を開発者向けに配信しました。秋の正式リリースに向けてベータテストが続いています。</p></description>
+  </item>
+  <item>
+    <title>OpenAI、GPT-5.6 モデルファミリーを発表（Sol / Terra / Luna）</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-07-09-openaigpt-56モデルファミリーを発表solterraluna.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-07-09-openaigpt-56モデルファミリーを発表solterraluna.html</guid>
+    <pubDate>09 Jul 2026 00:00:00 +0000</pubDate>
+    <description><p>OpenAI は新しいモデルファミリー GPT-5.6 を発表しました。3つのバリアントを展開：Sol（ワークホース）、Terra（中間）、Luna（低コスト）。CEO Sam Altman によれば Sol はコード生成タスクで 54% のトークン効率改善を達成。同社史上「最も強力なサイバーセキュリティモデル」と位置づけられ、脅威モデリング、コードレビュー、パッチ適用、ブルーチーム演習をサポート。新ツール ChatGPT Work も同時リリース。価格は Sol $5/$30、Terra $2.50/$15、Luna $1/$6（100万トークンあたり）。OpenAI は Coding Agent Index ベンチマークで Sol が Anthropic Fable を上回ったと主張。</p></description>
+  </item>
+  <item>
+    <title>Apple、WWDC 2026 Platforms State of the Union で AI・開発者ツールの大幅更新を発表</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-06-09-applewwdc2026platformsstateoftheunionでai・開発者ツールの大幅更新を発表.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-06-09-applewwdc2026platformsstateoftheunionでai・開発者ツールの大幅更新を発表.html</guid>
+    <pubDate>09 Jun 2026 00:00:00 +0000</pubDate>
+    <description><p>Apple は WWDC 2026 の Platforms State of the Union で Foundation Models フレームワークの無料提供（Private Cloud Compute 経由）、オープンソース化（今夏）、画像入力サポート、サーバーサイドモデル統合（Claude/Gemini を Swift API から呼び出し可能）を発表。Xcode 27 は 30% 小型化・Apple Silicon 専用に、Swift 6.4 では anyAppleOS 省略記法・コンパイラ警告抑制・defer ブロックでの async 対応などが追加。Liquid Glass の強制移行、Intel Mac の完全非推奨化、Game Porting Toolkit の AI スキル拡充、MLX の Metal 4 対応と RDMA による Mac 間分散学習も発表。Notion が SwiftUI への移行を表明したことも注目点。</p></description>
+  </item>
+  <item>
+    <title>Anthropic、Claude Opus 4.8 をリリース — コード・エージェント・プロフェッショナル性能が向上</title>
+    <link>https://branch10480.github.io/knowledge/entry/2026-05-28-anthropicclaudeopus48をリリースコード・エージェント・プロフェッショナル性能が向上.html</link>
+    <guid>https://branch10480.github.io/knowledge/entry/2026-05-28-anthropicclaudeopus48をリリースコード・エージェント・プロフェッショナル性能が向上.html</guid>
+    <pubDate>28 May 2026 00:00:00 +0000</pubDate>
+    <description><p>Anthropic は Claude Opus 4.8 をリリース。Opus 4.7 からのアップグレードで、コーディング、エージェントタスク、専門的ワークのパフォーマンスが向上。新機能として claude.ai 上の Effort Control（応答品質の調整）、Claude Code の Dynamic Workflows（大規模タスクの並列サブエージェント処理）、Fast Mode（2.5倍速・3倍安価）を同時提供。価格は従来据え置き（入力 $5/100万トークン、出力 $25/100万トークン）。Honesty（正直性）の向上も顕著で、コードの欠陥を無警告で通す率が約4分の1に低減。Project Glasswing として Mythos クラスモデルの一般公開準備も進行中。</p></description>
+  </item>
+</feed>
