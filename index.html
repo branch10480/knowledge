@@ -19,17 +19,51 @@ h2 { color: #a0a0ee; margin-top: 2em; }
 h3 { color: #9090dd; }
 a { color: #8888ff; }
 .date { color: #888; font-size: 0.9em; }
-.section { margin: 1.5em 0; padding: 1em; background: #222; border-radius: 8px; }
-.tag { display: inline-block; background: #333; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin-right: 4px; }
+.tag { display: inline-block; background: #333; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin-right: 4px; cursor: pointer; user-select: none; }
+.tag:hover { background: #555; }
+.tag.active { background: #4488cc; color: #fff; }
 .entry { margin: 1.5em 0; padding: 1em; background: #222; border-radius: 8px; }
 .source { color: #777; font-size: 0.85em; }
 .source a { color: #6666cc; }
+#search-box {
+  width: 100%;
+  padding: 10px 12px;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 1em;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+#search-box:focus { outline: none; border-color: #8888ff; }
+#tag-filters { margin-bottom: 16px; }
+#result-count { color: #888; font-size: 0.85em; margin-bottom: 8px; }
+.hidden { display: none !important; }
+@media (prefers-color-scheme: light) {
+  body { background: #f5f5f5; color: #222; }
+  h1 { color: #4444aa; }
+  h2 { color: #5555aa; }
+  a { color: #4444cc; }
+  .entry { background: #fff; }
+  .tag { background: #e0e0e0; color: #333; }
+  .tag.active { background: #4488cc; color: #fff; }
+  #search-box { background: #fff; border-color: #ccc; color: #222; }
+  .source { color: #999; }
+  .source a { color: #6666aa; }
+}
 </style>
 </head>
 <body>
-<h1>📚 Knowledge</h1>
+<main>
+<h1 aria-label="Knowledge">📚 Knowledge</h1>
 <p class="date">最終更新: 2026-08-02</p>
 <p>情報収集・勉強メモを蓄積していく知識ベースです。</p>
+<nav aria-label="フィルター">
+<input type="search" id="search-box" placeholder="エントリを検索..." aria-label="エントリを検索">
+<div id="tag-filters"></div>
+<p id="result-count"></p>
+</nav>
 <hr>
 <div id="entries">
 
@@ -129,5 +163,43 @@ a { color: #8888ff; }
       <hr>
     </div>
   </div>
+</main>
+<script>
+(function(){
+  var E = document.getElementById('entries');
+  if (!E) return;
+  var D = E.querySelectorAll('.entry');
+  var S = document.getElementById('search-box');
+  var TF = document.getElementById('tag-filters');
+  var RC = document.getElementById('result-count');
+  var allTags = [];
+  D.forEach(function(d){d.querySelectorAll('.tag').forEach(function(t){var x=t.textContent.trim();if(allTags.indexOf(x)===-1)allTags.push(x);});});
+  allTags.sort();
+  var activeTags = [];
+  allTags.forEach(function(tag){
+    var b = document.createElement('span'); b.className = 'tag'; b.textContent = tag;
+    b.setAttribute('role','button'); b.setAttribute('aria-pressed','false');
+    b.addEventListener('click',function(){
+      var i = activeTags.indexOf(tag);
+      if(i===-1){activeTags.push(tag);b.classList.add('active');b.setAttribute('aria-pressed','true');}
+      else{activeTags.splice(i,1);b.classList.remove('active');b.setAttribute('aria-pressed','false');}
+      F();
+    });
+    TF.appendChild(b); TF.appendChild(document.createTextNode(' '));
+  });
+  function F(){
+    var q = S.value.toLowerCase(); var c = 0;
+    D.forEach(function(d){
+      var t = d.textContent.toLowerCase();
+      var dt = []; d.querySelectorAll('.tag').forEach(function(tg){dt.push(tg.textContent.trim());});
+      var mq = q === '' || t.indexOf(q) !== -1;
+      var mt = activeTags.length === 0 || activeTags.some(function(at){return dt.indexOf(at)!==-1;});
+      if(mq && mt){d.classList.remove('hidden');c++}else{d.classList.add('hidden');}
+    });
+    RC.textContent = c + ' / ' + D.length + ' 件';
+  }
+  S.addEventListener('input', F); F();
+})();
+</script>
 </body>
 </html>

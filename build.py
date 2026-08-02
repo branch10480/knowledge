@@ -1,55 +1,14 @@
 #!/usr/bin/env python3
 """
-entries.json から index.html を生成するビルドスクリプト。
-entries.json が正本（JSON 配列、日付降順）。
-全エントリをレンダリングして index.html を書き出す。
-content が HTML の場合はそのまま挿入、Markdown の場合は md_to_html() で変換。
+entries.json + template.html から index.html を生成するビルドスクリプト。
 """
 import json
 import re
+import os
 from html import escape
 from datetime import date
 
 ALLOWED_URL_SCHEMES = ("http://", "https://")
-
-HTML_TEMPLATE = """<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Knowledge</title>
-<style>
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Noto Sans JP', sans-serif;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  background: #1a1a1a;
-  color: #e0e0e0;
-  line-height: 1.7;
-}
-h1 { color: #c0c0ff; border-bottom: 1px solid #333; }
-h2 { color: #a0a0ee; margin-top: 2em; }
-h3 { color: #9090dd; }
-a { color: #8888ff; }
-.date { color: #888; font-size: 0.9em; }
-.section { margin: 1.5em 0; padding: 1em; background: #222; border-radius: 8px; }
-.tag { display: inline-block; background: #333; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin-right: 4px; }
-.entry { margin: 1.5em 0; padding: 1em; background: #222; border-radius: 8px; }
-.source { color: #777; font-size: 0.85em; }
-.source a { color: #6666cc; }
-</style>
-</head>
-<body>
-<h1>\U0001f4da Knowledge</h1>
-<p class="date">\u6700\u7d42\u66f4\u65b0: {today}</p>
-<p>\u60c5\u5831\u53ce\u96c6\u30fb\u52c9\u5f37\u30e1\u30e2\u3092\u84c4\u7a4d\u3057\u3066\u3044\u304f\u77e5\u8b58\u30d9\u30fc\u30b9\u3067\u3059\u3002</p>
-<hr>
-<div id="entries">
-{entries_html}
-  </div>
-</body>
-</html>"""
 
 
 def _is_html(text: str) -> bool:
@@ -139,15 +98,20 @@ def render_entry(entry: dict) -> str:
 
 def main():
     import sys
-    entries_path = "entries.json"
-    output_path = "index.html"
+    repo_dir = os.path.dirname(os.path.abspath(__file__))
+    entries_path = os.path.join(repo_dir, "entries.json")
+    template_path = os.path.join(repo_dir, "template.html")
+    output_path = os.path.join(repo_dir, "index.html")
 
     with open(entries_path, "r") as f:
         entries = json.load(f)
+    with open(template_path, "r") as f:
+        template = f.read()
 
     today = date.today().isoformat()
     entries_html = "\n".join(render_entry(e) for e in entries)
-    html = HTML_TEMPLATE.replace("{today}", today).replace("{entries_html}", entries_html)
+
+    html = template.replace("__TODAY__", today).replace("__ENTRIES__", entries_html)
 
     with open(output_path, "w") as f:
         f.write(html)
