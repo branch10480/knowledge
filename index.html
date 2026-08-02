@@ -29,7 +29,46 @@ a { color: #8888ff; }
 <p>情報収集・勉強メモを蓄積していく知識ベースです。</p>
 <hr>
 <div id="entries">
-  <!-- ここに cron ジョブがエントリを追記していく -->
-</div>
+
+    <div class="entry">
+      <h2>Apple、iOS 26.6 / iPadOS 26.6 / macOS 26.6 などをリリース</h2>
+      <p class="date">2026-07-27 <span class="tag">Apple</span><span class="tag">iOS</span><span class="tag">macOS</span><span class="tag">watchOS</span><span class="tag">visionOS</span></p>
+      <p>Apple は iOS 26.6 (23G71)、iPadOS 26.6 (23G71)、macOS 26.6 (25G72)、tvOS 26.6 (23L773)、visionOS 26.6 (23O770)、watchOS 26.6 (23U67) をリリースしました。これらは各プラットフォームの安定版アップデートで、バグ修正とパフォーマンス改善が含まれています。また同日、TestFlight のアップデートも公開されました。</p>
+      <p class="source">出典: <a href="https://developer.apple.com/news/releases/">https://developer.apple.com/news/releases/</a></p>
+      <hr>
+    </div>
+
+    <div class="entry">
+      <h2>Apple、iOS 27 / macOS 27 などの beta 4 を開発者向けに配信</h2>
+      <p class="date">2026-07-20 <span class="tag">Apple</span><span class="tag">iOS</span><span class="tag">macOS</span><span class="tag">beta</span><span class="tag">Xcode</span></p>
+      <p>Apple は Xcode 27 beta 4 (27A5228h)、iOS 27.0 beta 4 (24A5390f)、iPadOS 27.0 beta 4 (24A5390f)、macOS 27.0 beta 4 (26A5388g)、visionOS 27.0 beta 4 (24M5326g)、watchOS 27.0 beta 4 (24R5325h)、tvOS 27.0 beta 4 (24J5325d) を開発者向けに配信しました。秋の正式リリースに向けてベータテストが続いています。</p>
+      <p class="source">出典: <a href="https://developer.apple.com/news/releases/">https://developer.apple.com/news/releases/</a></p>
+      <hr>
+    </div>
+
+    <div class="entry">
+      <h2>OpenAI、GPT-5.6 モデルファミリーを発表（Sol / Terra / Luna）</h2>
+      <p class="date">2026-07-09 <span class="tag">AI</span><span class="tag">OpenAI</span><span class="tag">GPT</span></p>
+      <p>OpenAI は新しいモデルファミリー GPT-5.6 を発表しました。3つのバリアントを展開：Sol（ワークホース）、Terra（中間）、Luna（低コスト）。CEO Sam Altman によれば Sol はコード生成タスクで 54% のトークン効率改善を達成。同社史上「最も強力なサイバーセキュリティモデル」と位置づけられ、脅威モデリング、コードレビュー、パッチ適用、ブルーチーム演習をサポート。新ツール ChatGPT Work も同時リリース。価格は Sol $5/$30、Terra $2.50/$15、Luna $1/$6（100万トークンあたり）。OpenAI は Coding Agent Index ベンチマークで Sol が Anthropic Fable を上回ったと主張。</p>
+      <p class="source">出典: <a href="https://techcrunch.com/2026/07/09/openai-launches-its-new-family-of-models-with-gpt-5-6/">https://techcrunch.com/2026/07/09/openai-launches-its-new-family-of-models-with-gpt-5-6/</a></p>
+      <hr>
+    </div>
+
+    <div class="entry">
+      <h2>Apple、WWDC 2026 Platforms State of the Union で AI・開発者ツールの大幅更新を発表</h2>
+      <p class="date">2026-06-09 <span class="tag">Apple</span><span class="tag">WWDC</span><span class="tag">AI</span><span class="tag">Swift</span><span class="tag">Xcode</span><span class="tag">SwiftUI</span></p>
+      <p>Apple は WWDC 2026 の Platforms State of the Union で Foundation Models フレームワークの無料提供（Private Cloud Compute 経由）、オープンソース化（今夏）、画像入力サポート、サーバーサイドモデル統合（Claude/Gemini を Swift API から呼び出し可能）を発表。Xcode 27 は 30% 小型化・Apple Silicon 専用に、Swift 6.4 では anyAppleOS 省略記法・コンパイラ警告抑制・defer ブロックでの async 対応などが追加。Liquid Glass の強制移行、Intel Mac の完全非推奨化、Game Porting Toolkit の AI スキル拡充、MLX の Metal 4 対応と RDMA による Mac 間分散学習も発表。Notion が SwiftUI への移行を表明したことも注目点。</p>
+      <p class="source">出典: <a href="https://www.macrumors.com/2026/06/09/apple-outlines-major-ai-and-developer-tool-updates/">https://www.macrumors.com/2026/06/09/apple-outlines-major-ai-and-developer-tool-updates/</a></p>
+      <hr>
+    </div>
+
+    <div class="entry">
+      <h2>Anthropic、Claude Opus 4.8 をリリース — コード・エージェント・プロフェッショナル性能が向上</h2>
+      <p class="date">2026-05-28 <span class="tag">AI</span><span class="tag">Anthropic</span><span class="tag">Claude</span></p>
+      <p>Anthropic は Claude Opus 4.8 をリリース。Opus 4.7 からのアップグレードで、コーディング、エージェントタスク、専門的ワークのパフォーマンスが向上。新機能として claude.ai 上の Effort Control（応答品質の調整）、Claude Code の Dynamic Workflows（大規模タスクの並列サブエージェント処理）、Fast Mode（2.5倍速・3倍安価）を同時提供。価格は従来据え置き（入力 $5/100万トークン、出力 $25/100万トークン）。Honesty（正直性）の向上も顕著で、コードの欠陥を無警告で通す率が約4分の1に低減。Project Glasswing として Mythos クラスモデルの一般公開準備も進行中。</p>
+      <p class="source">出典: <a href="https://www.anthropic.com/news/claude-opus-4-8">https://www.anthropic.com/news/claude-opus-4-8</a></p>
+      <hr>
+    </div>
+  </div>
 </body>
 </html>
