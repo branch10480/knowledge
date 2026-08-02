@@ -37,11 +37,10 @@ GitHub Pages: https://branch10480.github.io/knowledge/
 - [x] index.html にアーカイブナビ (JS 自動生成)
 - [x] feed.xml への `<link rel="alternate">` タグ追加
 
-## 未着手
-
-### P3（運用改善）
-- [ ] GitHub Actions で main → gh-pages ビルド自動化
-- [ ] Lighthouse CI スコア追跡
+### P3（運用改善）✅
+- [x] GitHub Actions ワークフロー作成 (`.github/workflows/build.yml`)
+- [x] README に Actions の説明を追加
+- [x] main ブランチ push → gh-pages 自動ビルド・デプロイの仕組み構築
 
 ## 現状のファイル構成
 
@@ -53,7 +52,7 @@ knowledge/
 ├── add_entries.py    ← 追記 + 自動ビルド
 ├── index.html        ← 生成物
 ├── feed.xml          ← Atom フィード
-├── README.md         ← ドキュメント
+├── README.md         ← ドキュメント (Actions 説明付き)
 ├── entry/            ← 個別エントリページ (build.py で自動生成)
 │   └── *.html
 ├── archive/          ← 月別アーカイブ (build.py で自動生成)
@@ -62,11 +61,13 @@ knowledge/
 ```
 
 ## 運用中
-- cron ジョブ: `Knowledge収集` (ID: `317dac27c6f8`)
+- **cron ジョブ**: `Knowledge収集` (ID: `317dac27c6f8`)
   - スケジュール: `0 9 * * *` (毎日 9:00 JST)
   - 配信: signal + telegram
   - モデル: デフォルト (deepseek-v4-flash)
-  - 最終動作確認: 2026-08-02 (初回収集 12 エントリ)
+- **GitHub Actions**: `.github/workflows/build.yml`
+  - トリガー: main push / 毎日 9:00 JST / 手動実行
+  - 処理: build.py → gh-pages push → Pages デプロイ
 
 ## 再開方法
 ```bash
@@ -87,7 +88,3 @@ git push origin gh-pages
 python3 build.py
 # → index.html, feed.xml, entry/*.html, archive/YYYY-MM.html を生成
 ```
-
-### P3 作業開始時
-- Actions: `.github/workflows/build.yml` に YAML 追加
-- `main` ブランチにコード管理、push で gh-pages 自動ビルド

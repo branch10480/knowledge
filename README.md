@@ -8,22 +8,54 @@
 
 ```
 entries.json    ← 全エントリの正本（JSON 配列、日付降順）
-build.py        ← entries.json から index.html を生成
+build.py        ← entries.json から index.html / feed.xml / entry/*.html / archive/*.html を生成
 add_entries.py  ← 新しいエントリを entries.json に追記 → 自動ビルド
-index.html      ← 生成された静的なページ（編集不要）
-.lastrun        ← cron ジョブの最終実行時刻
+index.html      ← メインページ（編集不要）
+feed.xml        ← Atom フィード（編集不要）
+entry/          ← 個別エントリページ（build.py で自動生成）
+archive/        ← 月別アーカイブページ（build.py で自動生成）
+.github/workflows/build.yml  ← GitHub Actions 設定
 ```
 
 ## 運用
 
 ### cron ジョブ（自動収集）
-毎日 9:00 JST に以下を実行：
-1. Apple Developer News の Web 検索
-2. AI 業界ニュース検索
-3. ghq 管理リポジトリの更新チェック
-4. entries.json に追記 → build.py で index.html 再生成
-5. GitHub Pages に push
-6. Signal + Telegram に通知
+
+Hermes Agent の cron ジョブが毎日 9:00 JST に以下を実行：
+
+1. Apple Developer News / AI ニュースを Web 検索
+2. ghq 管理リポジトリの更新チェック
+3. `entries.json` に追記 → `build.py` で全ページ再生成
+4. GitHub Pages に push
+5. Signal + Telegram に通知
+
+### GitHub Actions（自動ビルド）
+
+`.github/workflows/build.yml` を設定済み。以下のタイミングで動作：
+
+| トリガー | 説明 |
+|---------|------|
+| `main` ブランチへの push | コード変更時に全ページを再生成 |
+| `schedule: 0 9 * * *` | 毎日 9:00 JST (0:00 UTC) に定期ビルド |
+| `workflow_dispatch` | GitHub UI から手動実行可能 |
+
+**ワークフローの処理内容:**
+
+```
+main ブランチに push
+  → Actions が発火
+    → Ubuntu runner で Python 3.11 をセットアップ
+      → build.py を実行（entries.json → index.html + feed.xml + entry/*.html + archive/*.html）
+        → 差分があればコミット & gh-pages ブランチへ push
+          → GitHub Pages が自動デプロイ
+```
+
+**main と gh-pages の役割:**
+
+- `main` — ソースコード管理（build.py, template.html, entries.json, .github/）
+- `gh-pages` — デプロイ用（生成された HTML ファイル一式）
+
+Actions は main への push を監視し、ビルド結果を gh-pages に自動反映します。Hermes cron の手動 push がなくても、main への変更があれば自動的に Pages が更新されます。
 
 ### 手動でエントリを追加する場合
 
@@ -42,13 +74,21 @@ cat <<'EOF' | python3 add_entries.py
 ]
 EOF
 
-git add entries.json index.html
+git add entries.json index.html feed.xml entry/ archive/
 git commit -m "knowledge: 手動追記"
 git push origin gh-pages
 ```
 
+### ビルドのみ
+
+```bash
+python3 build.py
+# → index.html, feed.xml, entry/*.html, archive/YYYY-MM.html を生成
+```
+
 ### 注意事項
-- entries.json を直接編集しても OK。その後 `python3 build.py` を実行すれば index.html が再生成される
+
+- entries.json を直接編集しても OK。その後 `python3 build.py` を実行すれば全ページが再生成される
 - content はマークダウン形式（見出し `#`、リスト `-`、リンク `[text](url)`、コード `` `code` `` が使える）
 - URL は `https://` のみ許可
 - タグは小文字推奨（`apple`, `ios`, `swift`, `ai`, `openai`, `anthropic`, `security` など）
