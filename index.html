@@ -364,8 +364,8 @@ code, pre { font-family: var(--font-mono); letter-spacing: 0; }
 <a href="feed.xml" title="Atom フィードを購読">RSS</a>
 <a href="https://github.com/branch10480/knowledge" target="_blank" rel="noopener">GitHub</a>
 </div>
-<button class="theme-toggle" id="theme-toggle" aria-label="テーマ切替">
-<span class="dot"></span> <span id="theme-label">自動</span>
+<button class="theme-toggle" id="themeToggle" aria-label="テーマ切り替え">
+<span class="dot"></span> <span id="themeLabel">自動</span>
 </button>
 </div>
 </nav>
@@ -554,21 +554,31 @@ code, pre { font-family: var(--font-mono); letter-spacing: 0; }
   const AL = document.getElementById('archive-links');
   const root = document.documentElement;
 
-  // Theme toggle — design-system と同一ロジック
-  const TT = document.getElementById('theme-toggle');
-  const TL = document.getElementById('theme-label');
-  const setTheme = (t) => {
-    if (t === 'dark') { root.dataset.theme='dark'; root.dataset.themeMode='dark'; }
-    else if (t === 'light') { root.dataset.theme='light'; root.dataset.themeMode='light'; }
-    else { root.removeAttribute('data-theme'); root.dataset.themeMode='auto'; }
-    localStorage.setItem('tds-theme', t); TL.textContent = t === 'auto' ? '自動' : t;
+  // Theme toggle — design-system と同一ロジック（3状態トグル）
+  const btn = document.getElementById('themeToggle');
+  const label = document.getElementById('themeLabel');
+  const SEQ = ['auto', 'light', 'dark'];
+  const NAMES = { auto: '自動', light: 'ライト', dark: 'ダーク' };
+  let mode = localStorage.getItem('tds-theme') || 'auto';
+  const browserTheme = () => window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  const applyResolved = theme => {
+    root.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+    root.dataset.themeMode = 'auto';
   };
-  // Init label
-  setTheme(localStorage.getItem('tds-theme') || 'auto');
-  TT.addEventListener('click', () => {
-    const m = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    setTheme(root.dataset.themeMode === 'auto' ? m : 'auto');
+  function resolveSystemTheme() {
+    applyResolved(browserTheme());
+  }
+  function apply() {
+    if (mode === 'auto') resolveSystemTheme();
+    else { root.dataset.theme = mode; root.dataset.themeMode = mode; }
+    label.textContent = NAMES[mode];
+  }
+  btn.addEventListener('click', () => {
+    mode = SEQ[(SEQ.indexOf(mode) + 1) % SEQ.length];
+    localStorage.setItem('tds-theme', mode);
+    apply();
   });
+  apply();
 
   // Collect all tags + archives
   const tags = new Map();

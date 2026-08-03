@@ -208,10 +208,16 @@ def generate_archive_page(month: str, entries: list) -> str:
 (() => {{
   const root = document.documentElement;
   const browserTheme = () => window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const applyResolved = (theme) => {{
+    root.dataset.theme = theme === "dark" ? "dark" : "light";
+    root.dataset.themeMode = "auto";
+  }};
   try {{
     const mode = localStorage.getItem("tds-theme") || "auto";
-    if (mode === "light" || mode === "dark") {{ root.dataset.theme = mode; root.dataset.themeMode = mode; return; }}
-    root.dataset.theme = browserTheme() === "dark" ? "dark" : "light";
+    if (mode === "light" || mode === "dark") {{
+      root.dataset.theme = mode; root.dataset.themeMode = mode; return;
+    }}
+    applyResolved(browserTheme());
   }} catch {{}}
 }})();
 </script>
@@ -232,26 +238,34 @@ def generate_archive_page(month: str, entries: list) -> str:
 </style>
 </head>
 <body data-view="home">
-<nav class="globalnav"><div class="gn-inner"><a class="gn-brand" href="index.html">Knowledge</a><button class="theme-toggle" id="theme-toggle" aria-label="テーマ切替"><span class="dot"></span> <span id="theme-label">自動</span></button></div></nav>
+<nav class="globalnav"><div class="gn-inner"><a class="gn-brand" href="index.html">Knowledge</a><button class="theme-toggle" id="themeToggle" aria-label="テーマ切り替え"><span class="dot"></span> <span id="themeLabel">自動</span></button></div></nav>
 <header class="hero"><p class="eyebrow">{month}</p><h1>{escape(month_title)}</h1></header>
 <main class="entries-list">\n{items_html}\n</main>
 <footer class="sitefooter"><div class="inner"><p>Powered by <a href="index.html">Knowledge</a> · Toshi Design System v0.7.0</p></div></footer>
 <script>
 (() => {{
   const root = document.documentElement;
-  const TT = document.getElementById('theme-toggle');
-  const TL = document.getElementById('theme-label');
-  const setTheme = (t) => {{
-    if (t === 'dark') {{ root.dataset.theme='dark'; root.dataset.themeMode='dark'; }}
-    else if (t === 'light') {{ root.dataset.theme='light'; root.dataset.themeMode='light'; }}
-    else {{ root.removeAttribute('data-theme'); root.dataset.themeMode='auto'; }}
-    localStorage.setItem('tds-theme', t); TL.textContent = t === 'auto' ? '自動' : t;
-  }};
-  setTheme(localStorage.getItem('tds-theme') || 'auto');
-  TT.addEventListener('click', () => {{
-    const m = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    setTheme(root.dataset.themeMode === 'auto' ? m : 'auto');
+  const btn = document.getElementById('themeToggle');
+  const label = document.getElementById('themeLabel');
+  const SEQ = ['auto', 'light', 'dark'];
+  const NAMES = {{ auto: '自動', light: 'ライト', dark: 'ダーク' }};
+  let mode = localStorage.getItem('tds-theme') || 'auto';
+  function resolveSystemTheme() {{
+    const browserTheme = () => window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    root.dataset.theme = browserTheme() === 'dark' ? 'dark' : 'light';
+    root.dataset.themeMode = 'auto';
+  }}
+  function apply() {{
+    if (mode === 'auto') resolveSystemTheme();
+    else {{ root.dataset.theme = mode; root.dataset.themeMode = mode; }}
+    label.textContent = NAMES[mode];
+  }}
+  btn.addEventListener('click', () => {{
+    mode = SEQ[(SEQ.indexOf(mode) + 1) % SEQ.length];
+    localStorage.setItem('tds-theme', mode);
+    apply();
   }});
+  apply();
 }})();
 </script>
 </body>
@@ -313,27 +327,43 @@ def generate_single_page(entry: dict, related_entries: list) -> str:
     theme_init = """(() => {
   const root = document.documentElement;
   const browserTheme = () => window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const applyResolved = (theme) => {
+    root.dataset.theme = theme === "dark" ? "dark" : "light";
+    root.dataset.themeMode = "auto";
+  };
   try {
     const mode = localStorage.getItem("tds-theme") || "auto";
-    if (mode === "light" || mode === "dark") { root.dataset.theme = mode; root.dataset.themeMode = mode; return; }
-    root.dataset.theme = browserTheme() === "dark" ? "dark" : "light";
+    if (mode === "light" || mode === "dark") {
+      root.dataset.theme = mode; root.dataset.themeMode = mode; return;
+    }
+    applyResolved(browserTheme());
   } catch {}
 })();"""
 
     theme_toggle_js = """(() => {
   const root = document.documentElement;
-  const TT = document.getElementById('theme-toggle');
-  const TL = document.getElementById('theme-label');
-  const setTheme = (t) => {
-    if (t === 'dark') { root.dataset.theme='dark'; root.dataset.themeMode='dark'; }
-    else if (t === 'light') { root.dataset.theme='light'; root.dataset.themeMode='light'; }
-    else { root.removeAttribute('data-theme'); root.dataset.themeMode='auto'; }
-    localStorage.setItem('tds-theme', t); TL.textContent = t === 'auto' ? '自動' : t;
+  const btn = document.getElementById('themeToggle');
+  const label = document.getElementById('themeLabel');
+  const SEQ = ['auto', 'light', 'dark'];
+  const NAMES = { auto: '自動', light: 'ライト', dark: 'ダーク' };
+  let mode = localStorage.getItem('tds-theme') || 'auto';
+  const applyResolved = (theme) => {
+    root.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+    root.dataset.themeMode = 'auto';
   };
-  setTheme(localStorage.getItem('tds-theme') || 'auto');
-  TT.addEventListener('click', () => {
-    const m = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    setTheme(root.dataset.themeMode === 'auto' ? m : 'auto');
+  function resolveSystemTheme() {
+    const browserTheme = () => window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    applyResolved(browserTheme());
+  }
+  function apply() {
+    if (mode === 'auto') resolveSystemTheme();
+    else { root.dataset.theme = mode; root.dataset.themeMode = mode; }
+    label.textContent = NAMES[mode];
+  }
+  btn.addEventListener('click', () => {
+    mode = SEQ[(SEQ.indexOf(mode) + 1) % SEQ.length];
+    localStorage.setItem('tds-theme', mode);
+    apply();
   });
 })();"""
 
@@ -345,8 +375,8 @@ def generate_single_page(entry: dict, related_entries: list) -> str:
         "</head>\n<body data-view=\"single\">\n"
         "<nav class=\"globalnav\"><div class=\"gn-inner\">"
         "<a class=\"gn-brand\" href=\"index.html\">Knowledge</a>"
-        "<button class=\"theme-toggle\" id=\"theme-toggle\" aria-label=\"テーマ切替\">"
-        "<span class=\"dot\"></span> <span id=\"theme-label\">自動</span></button>"
+        "<button class=\"theme-toggle\" id=\"themeToggle\" aria-label=\"テーマ切り替え\">"
+        "<span class=\"dot\"></span> <span id=\"themeLabel\">自動</span></button>"
         "</div></nav>\n"
         "<div class=\"content-area\">\n"
         "<a href=\"index.html\" class=\"back-link\">\u2190 Back to all entries</a>\n"
