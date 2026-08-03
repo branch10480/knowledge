@@ -45,7 +45,7 @@
 }
 
 /* ============================================================
-   :root tokens — Toshi Design System (single-page.html と同一)
+   :root tokens — Toshi Design System v0.7.0 (single-page.html と同一)
    ============================================================ */
 :root {
   color-scheme: light dark;
@@ -206,27 +206,43 @@ code, pre { font-family: var(--font-mono); letter-spacing: 0; }
 }
 .gn-links a:hover { color: var(--text); text-decoration: none; }
 
+/* Theme toggle — design-system と同一 */
+.theme-toggle {
+  font: 500 12px var(--font-text);
+  color: var(--text-2);
+  background: var(--bg-alt);
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  padding: 5px 14px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: color 120ms, border-color 120ms;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--separator); }
+.theme-toggle .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--tint); }
+
 /* ============================================================
-   Hero
+   Hero — design-system と同一値
    ============================================================ */
 .hero {
   background: var(--bg-alt);
-  padding: 64px 22px 56px;
+  padding: 88px 22px 72px;
   text-align: center;
 }
 .eyebrow { font-size: 14px; color: var(--text-2); margin: 0 0 10px; font-weight: 500; }
 .hero h1 {
   margin: 0 auto;
-  font-size: clamp(30px, 4.5vw, 44px);
+  font-size: clamp(34px, 5.2vw, 52px);
   font-weight: 600;
   letter-spacing: -0.015em;
   line-height: 1.14;
 }
 .hero .abstract {
-  margin: 16px auto 0;
-  max-width: 560px;
-  font-size: 18px; line-height: 1.45;
+  margin: 20px auto 0;
+  max-width: 600px;
+  font-size: 21px; line-height: 1.45;
   color: var(--text-2);
+  font-weight: 400;
 }
 
 /* ============================================================
@@ -273,7 +289,7 @@ code, pre { font-family: var(--font-mono); letter-spacing: 0; }
 }
 
 /* ============================================================
-   Entry cards — topic-card style (design-system)
+   Entry cards — topic-card style (design-system と同一)
    ============================================================ */
 .entries-list {
   max-width: var(--doc-max); margin: 0 auto; padding: 12px 22px 96px;
@@ -312,22 +328,26 @@ code, pre { font-family: var(--font-mono); letter-spacing: 0; }
 .entry-body p { margin: 0 0 8px; }
 .entry-body p:last-child { margin-bottom: 0; }
 .entry-body code { font-size: 0.92em; background: var(--bg-alt); border-radius: 4px; padding: 1px 5px; color: var(--text); }
-.entry-body pre { background: var(--bg-code); border: 1px solid var(--hairline); border-radius: var(--r-md); padding: 12px 14px; overflow-x: auto; font-size: 14px; line-height: 1.55; }
+.entry-body pre { background: var(--bg-code); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: 18px 16px; overflow-x: auto; font-size: 15px; line-height: 1.62; }
 .entry-body ul, .entry-body ol { margin: 0 0 8px; padding-left: 20px; }
 .entry-body li { margin: 3px 0; }
 
 /* ============================================================
    Footer
    ============================================================ */
-footer {
-  max-width: var(--doc-max); margin: 0 auto; padding: 32px 22px;
+.sitefooter {
   border-top: 1px solid var(--hairline);
-  font-size: 12px; color: var(--text-3); text-align: center;
+  background: var(--bg-alt);
+  padding: 24px 0 34px;
+  font-size: 12px; color: var(--text-3);
 }
+.sitefooter .inner { max-width: var(--doc-max); margin: 0 auto; padding: 0 22px; display: flex; justify-content: center; }
+.sitefooter a { color: var(--text-2); }
 
 /* ============================================================
    Responsive
    ============================================================ */
+@media (max-width: 700px) { .hero h1 br { display: none; } }
 @media (max-width: 600px) {
   .hero { padding: 48px 16px 40px; }
   .toolbar, .entries-list { padding-left: 16px; padding-right: 16px; }
@@ -339,13 +359,13 @@ footer {
 <!-- Global Nav -->
 <nav class="globalnav" aria-label="メインナビゲーション">
 <div class="gn-inner">
-<span class="gn-brand"><a href="index.html">Knowledge</a></span>
+<a class="gn-brand" href="index.html">Knowledge</a>
 <div class="gn-links">
 <a href="feed.xml" title="Atom フィードを購読">RSS</a>
 <a href="https://github.com/branch10480/knowledge" target="_blank" rel="noopener">GitHub</a>
 </div>
 <button class="theme-toggle" id="theme-toggle" aria-label="テーマ切替">
-<span class="dot"></span> <span id="theme-label">auto</span>
+<span class="dot"></span> <span id="theme-label">自動</span>
 </button>
 </div>
 </nav>
@@ -377,9 +397,9 @@ footer {
 __ENTRIES__
 </main>
 
-<footer>
+<footer class="sitefooter"><div class="inner">
 <p>Powered by <a href="https://github.com/branch10480/knowledge">Knowledge</a> · Toshi Design System v0.7.0</p>
-</footer>
+</div></footer>
 
 <script>
 (() => {
@@ -389,16 +409,19 @@ __ENTRIES__
   const TC = document.getElementById('entries-container');
   const TF = document.getElementById('tag-filters');
   const AL = document.getElementById('archive-links');
+  const root = document.documentElement;
 
-  // Theme toggle
+  // Theme toggle — design-system と同一ロジック
   const TT = document.getElementById('theme-toggle');
   const TL = document.getElementById('theme-label');
   const setTheme = (t) => {
     if (t === 'dark') { root.dataset.theme='dark'; root.dataset.themeMode='dark'; }
     else if (t === 'light') { root.dataset.theme='light'; root.dataset.themeMode='light'; }
     else { root.removeAttribute('data-theme'); root.dataset.themeMode='auto'; }
-    localStorage.setItem('tds-theme', t); TL.textContent = t;
+    localStorage.setItem('tds-theme', t); TL.textContent = t === 'auto' ? '自動' : t;
   };
+  // Init label
+  setTheme(localStorage.getItem('tds-theme') || 'auto');
   TT.addEventListener('click', () => {
     const m = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     setTheme(root.dataset.themeMode === 'auto' ? m : 'auto');
