@@ -5,25 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Knowledge — Toshi Design System</title>
 <link rel="alternate" type="application/atom+xml" title="Knowledge Atom Feed" href="feed.xml">
-<script>
-(() => {
-  const root = document.documentElement;
-  const browserTheme = () => window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  const applyResolved = (theme) => {
-    root.dataset.theme = theme === "dark" ? "dark" : "light";
-    root.dataset.themeMode = "auto";
-  };
-  try {
-    const mode = localStorage.getItem("tds-theme") || "auto";
-    if (mode === "light" || mode === "dark") {
-      root.dataset.theme = mode;
-      root.dataset.themeMode = mode;
-      return;
-    }
-    applyResolved(browserTheme());
-  } catch {}
-})();
-</script>
 <style>
 /* ============================================================
    Fonts — UDEV Gothic 35LG (GitHub Pages absolute URL for external repos)
@@ -174,7 +155,10 @@ body {
   line-height: 1.47;
   letter-spacing: -0.022em;
   -webkit-font-smoothing: antialiased;
+  opacity: 0;
+  transition: opacity 80ms ease;
 }
+body[data-theme-loaded] { opacity: 1; }
 a { color: var(--tint); text-decoration: none; }
 a:hover { text-decoration: underline; }
 h1, h2, h3, h4 { font-family: var(--font-display); color: var(--text); }
@@ -572,6 +556,7 @@ code, pre { font-family: var(--font-mono); letter-spacing: 0; }
     if (mode === 'auto') resolveSystemTheme();
     else { root.dataset.theme = mode; root.dataset.themeMode = mode; }
     label.textContent = NAMES[mode];
+    document.body.setAttribute('data-theme-loaded', '');
   }
   btn.addEventListener('click', () => {
     mode = SEQ[(SEQ.indexOf(mode) + 1) % SEQ.length];
