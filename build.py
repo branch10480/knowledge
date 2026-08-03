@@ -3,6 +3,8 @@
 entries.json + template.html から index.html を生成するビルドスクリプト。
 P2: RSS/Atom フィード, 個別エントリページ, 月別アーカイブ, 関連エントリ表示に対応.
 全ページ Toshi Design System v0.7.0 に準拠.
+
+書き直し: f-string を使った正しい文字列結合に変更し、HTML生成のバグを防止.
 """
 from __future__ import annotations
 import json
@@ -240,7 +242,7 @@ def generate_archive_page(month: str, entries: list) -> str:
 <body data-view="home">
 <nav class="globalnav"><div class="gn-inner"><a class="gn-brand" href="index.html">Knowledge</a><button class="theme-toggle" id="themeToggle" aria-label="テーマ切り替え"><span class="dot"></span> <span id="themeLabel">自動</span></button></div></nav>
 <header class="hero"><p class="eyebrow">{month}</p><h1>{escape(month_title)}</h1></header>
-<main class="entries-list">\n{items_html}\n</main>
+<main class="entries-list">{items_html}</main>
 <footer class="sitefooter"><div class="inner"><p>Powered by <a href="index.html">Knowledge</a> · Toshi Design System v0.7.0</p></div></footer>
 <script>
 (() => {{
@@ -273,8 +275,8 @@ def generate_archive_page(month: str, entries: list) -> str:
 
 
 # ── 個別エントリページ生成 ─────────────────────────────────────────
-
 def generate_single_page(entry: dict, related_entries: list) -> str:
+    """個別エントリページを f-string で生成。正しい文字列結合でバグを防止。"""
     title = escape(entry["title"])
     date_str = entry["date"]
     tags = entry.get("tags", [])
@@ -306,7 +308,11 @@ def generate_single_page(entry: dict, related_entries: list) -> str:
             r_slug = make_slug(r["title"], r_date)
             rel_items.append(f'<li><a href="../entry/{r_slug}.html">{r_title}</a> <span class="date">({r_date})</span></li>')
         if rel_items:
-            related_html = "\n    <div class=\"related-entries\">\n      <h3>関連エントリ</h3>\n      <ul>" + "".join(rel_items) + "\n    </ul>\n  </div>"
+            related_html = f"""
+    <div class="related-entries">
+      <h3>関連エントリ</h3>
+      <ul>{"".join(rel_items)}</ul>
+    </div>"""
 
     css = """@font-face { font-family: "UDEV Gothic 35LG"; src: url("https://branch10480.github.io/design-system/fonts/UDEVGothic35LG-Regular.woff2") format("woff2"); font-weight:400; font-display:swap; }
 @font-face { font-family: "UDEV Gothic 35LG"; src: url("https://branch10480.github.io/design-system/fonts/UDEVGothic35LG-Bold.woff2") format("woff2"); font-weight:700; font-display:swap; }
@@ -367,36 +373,49 @@ def generate_single_page(entry: dict, related_entries: list) -> str:
   });
 })();"""
 
-    body = (
-        "<!doctype html>\\n<html lang=\\\"ja\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n"
-        "<meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1\\\">\\n"
-        "<title>\" + title + \" — Knowledge</title>\\n"
-        "<script>\\n\" + theme_init + \"\\n</script>\\n<style>\\n\" + css + \"\\n</style>\\n"
-        "</head>\\n<body data-view=\\\"single\\\">\\n"
-        "<nav class=\\\"globalnav\\\"><div class=\\\"gn-inner\\\">"
-        "<a class=\\\"gn-brand\\\" href=\\\"../index.html\\\">Knowledge</a>"
-        "<button class=\\\"theme-toggle\\\" id=\\\"themeToggle\\\" aria-label=\\\"テーマ切り替え\\\">"
-        "<span class=\\\"dot\\\"></span> <span id=\\\"themeLabel\\\">自動</span></button>"
-        "</div></nav>"
-        "<div class=\\\"content-area\\\">\\n"
-        "<a href=\\\"../index.html\\\" class=\\\"back-link\\\">← Back to all entries</a>\\n"
-        "<header class=\\\"entry-detail-header\\\">\\n"
-        "<h1>\" + title + \"</h1>\\n"
-        "<div class=\\\"entry-meta\\\"><time datetime=\\\"\\\" + date_str + \"\\\">\" + date_str + \"</time> \" + tag_html + \"</div>\\n"
-        "<div class=\\\"entry-body\\\">\" + content_html + \"</div>\\n"
-        "</header>\\n"
-    )
-    footer = (
-        source_html + "\n"
-        + related_html + "\n"
-        "</div>\n"
-        "<footer class=\"sitefooter\"><div class=\"inner\">"
-        "<p>Powered by <a href=\"../index.html\">Knowledge</a> · Toshi Design System v0.7.0</p>"
-        "</div></footer>\n"
-        "<script>\n" + theme_toggle_js + "\n</script>\n"
-        "</body>\n</html>"
-    )
-    return body + footer
+    # f-string を使った正しい HTML 生成
+    nav_html = f'''<nav class="globalnav"><div class="gn-inner">
+<a class="gn-brand" href="../index.html">Knowledge</a>
+<button class="theme-toggle" id="themeToggle" aria-label="テーマ切り替え">
+<span class="dot"></span> <span id="themeLabel">自動</span></button>
+</div></nav>'''
+
+    body_html = f'''<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title} — Knowledge</title>
+<script>
+{theme_init}
+</script>
+<style>
+{css}
+</style>
+</head>
+<body data-view="single">
+{nav_html}
+<div class="content-area">
+<a href="../index.html" class="back-link">← Back to all entries</a>
+<header class="entry-detail-header">
+<h1>{title}</h1>
+<div class="entry-meta"><time datetime="{date_str}">{date_str}</time> {tag_html}</div>
+<div class="entry-body">{content_html}</div>
+</header>
+{source_html}
+
+{related_html}
+</div>
+<footer class="sitefooter"><div class="inner">
+<p>Powered by <a href="../index.html">Knowledge</a> · Toshi Design System v0.7.0</p>
+</div></footer>
+<script>
+{theme_toggle_js}
+</script>
+</body>
+</html>'''
+
+    return body_html
 
 
 # ── メインビルド ───────────────────────────────────────────────────
@@ -436,9 +455,9 @@ def main():
         slug = make_slug(entry["title"], entry["date"])
         tags = set(entry.get("tags", []))
         related = [e for e in entries if e is not entry and tags & set(e.get("tags", []))]
-        related_html = generate_single_page(entry, related[:5])
+        html = generate_single_page(entry, related[:5])
         with open(os.path.join(entry_dir, f"{slug}.html"), "w") as f:
-            f.write(related_html)
+            f.write(html)
 
     # index.html 用（関連エントリ付き）
     entries_with_related = []
