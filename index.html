@@ -594,10 +594,17 @@ code, pre { font-family: var(--font-mono); letter-spacing: 0; }
     TF.appendChild(btn);
   });
 
+  // Slug generation helper (same as Python's make_slug)
+  function makeSlug(title, dateStr) {
+    let slug = title.replace(/[^a-zA-Z0-9\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\-_]/g, '');
+    slug = slug.toLowerCase().slice(0, 80);
+    return dateStr ? `${dateStr}-${slug}` : 'entry';
+  }
+
   // Filter logic
   function F() {
     const q = S.value.toLowerCase().trim();
-    const activeTags = [...TF.querySelectorAll('.filter-btn[aria-pressed="true"]')].map(b => b.textContent.match(/^(.+?)\s*\(\d+\)/)?.[1]||'').filter(Boolean);
+    const activeTags = [...TF.querySelectorAll('.filter-btn[aria-pressed="true"]')].map(b => b.textContent.match(/^(.+?)\\s*\\(\\d+\\)/)?.[1]||'').filter(Boolean);
 
     const filtered = D.filter(e => {
       if (q) {
@@ -610,7 +617,7 @@ code, pre { font-family: var(--font-mono); letter-spacing: 0; }
 
     TC.innerHTML = filtered.map(e => `
       <article class="entry-card" role="listitem">
-        <h2 class="entry-header"><a href="entry/${e.slug}.html">${e.title}</a></h2>
+        <h2 class="entry-header"><a href="entry/${makeSlug(e.title, e.date)}.html">${e.title}</a></h2>
         <div class="entry-meta">
           <time datetime="${e.date}">${e.date}</time>
           ${e.source ? `<span class="entry-source"><a href="${escapeHtml(e.source)}" target="_blank" rel="noopener">${new URL(e.source).hostname.replace('www.','')}</a></span>` : ''}
