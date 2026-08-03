@@ -114,17 +114,17 @@ def render_entry_html(entry: dict, show_related: bool = False, related_entries: 
             r_title = escape(r["title"])
             r_date = r["date"]
             r_slug = make_slug(r["title"], r_date)
-            related_items.append(f'<li><a href="entry/{r_slug}.html">{r_title}</a> <span class="date">({r_date})</span></li>')
+            related_items.append(f'<li><a href="../entry/{r_slug}.html">{r_title}</a> <span class="date">({r_date})</span></li>')
         if related_items:
             related_html = f'''
     <div class="related-entries">
-      <h3>\u95a2\u9023\u30a8\u30f3\u30c8\u30ea</h3>
+      <h3>関連エントリ</h3>
       <ul>{"".join(related_items)}</ul>
     </div>'''
 
     return f"""
     <article class="entry-card">
-      <h2 class="entry-header"><a href="entry/{make_slug(entry['title'], date_str)}.html">{title}</a></h2>
+      <h2 class="entry-header"><a href="../entry/{make_slug(entry['title'], date_str)}.html">{title}</a></h2>
       <p class="entry-meta"><time datetime="{date_str}">{date_str}</time>{tag_html}</p>
       {content_html}
       {source_html}
@@ -304,9 +304,9 @@ def generate_single_page(entry: dict, related_entries: list) -> str:
             r_title = escape(r["title"])
             r_date = r["date"]
             r_slug = make_slug(r["title"], r_date)
-            rel_items.append(f'<li><a href="entry/{r_slug}.html">{r_title}</a> <span class="date">({r_date})</span></li>')
+            rel_items.append(f'<li><a href="../entry/{r_slug}.html">{r_title}</a> <span class="date">({r_date})</span></li>')
         if rel_items:
-            related_html = "\n    <div class=\"related-entries\">\n      <h3>関連エントリ</h3>\n      <ul>" + "".join(rel_items) + "\n    </div>"
+            related_html = "\n    <div class=\"related-entries\">\n      <h3>関連エントリ</h3>\n      <ul>" + "".join(rel_items) + "\n    </ul>\n  </div>"
 
     css = """@font-face { font-family: "UDEV Gothic 35LG"; src: url("https://branch10480.github.io/design-system/fonts/UDEVGothic35LG-Regular.woff2") format("woff2"); font-weight:400; font-display:swap; }
 @font-face { font-family: "UDEV Gothic 35LG"; src: url("https://branch10480.github.io/design-system/fonts/UDEVGothic35LG-Bold.woff2") format("woff2"); font-weight:700; font-display:swap; }
@@ -318,10 +318,10 @@ def generate_single_page(entry: dict, related_entries: list) -> str:
 .globalnav { position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--hairline) } .gn-inner { max-width:var(--doc-max);margin:0 auto;height:48px;padding:0 22px;display:flex;align-items:center;gap:28px } .gn-brand { font-size:17px;font-weight:600;color:var(--text);letter-spacing:-.02em } .gn-brand:hover { text-decoration:none }
 .theme-toggle { font:500 12px var(--font-text);color:var(--text-2);background:var(--bg-alt);border:1px solid transparent;border-radius:var(--r-pill);padding:5px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:color 120ms,border-color 120ms } .theme-toggle:hover { color:var(--text);border-color:var(--separator) } .theme-toggle .dot { width:8px;height:8px;border-radius:50%;background:var(--tint) }
 .hero { background:var(--bg-alt);padding:88px 22px 72px;text-align:center } .eyebrow { font-size:14px;color:var(--text-2);margin:0 0 10px;font-weight:500 } .hero h1 { margin:0 auto;font-size:clamp(34px,5.2vw,52px);font-weight:600;letter-spacing:-.015em;line-height:1.14 }
-.content-area { max-width:min(var(--doc-max),calc(100vw - 2 * var(--otp-reserve)));margin:0 auto;padding:48px 22px 96px } .entry-card { display:flex;flex-direction:column;background:var(--bg-elev);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:20px 22px;margin-bottom:16px;box-shadow:var(--sh-1) } .entry-header { display:flex;align-items:baseline;gap:12px;margin-bottom:6px } .entry-title { font-size:18px;font-weight:600;letter-spacing:-.01em;margin:0 } .entry-title a { color:var(--text) } .entry-title a:hover { color:var(--tint);text-decoration:none } .entry-meta { display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--text-3);margin-bottom:8px } .entry-tags { display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px } .tag-pill { font:500 11px var(--font-text);color:var(--tint);padding:2px 8px;border-radius:var(--r-pill);background:color-mix(in srgb,var(--tint) 12%,transparent) } .entry-body { font-size:15px;line-height:1.6;color:var(--text) } .entry-body p { margin:0 0 8px } .entry-body code { font-size:.92em;background:var(--bg-alt);border-radius:4px;padding:1px 5px;color:var(--text) } .entry-body pre { background:var(--bg-code);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:18px 16px;overflow-x:auto;font-size:15px;line-height:1.62 }
-.related-entries { margin-top:40px;padding-top:24px;border-top:1px solid var(--hairline) } .related-entries h3 { font-size:17px;font-weight:600;margin:0 0 12px } .related-entries ul { margin:0;padding-left:20px } .related-entries li { margin:6px 0;font-size:15px } .related-entries .date { color:var(--text-3);font-size:13px }
+.content-area { max-width:var(--doc-max);margin:0 auto;padding:48px 22px 96px } .entry-detail-header { padding-bottom:28px;border-bottom:1px solid var(--hairline) } .entry-detail-header h1 { margin:0;font-size:clamp(32px,4.5vw,44px);font-weight:600;letter-spacing:-.015em;line-height:1.1 } .entry-detail-header .entry-meta { margin:14px 0 0;display:flex;align-items:center;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--text-3) } .entry-detail-header .entry-tags { display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0 } .tag-pill { display:inline-flex;align-items:center;font:500 12px var(--font-text);color:var(--text-2);background:var(--bg-alt);padding:4px 12px;border-radius:var(--r-pill) } .entry-body { padding:44px 0 8px;font-size:15px;line-height:1.6;color:var(--text) } .entry-body p { margin:0 0 14px } .entry-body p:last-child { margin-bottom:0 } .entry-body ul,.entry-body ol { margin:14px 0;padding-left:20px } .entry-body li { margin:4px 0;line-height:1.55 } .entry-body code { font-size:.92em;font-weight:var(--code-weight);background:var(--bg-alt);border-radius:4px;padding:1px 5px;color:var(--text) } .entry-body pre { margin:14px 0;background:var(--bg-code);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:18px 16px;overflow-x:auto;font-size:15px;line-height:1.62;font-weight:var(--code-weight);color:var(--text) }
+.related-entries { margin:40px 0 0;padding:14px 18px;border:1px solid var(--hairline);border-left:4px solid var(--text-3);border-radius:var(--r-md);background:var(--bg-alt) } .related-entries h3 { margin:0 0 4px;font-size:13px;font-weight:600;color:var(--text-2) } .related-entries ul { margin:0;padding-left:20px } .related-entries li { margin:4px 0;font-size:14px;line-height:1.55 } .related-entries .date { color:var(--text-3);font-size:12px }
 .back-link { display:inline-block;margin-bottom:24px;font-size:15px;color:var(--tint) } .back-link:hover { text-decoration:none }
-.sitefooter { border-top:1px solid var(--hairline);background:var(--bg-alt);padding:24px 0 34px;font-size:12px;color:var(--text-3) } .sitefooter .inner { max-width:var(--doc-max);margin:0 auto;padding:0 22px;display:flex;justify-content:center } .sitefooter a { color:var(--text-2) }
+.sitefooter { border-top:1px solid var(--hairline);background:var(--bg-alt);padding:24px 0 34px;font-size:12px;color:var(--text-3) } .sitefooter p { margin:0 } .sitefooter .inner { max-width:var(--doc-max);margin:0 auto;padding:0 22px;display:flex;justify-content:center }
 @media(max-width:700px) { .hero h1 br { display:none } } @media(max-width:600px) { .hero { padding:48px 16px 40px } .content-area { padding-left:16px;padding-right:16px } }"""
 
     theme_init = """(() => {
@@ -374,22 +374,24 @@ def generate_single_page(entry: dict, related_entries: list) -> str:
         "<script>\n" + theme_init + "\n</script>\n<style>\n" + css + "\n</style>\n"
         "</head>\n<body data-view=\"single\">\n"
         "<nav class=\"globalnav\"><div class=\"gn-inner\">"
-        "<a class=\"gn-brand\" href=\"index.html\">Knowledge</a>"
+        "<a class=\"gn-brand\" href=\"../index.html\">Knowledge</a>"
         "<button class=\"theme-toggle\" id=\"themeToggle\" aria-label=\"テーマ切り替え\">"
         "<span class=\"dot\"></span> <span id=\"themeLabel\">自動</span></button>"
         "</div></nav>\n"
         "<div class=\"content-area\">\n"
-        "<a href=\"index.html\" class=\"back-link\">\u2190 Back to all entries</a>\n"
+        "<a href=\"../index.html\" class=\"back-link\">← Back to all entries</a>\n"
+        "<header class=\"entry-detail-header\">\n"
         "<h1>" + title + "</h1>\n"
-        "<p class=\"entry-meta\"><time datetime=\"" + date_str + "\">" + date_str + "</time> " + tag_html + "</p>\n"
+        "<div class=\"entry-meta\"><time datetime=\"" + date_str + "\">" + date_str + "</time> " + tag_html + "</div>\n"
         "<div class=\"entry-body\">" + content_html + "</div>\n"
+        "</header>\n"
     )
     footer = (
         source_html + "\n"
         + related_html + "\n"
         "</div>\n"
         "<footer class=\"sitefooter\"><div class=\"inner\">"
-        "<p>Powered by <a href=\"index.html\">Knowledge</a> · Toshi Design System v0.7.0</p>"
+        "<p>Powered by <a href=\"../index.html\">Knowledge</a> · Toshi Design System v0.7.0</p>"
         "</div></footer>\n"
         "<script>\n" + theme_toggle_js + "\n</script>\n"
         "</body>\n</html>"
