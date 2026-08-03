@@ -92,3 +92,17 @@ python3 build.py
 - content はマークダウン形式（見出し `#`、リスト `-`、リンク `[text](url)`、コード `` `code` `` が使える）
 - URL は `https://` のみ許可
 - タグは小文字推奨（`apple`, `ios`, `swift`, `ai`, `openai`, `anthropic`, `security` など）
+
+---
+
+## 開発メモ
+
+### テーマ切り替え UI の位置
+
+GitHub Pages の子ページ（個別エントリページ）のライト・ダークモード切り替え UI は、デザインシステムに準拠してナビゲーションバー内（`.gn-inner`）に配置します。
+
+- **修正内容** (`build.py`):
+  - `generate_single_page()` の CSS: `position:absolute;top:1rem;right:22px` を削除（デザインシステムと同様のインライン配置）
+  - HTML 構造: `<button class="theme-toggle">` を `.gn-inner` の中（ブランドリンク直後）に配置
+
+これにより、テーマ切り替えボタンが左に寄るのではなく、ナビゲーションバー内で適切な位置に表示されるようになります。
