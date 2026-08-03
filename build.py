@@ -450,7 +450,7 @@ def main():
         entries_html_parts.append(render_entry_html(entry, show_related=True, related_entries=rel))
     entries_html = "\n".join(entries_html_parts)
 
-    html = template.replace("__TODAY__", today).replace("__ENTRIES__", entries_html)
+    html = template.replace("__TODAY__", today).replace("__ENTRIES__", entries_html).replace("__ENTRIES_JSON__", json.dumps(entries)[1:-1])
     with open(index_path, "w") as f:
         f.write(html)
 
