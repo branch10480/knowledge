@@ -27,7 +27,7 @@
           "text": { "type": "string", "minLength": 1, "maxLength": 500 },
           "evidence_quotes": {
             "type": "array", "maxItems": 10,
-            "items": { "type": "string", "minLength": 1, "maxLength": 300 }
+            "items": { "type": "string", "minLength": 1, "maxLength": 1000 }
           }
         }
       }

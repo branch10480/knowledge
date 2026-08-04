@@ -66,6 +66,7 @@ def build_summary_request(candidate: Candidate, *, prompt_version: str) -> dict:
         "形式: {\"candidate_id\": string, \"title_ja\": string, \"summary_ja\": string, "
         "\"key_points\": [string], \"tags\": [string], \"claims\": [{\"text\": string, \"evidence_quotes\": [string]}], "
         "\"insufficient_evidence\": bool}"
+        "引用文(evidence_quotes)は1000文字以内にしてください。"
     )
     user = json.dumps(_truncate_input(candidate, max_bytes=24576), ensure_ascii=False)
     return {
