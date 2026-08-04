@@ -92,3 +92,21 @@ def test_json_escape_for_script_is_parseable():
     parsed = json.loads(escaped)
     assert parsed[0]["title"] == "a</script><script>"
     assert parsed[0]["summary"] == "x&y<b>"
+
+
+def test_embedded_index_data_is_parseable_json(tmp_path):
+    import json
+    import re
+
+    doc = models.EntriesDocument(2, _entries(3))
+    out = tmp_path / "out"
+    _build(doc, out, "2026-08-03T00:00:00Z")
+
+    html = (out / "index.html").read_text(encoding="utf-8")
+    match = re.search(
+        r'<script type="application/json" id="knowledge-data">(.*?)</script>',
+        html,
+        re.DOTALL,
+    )
+    assert match is not None
+    assert len(json.loads(match.group(1))) == 3

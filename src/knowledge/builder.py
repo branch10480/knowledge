@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from markupsafe import Markup
 
 from .atom import render_atom
 from .links import check_internal_links
@@ -123,9 +124,10 @@ def _copy_static(static_dir: Path, out_dir: Path) -> dict[str, str]:
 
 def _escape_json_for_script(value: object) -> str:
     """JSON を script type=application/json 要素へ埋め込むための escape。
-    `<` を \\u003c に置換して </script> 終了を防ぐ。"""
+    `<` を \\u003c に置換して </script> 終了を防ぎ、Jinja2 に安全済みと伝える。"""
     s = json.dumps(value, ensure_ascii=False)
-    return s.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+    escaped = s.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+    return Markup(escaped)
 
 
 def build_site(
