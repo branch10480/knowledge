@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Storeの特集掲載プロセスの拡張：Featuring Nominationsとマーケティングアセットの新機能 — Knowledge</title>
+<link rel="alternate" type="application/atom+xml" title="Knowledge Atom Feed" href="/knowledge/feed.xml">
+<link rel="stylesheet" href="/knowledge/assets/style.287f0eecae61.css">
+<script>
+(() => {
+  const root = document.documentElement;
+  const browserTheme = () => window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const applyResolved = (theme) => {
+    root.dataset.theme = theme === "dark" ? "dark" : "light";
+    root.dataset.themeMode = "auto";
+  };
+  try {
+    const mode = localStorage.getItem("tds-theme") || "auto";
+    if (mode === "light" || mode === "dark") {
+      root.dataset.theme = mode; root.dataset.themeMode = mode; return;
+    }
+    applyResolved(browserTheme());
+  } catch (_) {}
+})();
+</script>
+</head>
+<body data-view="single">
+<nav class="globalnav" aria-label="メインナビゲーション">
+<div class="gn-inner">
+<a class="gn-brand" href="/knowledge/index.html">Knowledge</a>
+<div class="gn-links">
+<a href="/knowledge/feed.xml" title="Atom フィードを購読">RSS</a>
+<a href="https://github.com/branch10480/knowledge" target="_blank" rel="noopener">GitHub</a>
+</div>
+<button class="theme-toggle" id="themeToggle" aria-label="テーマ切り替え">
+<span class="dot"></span> <span id="themeLabel">自動</span>
+</button>
+</div>
+</nav>
+
+<div class="content-area">
+<a href="/knowledge/index.html" class="back-link">← Back to all entries</a>
+<header class="entry-detail-header">
+<h1>App Storeの特集掲載プロセスの拡張：Featuring Nominationsとマーケティングアセットの新機能</h1>
+<div class="entry-meta">
+<time datetime="2026-08-04T04:27:44Z">2026-08-04</time>
+<span class="tag-pill">App Store</span><span class="tag-pill">App Store Connect</span><span class="tag-pill">Featuring Nominations</span><span class="tag-pill">開発者</span><span class="tag-pill">マーケティング</span>
+</div>
+</header>
+<div class="entry-tags" hidden></div>
+<div class="entry-body">
+<p>Appleは2024年11月12日、App Storeの特集掲載プロセスを拡張し、App Store Connectで新たに「Featuring Nominations」を導入しました。開発者はアプリやゲームの新規リリース、アプリ内コンテンツ、追加機能などをノミネートして特集掲載を申請できます。Todayタブなどの特集掲載に選ばれた場合、App Store Connectアプリで通知を受け取れます。また、アプリのローンチや新バージョンなどの重要な瞬間を宣伝するための、AppleがデザインしたマーケティングアセットをApp Store Connectアプリで生成し、ソーシャルメディアで共有できます。アセットにはApp Storeでアプリをダウンロードできるリンクを含めることができます。</p>
+
+<ul>
+<li>App Store Connectに新機能「Featuring Nominations」が追加され、開発者は新規リリース、アプリ内コンテンツ、追加機能を特集掲載のためにノミネートできる。</li><li>Todayタブなどの特集掲載に選ばれた場合、App Store Connectアプリで通知が届く。</li><li>アプリのローンチ、新バージョン、特集掲載などの重要な瞬間を宣伝するための、AppleがデザインしたマーケティングアセットをApp Store Connectアプリで生成できる。</li><li>生成したアセットにはApp Storeでアプリをダウンロードするためのリンクを含めることができ、ソーシャルメディアで共有できる。</li>
+</ul>
+
+</div>
+<p class="entry-meta">出典: <span class="entry-source"><a href="https://developer.apple.com/news/?id=nx3eotat" target="_blank" rel="noopener">developer.apple.com</a></span></p>
+
+<div class="related-entries">
+<h3>関連エントリ</h3>
+<ul>
+
+<li><a href="/knowledge/entry/kn_0adab5a833632fb607ce2371.html">最新ベータ版リリースへの対応準備</a> <span class="date">(2026-08-04)</span></li>
+
+<li><a href="/knowledge/entry/kn_05343fdec0087778f5191d42.html">Advanced Commerce API の導入</a> <span class="date">(2026-08-04)</span></li>
+
+<li><a href="/knowledge/entry/kn_02de2fe526a242d247fe4b61.html">アプリ、App内課金、サブスクリプションの価格と税制の更新（2024年11月14日）</a> <span class="date">(2026-08-04)</span></li>
+
+<li><a href="/knowledge/entry/kn_00efe83d40eb5da8221ba1c7.html">欧州経済領域・英国・米国における規制対象医療機器アプリの表示更新</a> <span class="date">(2026-08-04)</span></li>
+
+</ul>
+</div>
+
+</div>
+
+<footer class="sitefooter">
+<div class="inner"><p>Powered by <a href="/knowledge/index.html">Knowledge</a> · Toshi Design System v0.7.0</p></div>
+</footer>
+<script src="/knowledge/assets/app.f68262abf5e1.js"></script>
+<script>
+(() => {
+  const root = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  const label = document.getElementById('themeLabel');
+  const SEQ = ['auto', 'light', 'dark'];
+  const NAMES = { auto: '自動', light: 'ライト', dark: 'ダーク' };
+  let mode = localStorage.getItem('tds-theme') || 'auto';
+  const browserTheme = () => window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  const applyResolved = (theme) => {
+    root.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+    root.dataset.themeMode = 'auto';
+  };
+  function resolveSystemTheme() { applyResolved(browserTheme()); }
+  function apply() {
+    if (mode === 'auto') resolveSystemTheme();
+    else { root.dataset.theme = mode; root.dataset.themeMode = mode; }
+    label.textContent = NAMES[mode];
+  }
+  btn.addEventListener('click', () => {
+    mode = SEQ[(SEQ.indexOf(mode) + 1) % SEQ.length];
+    localStorage.setItem('tds-theme', mode);
+    apply();
+  });
+  apply();
+})();
+</script>
+</body>
+</html>

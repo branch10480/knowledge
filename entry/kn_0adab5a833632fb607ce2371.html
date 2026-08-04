@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>最新ベータ版リリースへの対応準備 — Knowledge</title>
+<link rel="alternate" type="application/atom+xml" title="Knowledge Atom Feed" href="/knowledge/feed.xml">
+<link rel="stylesheet" href="/knowledge/assets/style.287f0eecae61.css">
+<script>
+(() => {
+  const root = document.documentElement;
+  const browserTheme = () => window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const applyResolved = (theme) => {
+    root.dataset.theme = theme === "dark" ? "dark" : "light";
+    root.dataset.themeMode = "auto";
+  };
+  try {
+    const mode = localStorage.getItem("tds-theme") || "auto";
+    if (mode === "light" || mode === "dark") {
+      root.dataset.theme = mode; root.dataset.themeMode = mode; return;
+    }
+    applyResolved(browserTheme());
+  } catch (_) {}
+})();
+</script>
+</head>
+<body data-view="single">
+<nav class="globalnav" aria-label="メインナビゲーション">
+<div class="gn-inner">
+<a class="gn-brand" href="/knowledge/index.html">Knowledge</a>
+<div class="gn-links">
+<a href="/knowledge/feed.xml" title="Atom フィードを購読">RSS</a>
+<a href="https://github.com/branch10480/knowledge" target="_blank" rel="noopener">GitHub</a>
+</div>
+<button class="theme-toggle" id="themeToggle" aria-label="テーマ切り替え">
+<span class="dot"></span> <span id="themeLabel">自動</span>
+</button>
+</div>
+</nav>
+
+<div class="content-area">
+<a href="/knowledge/index.html" class="back-link">← Back to all entries</a>
+<header class="entry-detail-header">
+<h1>最新ベータ版リリースへの対応準備</h1>
+<div class="entry-meta">
+<time datetime="2026-08-04T04:27:44Z">2026-08-04</time>
+<span class="tag-pill">Apple</span><span class="tag-pill">ベータ版</span><span class="tag-pill">iOS</span><span class="tag-pill">iPadOS</span><span class="tag-pill">macOS</span><span class="tag-pill">tvOS</span><span class="tag-pill">visionOS</span><span class="tag-pill">watchOS</span><span class="tag-pill">Xcode</span><span class="tag-pill">開発者</span>
+</div>
+</header>
+<div class="entry-tags" hidden></div>
+<div class="entry-body">
+<p>Appleは2024年12月16日、iOS 18.3、iPadOS 18.3、macOS 15.3、tvOS 18.3、visionOS 2.3、watchOS 11.3のベータ版を公開しました。開発者には、これらのリリースでアプリが期待通り動作することを確認し、Xcode 16.2でビルドとテストを行って最新SDKの利点を活用するよう求めています。ダウンロード、リリースノート、ベータOSのテスト方法、フィードバック送信に関する情報が提供されています。</p>
+
+<ul>
+<li>iOS 18.3、iPadOS 18.3、macOS 15.3、tvOS 18.3、visionOS 2.3、watchOS 11.3のベータ版が利用可能になった。</li><li>開発者はアプリがこれらのベータリリースで期待通り動作することを確認する必要がある。</li><li>最新SDKの利点を活用するため、Xcode 16.2でビルドとテストを行うことが推奨されている。</li><li>ダウンロード、リリースノート、ベータOSのテスト、フィードバック送信に関するリソースが提供されている。</li>
+</ul>
+
+</div>
+<p class="entry-meta">出典: <span class="entry-source"><a href="https://developer.apple.com/news/?id=rcvik60x" target="_blank" rel="noopener">developer.apple.com</a></span></p>
+
+<div class="related-entries">
+<h3>関連エントリ</h3>
+<ul>
+
+<li><a href="/knowledge/entry/kn_053d06cfd4ab8012f0282d78.html">App Storeの特集掲載プロセスの拡張：Featuring Nominationsとマーケティングアセットの新機能</a> <span class="date">(2026-08-04)</span></li>
+
+<li><a href="/knowledge/entry/kn_05343fdec0087778f5191d42.html">Advanced Commerce API の導入</a> <span class="date">(2026-08-04)</span></li>
+
+<li><a href="/knowledge/entry/kn_02de2fe526a242d247fe4b61.html">アプリ、App内課金、サブスクリプションの価格と税制の更新（2024年11月14日）</a> <span class="date">(2026-08-04)</span></li>
+
+<li><a href="/knowledge/entry/kn_00efe83d40eb5da8221ba1c7.html">欧州経済領域・英国・米国における規制対象医療機器アプリの表示更新</a> <span class="date">(2026-08-04)</span></li>
+
+<li><a href="/knowledge/entry/kn_ff4d948a5854294fe3d4b017.html">TestFlight、ベータアプリ検索機能を追加</a> <span class="date">(2026-07-31)</span></li>
+
+</ul>
+</div>
+
+</div>
+
+<footer class="sitefooter">
+<div class="inner"><p>Powered by <a href="/knowledge/index.html">Knowledge</a> · Toshi Design System v0.7.0</p></div>
+</footer>
+<script src="/knowledge/assets/app.f68262abf5e1.js"></script>
+<script>
+(() => {
+  const root = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  const label = document.getElementById('themeLabel');
+  const SEQ = ['auto', 'light', 'dark'];
+  const NAMES = { auto: '自動', light: 'ライト', dark: 'ダーク' };
+  let mode = localStorage.getItem('tds-theme') || 'auto';
+  const browserTheme = () => window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  const applyResolved = (theme) => {
+    root.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+    root.dataset.themeMode = 'auto';
+  };
+  function resolveSystemTheme() { applyResolved(browserTheme()); }
+  function apply() {
+    if (mode === 'auto') resolveSystemTheme();
+    else { root.dataset.theme = mode; root.dataset.themeMode = mode; }
+    label.textContent = NAMES[mode];
+  }
+  btn.addEventListener('click', () => {
+    mode = SEQ[(SEQ.indexOf(mode) + 1) % SEQ.length];
+    localStorage.setItem('tds-theme', mode);
+    apply();
+  });
+  apply();
+})();
+</script>
+</body>
+</html>

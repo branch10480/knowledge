@@ -1,6 +1,0 @@
-# GitHub Actions - gh-pages には不要
-.github/
-
-# Python
-__pycache__/
-*.pyc
