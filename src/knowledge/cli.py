@@ -220,7 +220,9 @@ def check_command(*, entries_path: Path, dist_dir: Path) -> int:
         on_disk = {
             p.relative_to(dist_dir).as_posix()
             for p in dist_dir.rglob("*")
-            if p.is_file() and p.name != "manifest.json"
+            if p.is_file()
+            and p.name != "manifest.json"
+            and ".git" not in p.parts
         }
         in_man = set(man.get("files", {}).keys())
         missing = in_man - on_disk

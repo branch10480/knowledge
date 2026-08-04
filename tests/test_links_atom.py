@@ -2,7 +2,7 @@
 from __future__ import annotations
 import xml.etree.ElementTree as ET
 
-from knowledge import atom, links, models
+from knowledge import atom, cli, links, models
 
 
 def _entry(iid: str, title: str) -> models.Entry:
@@ -56,3 +56,15 @@ def test_link_checker_detects_broken(tmp_path):
     )
     rep = links.check_internal_links(tmp_path, base_path="/knowledge/")
     assert not rep.ok
+
+
+def test_check_command_ignores_git_metadata(tmp_path):
+    entries_path = tmp_path / "entries.json"
+    entries_path.write_text('{"schema_version": 2, "entries": []}', encoding="utf-8")
+
+    dist_dir = tmp_path / "dist"
+    (dist_dir / ".git").mkdir(parents=True)
+    (dist_dir / ".git" / "config").write_text("metadata", encoding="utf-8")
+    (dist_dir / "manifest.json").write_text('{"files": {}}', encoding="utf-8")
+
+    assert cli.check_command(entries_path=entries_path, dist_dir=dist_dir) == 0
