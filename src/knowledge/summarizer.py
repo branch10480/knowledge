@@ -66,17 +66,25 @@ def build_summary_request(candidate: Candidate, *, prompt_version: str) -> dict:
         "形式: {\"candidate_id\": string, \"title_ja\": string, \"summary_ja\": string, "
         "\"key_points\": [string], \"tags\": [string], \"claims\": [{\"text\": string, \"evidence_quotes\": [string]}], "
         "\"insufficient_evidence\": bool}"
-        "引用文(evidence_quotes)は1000文字以内にしてください。"
+        "引用文(evidence_quotes)は300文字以内にしてください。"
+        "summary_ja は300文字以内、key_points は最大3件、tags は最大5件、claims は最大2件にしてください。"
+        "各 claim の evidence_quotes は1件だけにしてください。"
+        "evidence_quotes は source_text からそのままコピーした一字一句の文字列でなければなりません。"
+        "要約・言い換え・抜粋をしないでください。完全一致の文字列を引用してください。"
+        "output token数はmax_tokensの制限内で収めてください。"
+        "長くなりすぎる場合は、key_pointsとtagsを優先して簡潔に記述してください。"
     )
     user = json.dumps(_truncate_input(candidate, max_bytes=24576), ensure_ascii=False)
     return {
         "model": None,  # 呼び出し側で決定
         "temperature": 0,
         "seed": None,
+        "max_tokens": None,  # 呼び出し側で設定
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
+        "chat_template_kwargs": {"enable_thinking": False},
     }
 
 
@@ -166,6 +174,9 @@ def summarize_candidates(
     out: list[SummaryOutput] = []
     for c in candidates[: config.max_candidates_per_run]:
         req = build_summary_request(c, prompt_version=prompt_version)
+        req["max_tokens"] = config.max_output_tokens_per_candidate
+        # llama.cpp/Qwen の reasoning が全トークンを消費して content が空になるのを防ぐ。
+        req["chat_template_kwargs"] = {"enable_thinking": False}
         raw: bytes | None = None
         last_err: Exception | None = None
         for _ in range(config.max_retries + 1):
