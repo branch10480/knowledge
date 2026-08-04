@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "last_success_at": "1970-01-01T00:00:00Z",
+  "sources": {
+    "apple-developer-news": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": [
+        {
+          "external_id_hash": "sha256:a742178ae667f4cc5ac212b048cdbad55aa03d5779a93134bcc75497321aa42e",
+          "canonical_url_hash": "sha256:a742178ae667f4cc5ac212b048cdbad55aa03d5779a93134bcc75497321aa42e",
+          "first_seen_at": "2026-08-04T04:27:44Z"
+        },
+        {
+          "external_id_hash": "sha256:b8e9eede9374b61cc370b572b732feff36c268f5a60ac809ff3a51d6800497fa",
+          "canonical_url_hash": "sha256:b8e9eede9374b61cc370b572b732feff36c268f5a60ac809ff3a51d6800497fa",
+          "first_seen_at": "2026-08-04T04:27:44Z"
+        },
+        {
+          "external_id_hash": "sha256:bd7ca47890e3fb17d739deca6834ff3d4eb24be7c1e3236bf552d722bdeca145",
+          "canonical_url_hash": "sha256:bd7ca47890e3fb17d739deca6834ff3d4eb24be7c1e3236bf552d722bdeca145",
+          "first_seen_at": "2026-08-04T04:27:44Z"
+        },
+        {
+          "external_id_hash": "sha256:715a3230eddb7095ca270cc628298bb0cb792161549a99488f2bbddf8d8d490f",
+          "canonical_url_hash": "sha256:715a3230eddb7095ca270cc628298bb0cb792161549a99488f2bbddf8d8d490f",
+          "first_seen_at": "2026-08-04T04:27:44Z"
+        },
+        {
+          "external_id_hash": "sha256:fec7f690ba57fbedf41eb037eab060f3f1625b51b491131a1477ed83b524cc19",
+          "canonical_url_hash": "sha256:fec7f690ba57fbedf41eb037eab060f3f1625b51b491131a1477ed83b524cc19",
+          "first_seen_at": "2026-08-04T04:27:44Z"
+        }
+      ]
+    },
+    "apple-developer-releases": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": []
+    },
+    "openai-news": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": []
+    },
+    "anthropic-newsroom": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": []
+    },
+    "swift-releases": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": []
+    }
+  }
+}

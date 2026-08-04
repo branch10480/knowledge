@@ -2,6 +2,188 @@
   "schema_version": 2,
   "entries": [
     {
+      "id": "kn_0adab5a833632fb607ce2371",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=rcvik60x",
+      "canonical_url": "https://developer.apple.com/news/?id=rcvik60x",
+      "published_at": "2026-08-04T04:27:44Z",
+      "collected_at": "2026-08-04T04:27:44Z",
+      "title": "最新ベータ版リリースへの対応準備",
+      "summary": "Appleは2024年12月16日、iOS 18.3、iPadOS 18.3、macOS 15.3、tvOS 18.3、visionOS 2.3、watchOS 11.3のベータ版を公開しました。開発者には、これらのリリースでアプリが期待通り動作することを確認し、Xcode 16.2でビルドとテストを行って最新SDKの利点を活用するよう求めています。ダウンロード、リリースノート、ベータOSのテスト方法、フィードバック送信に関する情報が提供されています。",
+      "key_points": [
+        "iOS 18.3、iPadOS 18.3、macOS 15.3、tvOS 18.3、visionOS 2.3、watchOS 11.3のベータ版が利用可能になった。",
+        "開発者はアプリがこれらのベータリリースで期待通り動作することを確認する必要がある。",
+        "最新SDKの利点を活用するため、Xcode 16.2でビルドとテストを行うことが推奨されている。",
+        "ダウンロード、リリースノート、ベータOSのテスト、フィードバック送信に関するリソースが提供されている。"
+      ],
+      "tags": [
+        "Apple",
+        "ベータ版",
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS",
+        "Xcode",
+        "開発者"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:7757e3fd25eb6b1e3ec4add748e862f2e5ff16196b71b7efef405e7ad16855c2",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-04T04:27:44Z"
+      }
+    },
+    {
+      "id": "kn_053d06cfd4ab8012f0282d78",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=nx3eotat",
+      "canonical_url": "https://developer.apple.com/news/?id=nx3eotat",
+      "published_at": "2026-08-04T04:27:44Z",
+      "collected_at": "2026-08-04T04:27:44Z",
+      "title": "App Storeの特集掲載プロセスの拡張：Featuring Nominationsとマーケティングアセットの新機能",
+      "summary": "Appleは2024年11月12日、App Storeの特集掲載プロセスを拡張し、App Store Connectで新たに「Featuring Nominations」を導入しました。開発者はアプリやゲームの新規リリース、アプリ内コンテンツ、追加機能などをノミネートして特集掲載を申請できます。Todayタブなどの特集掲載に選ばれた場合、App Store Connectアプリで通知を受け取れます。また、アプリのローンチや新バージョンなどの重要な瞬間を宣伝するための、AppleがデザインしたマーケティングアセットをApp Store Connectアプリで生成し、ソーシャルメディアで共有できます。アセットにはApp Storeでアプリをダウンロードできるリンクを含めることができます。",
+      "key_points": [
+        "App Store Connectに新機能「Featuring Nominations」が追加され、開発者は新規リリース、アプリ内コンテンツ、追加機能を特集掲載のためにノミネートできる。",
+        "Todayタブなどの特集掲載に選ばれた場合、App Store Connectアプリで通知が届く。",
+        "アプリのローンチ、新バージョン、特集掲載などの重要な瞬間を宣伝するための、AppleがデザインしたマーケティングアセットをApp Store Connectアプリで生成できる。",
+        "生成したアセットにはApp Storeでアプリをダウンロードするためのリンクを含めることができ、ソーシャルメディアで共有できる。"
+      ],
+      "tags": [
+        "App Store",
+        "App Store Connect",
+        "Featuring Nominations",
+        "開発者",
+        "マーケティング"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:3baed0d98dd1ea09eacda947605ac24cb20fdf6029799e2fd40e448a36492ccb",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-04T04:27:44Z"
+      }
+    },
+    {
+      "id": "kn_05343fdec0087778f5191d42",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=yxy958ya",
+      "canonical_url": "https://developer.apple.com/news/?id=yxy958ya",
+      "published_at": "2026-08-04T04:27:44Z",
+      "collected_at": "2026-08-04T04:27:44Z",
+      "title": "Advanced Commerce API の導入",
+      "summary": "Apple は、App Store の取引をさらに柔軟に管理できる新しい Advanced Commerce API を発表しました。この API は、大規模なコンテンツカタログ、クリエイター向けエクスペリエンス、オプションのアドオンを備えたサブスクリプションなど、進化するビジネスモデルをサポートします。開発者は申請を通じて利用でき、エンドツーエンドの決済処理、税務サポート、カスタマーサービスなど、信頼される App Store のコマースシステムを活用しながら、アプリ内課金をより柔軟に管理できます。",
+      "key_points": [
+        "App Store は年間数十億件の取引を処理しており、開発者のビジネス成長と顧客体験を支えている。",
+        "Advanced Commerce API は、大規模なコンテンツカタログ、クリエイター向けエクスペリエンス、オプションのアドオン付きサブスクリプションなどのビジネスモデルを対象としている。",
+        "開発者は申請して利用でき、アプリ内課金をより柔軟に管理できる。",
+        "この API は、エンドツーエンドの決済処理、税務サポート、カスタマーサービスなど、App Store の信頼されるコマースシステムを活用する。",
+        "適格性の要件と申請方法が案内されている。"
+      ],
+      "tags": [
+        "Apple",
+        "App Store",
+        "API",
+        "アプリ内課金",
+        "コマース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:71e3264f72b4a391023e77c4f2c07cccc51a56ec3e8a06cdf81add88978b9b8d",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-04T04:27:44Z"
+      }
+    },
+    {
+      "id": "kn_02de2fe526a242d247fe4b61",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=onjo01rj",
+      "canonical_url": "https://developer.apple.com/news/?id=onjo01rj",
+      "published_at": "2026-08-04T04:27:44Z",
+      "collected_at": "2026-08-04T04:27:44Z",
+      "title": "アプリ、App内課金、サブスクリプションの価格と税制の更新（2024年11月14日）",
+      "summary": "Appleは2024年11月14日、App Storeにおけるアプリ、App内課金、サブスクリプションの価格と税制の更新を発表しました。10月時点の税制変更として、ネパールとカザフスタンではAppleが現地開発者向けにVAT（付加価値税）を納付しなくなり、開発者の収益が増加。マデイラでは新聞・雑誌・書籍・オーディオブックのVAT率が5%から4%に引き下げられました。12月2日からは、日本とトルコのストアフロントを基準にしていないアプリとApp内課金の価格が更新されます。基準として選択している場合は価格は変更されません。自動更新サブスクリプションや手動価格管理を行っているストアフロントでは価格は変わりません。App Store Connectの価格と提供状況セクションで今後の価格変更を確認できます。",
+      "key_points": [
+        "10月時点の税制変更：ネパールとカザフスタンではAppleが現地開発者向けVATを納付しなくなり、対象アプリとApp内課金の収益が増加。",
+        "マデイラでは新聞・雑誌・定期刊行物・書籍・オーディオブックのVAT率が5%から4%に引き下げられた。",
+        "12月2日から、日本とトルコのストアフロントを基準にしていないアプリとApp内課金の価格が更新される。",
+        "日本またはトルコを基準にしている場合、自動更新サブスクリプション、手動価格管理のストアフロントでは価格は変更されない。",
+        "App Store Connectの価格と提供状況セクションで今後の価格変更を確認できる。"
+      ],
+      "tags": [
+        "Apple",
+        "App Store",
+        "価格更新",
+        "税制",
+        "VAT",
+        "App内課金",
+        "サブスクリプション"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:1c71e79b301e9549c6559e293702f988a02c8f7993c58fd6220f10d9693749ac",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-04T04:27:44Z"
+      }
+    },
+    {
+      "id": "kn_00efe83d40eb5da8221ba1c7",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=nyqbfz1y",
+      "canonical_url": "https://developer.apple.com/news/?id=nyqbfz1y",
+      "published_at": "2026-08-04T04:27:44Z",
+      "collected_at": "2026-08-04T04:27:44Z",
+      "title": "欧州経済領域・英国・米国における規制対象医療機器アプリの表示更新",
+      "summary": "Appleは、欧州経済領域（EEA）、英国、米国において、App Storeの製品ページに規制対象医療機器アプリであることを表示することを発表しました。対象となるアプリは、診断・予防・モニタリング・治療などの医療目的で機能するもので、FDAなどの規制当局による登録や承認が必要となる場合があります。開発者はApp Store Connectで規制対象医療機器ステータスと関連する規制情報（連絡先や安全情報など）を提供する必要があります。新規アプリは本日から必須、既存アプリは2027年初頭までに提供する必要があり、期限までに提供しない場合はアプリのアップデート提出ができなくなります。",
+      "key_points": [
+        "App Storeの製品ページで規制対象医療機器アプリであることを表示する",
+        "対象地域は欧州経済領域（EEA）、英国、米国",
+        "対象基準：Health & FitnessまたはMedicalカテゴリ、または年齢評価でMedical/Treatment Informationへの頻繁な言及",
+        "新規アプリは2026年3月26日から必須、既存アプリは2027年初頭までに提供が必要",
+        "期限までに提供しない場合、アプリのアップデート提出ができなくなる"
+      ],
+      "tags": [
+        "Apple",
+        "App Store",
+        "医療機器",
+        "規制",
+        "欧州経済領域",
+        "英国",
+        "米国"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:2f23809fe50133d632478cb5cf96fc59818d3d42f94bc614964fb265c44478ad",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-04T04:27:44Z"
+      }
+    },
+    {
       "id": "kn_ff4d948a5854294fe3d4b017",
       "source_id": "web-secondary",
       "external_id": "https://www.explosion.com/205061/apple-adds-search-to-testflight-for-beta-app-heavy-users/",
