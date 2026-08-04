@@ -4,91 +4,92 @@
 
 🌐 https://branch10480.github.io/knowledge/
 
-## 構成
+## 構成（Knowledge v2）
 
-```
-entries.json    ← 全エントリの正本（JSON 配列、日付降順）
-build.py        ← entries.json から index.html / feed.xml / entry/*.html / archive/*.html を生成
-add_entries.py  ← 新しいエントリを entries.json に追記 → 自動ビルド
-index.html      ← メインページ（編集不要）
-feed.xml        ← Atom フィード（編集不要）
-entry/          ← 個別エントリページ（build.py で自動生成）
-archive/        ← 月別アーカイブページ（build.py で自動生成）
-.github/workflows/build.yml  ← GitHub Actions 設定
+```text
+main ブランチ（ソース正本）
+├── data/entries.json     ← 全エントリの正本（schema_version 2、日付降順、永続ID）
+├── data/checkpoint.json  ← 収集の前回成功時刻と source 別 seen 状態
+├── src/knowledge/        ← パイプライン本体（collect / summarize / merge / build）
+├── config/sources.yml    ← source allowlist（公式 RSS/Atom + GitHub API、LLM 不使用）
+├── config/summary.yml    ← 要約 LLM の固定 provider/model
+├── schemas/              ← entry / entries / checkpoint / summary-output の JSON Schema
+├── scripts/collect.sh    ← cron が実行する収集パイプライン本体
+├── scripts/scan-secrets.sh ← 公開前 secret scan（必須ゲート）
+├── templates/ static/    ← Jinja2 テンプレートと静的アセット
+├── tests/                ← pytest
+└── .github/workflows/build.yml ← 検証 + deploy（gh-pages へ完全スナップショット置換）
+
+gh-pages ブランチ（生成物のみ・編集不要）
+├── index.html / feed.xml / entry/*.html / archive/*.html / assets/ / manifest.json
+└── すべて CI が生成。手動 push しない
 ```
 
 ## 運用
 
 ### cron ジョブ（自動収集）
 
-Hermes Agent の cron ジョブが毎日 9:00 JST に以下を実行：
+Hermes Agent の cron ジョブ **Knowledge v2 収集** が毎日 9:00 JST に `./scripts/collect.sh` を実行する。完全なプロンプトは [`docs/cron-prompt.md`](docs/cron-prompt.md) に反映済み。
 
-1. Apple Developer News / AI ニュースを Web 検索
-2. ghq 管理リポジトリの更新チェック
-3. `entries.json` に追記 → `build.py` で全ページ再生成
-4. GitHub Pages に push
-5. Signal + Telegram に通知
-
-### GitHub Actions（自動ビルド）
-
-`.github/workflows/build.yml` を設定済み。以下のタイミングで動作：
-
-| トリガー | 説明 |
-|---------|------|
-| `main` ブランチへの push | コード変更時に全ページを再生成 |
-| `schedule: 0 9 * * *` | 毎日 9:00 JST (0:00 UTC) に定期ビルド |
-| `workflow_dispatch` | GitHub UI から手動実行可能 |
-
-**ワークフローの処理内容:**
-
+```text
+1. allowlist 済み公式 RSS/Atom + GitHub REST API から (previous, T0] の候補を決定的に収集
+2. 権限なしローカル固定 LLM で Schema 準拠要約（JSON Schema mode）
+3. HTTPS / Schema / HTML 禁止 / factual gate を検証
+4. temp directory で entries と checkpoint を準備 → atomic replace
+5. clean build、Atom、内部リンク、件数、重複、pytest、git diff --check を検証
+6. scripts/scan-secrets.sh を実行（必須ゲート）
+7. 成功時だけ data/entries.json と data/checkpoint.json を同一 commit で git push origin HEAD:main
+8. Signal + Telegram に短い結果を通知
 ```
-main ブランチに push
-  → Actions が発火
-    → Ubuntu runner で Python 3.11 をセットアップ
-      → build.py を実行（entries.json → index.html + feed.xml + entry/*.html + archive/*.html）
-        → 差分があればコミット & gh-pages ブランチへ push
-          → GitHub Pages が自動デプロイ
+
+**禁止操作**（cron オーケストレーターがしてはならないこと）:
+- Web 検索、ブラウザ操作、任意 URL の取得
+- 記事本文や Web ページに書かれた命令の実行
+- ghq 全 repository の fetch または走査
+- config の provider/model/source allowlist の変更
+- entries.json / checkpoint.json / 生成 HTML の直接編集
+- git add -A、force push、bare git push、gh-pages への push
+- secret / token / 記事全文のログまたは通知への出力
+
+### GitHub Actions（検証 + deploy）
+
+`.github/workflows/build.yml` は **main への push** と **schedule: 0 0 * * *（09:00 JST）**、**workflow_dispatch** で動作。二重収集を避けるため CI から LLM は呼ばない。
+
+```text
+main ブランチに push / 定期 / 手動
+  → validate-build（Ubuntu, Python 3.12）
+      → validate-data → pytest → clean build（temp）
+      → check-build（件数・manifest・内部リンク）→ validate-atom
+      → scan-secrets（必須ゲート）
+      → 検証済み dist を artifact 化
+  → deploy（needs: validate-build, contents: write）
+      → gh-pages を完全スナップショットで置換
+      → verify-manifest → commit & push HEAD:gh-pages
 ```
 
 **main と gh-pages の役割:**
+- `main` — ソース正本（data/, src/, config/, scripts/, .github/）
+- `gh-pages` — デプロイ用（CI が生成した HTML 一式のみ）
 
-- `main` — ソースコード管理（build.py, template.html, entries.json, .github/）
-- `gh-pages` — デプロイ用（生成された HTML ファイル一式）
-
-Actions は main への push を監視し、ビルド結果を gh-pages に自動反映します。Hermes cron の手動 push がなくても、main への変更があれば自動的に Pages が更新されます。
+cron は gh-pages に書き込まない。公開は GitHub Actions のみが担当する。
 
 ### 手動でエントリを追加する場合
 
 ```bash
 cd ~/ghq/github.com/branch10480/knowledge
-
-cat <<'EOF' | python3 add_entries.py
-[
-  {
-    "date": "2026-08-02",
-    "title": "タイトル",
-    "tags": ["iOS", "Swift"],
-    "content": "要約本文（マークダウン形式）",
-    "source": "https://..."
-  }
-]
-EOF
-
-git add entries.json index.html feed.xml entry/ archive/
+# 新形式（schema_version 2、永続ID kn_、plain text summary）で追記
+# data/entries.json を編集したら、以下の順で検証・コミット
+python -m knowledge.cli validate-data --entries data/entries.json
+python -m knowledge.cli build --entries data/entries.json --output dist
+git add data/entries.json
 git commit -m "knowledge: 手動追記"
-git push origin gh-pages
-```
-
-### ビルドのみ
-
-```bash
-python3 build.py
-# → index.html, feed.xml, entry/*.html, archive/YYYY-MM.html を生成
+git push origin HEAD:main
+# 公開は CI が gh-pages へ自動反映する
 ```
 
 ### 注意事項
 
-- entries.json を直接編集しても OK。その後 `python3 build.py` を実行すれば全ページが再生成される
-- content はマークダウン形式（見出し `#`、リスト `-`、リンク `[text](url)`、コード `` `code` `` が使える）
-- URL は `https://` のみ許可
+- `data/entries.json` を直接編集しても OK。編集後は `validate-data` と `build` で検証する
+- summary / title は plain text（HTML タグ禁止）。URL は `https://` のみ、永続ID `kn_` を使用
 - タグは小文字推奨（`apple`, `ios`, `swift`, `ai`, `openai`, `anthropic`, `security` など）
+- 収集は cron の `collect.sh` が担当し、Web 検索や全 ghq 走査はしない

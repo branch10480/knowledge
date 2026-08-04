@@ -1,6 +1,10 @@
-# GitHub Actions - gh-pages には不要
-.github/
-
-# Python
+.venv/
+.work/
+.work.run.*/
+dist/
 __pycache__/
 *.pyc
+.hermes/
+.codex-*.md
+HANDOFF.md
+.DS_Store

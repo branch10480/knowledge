@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://branch10480.github.io/knowledge/schemas/checkpoint.schema.json",
+  "title": "Knowledge checkpoint",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "last_success_at", "sources"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "last_success_at": { "type": "string", "format": "date-time" },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "etag": { "type": ["string", "null"] },
+          "last_modified": { "type": ["string", "null"] },
+          "last_commit_sha": { "type": ["string", "null"] },
+          "seen": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["external_id_hash", "canonical_url_hash", "first_seen_at"],
+              "properties": {
+                "external_id_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+                "canonical_url_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+                "first_seen_at": { "type": "string", "format": "date-time" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

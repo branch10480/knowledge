@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Knowledge{% endblock %} — Knowledge</title>
+<link rel="alternate" type="application/atom+xml" title="Knowledge Atom Feed" href="{{ url('feed.xml') }}">
+<link rel="stylesheet" href="{{ asset_url('style.css') }}">
+<script>
+(() => {
+  const root = document.documentElement;
+  const browserTheme = () => window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const applyResolved = (theme) => {
+    root.dataset.theme = theme === "dark" ? "dark" : "light";
+    root.dataset.themeMode = "auto";
+  };
+  try {
+    const mode = localStorage.getItem("tds-theme") || "auto";
+    if (mode === "light" || mode === "dark") {
+      root.dataset.theme = mode; root.dataset.themeMode = mode; return;
+    }
+    applyResolved(browserTheme());
+  } catch (_) {}
+})();
+</script>
+</head>
+<body data-view="{% block body_view %}home{% endblock %}">
+<nav class="globalnav" aria-label="メインナビゲーション">
+<div class="gn-inner">
+<a class="gn-brand" href="{{ url('index.html') }}">Knowledge</a>
+<div class="gn-links">
+<a href="{{ url('feed.xml') }}" title="Atom フィードを購読">RSS</a>
+<a href="https://github.com/branch10480/knowledge" target="_blank" rel="noopener">GitHub</a>
+</div>
+<button class="theme-toggle" id="themeToggle" aria-label="テーマ切り替え">
+<span class="dot"></span> <span id="themeLabel">自動</span>
+</button>
+</div>
+</nav>
+{% block content %}{% endblock %}
+<footer class="sitefooter">
+<div class="inner"><p>Powered by <a href="{{ url('index.html') }}">Knowledge</a> · Toshi Design System v0.7.0</p></div>
+</footer>
+<script src="{{ asset_url('app.js') }}"></script>
+<script>
+(() => {
+  const root = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  const label = document.getElementById('themeLabel');
+  const SEQ = ['auto', 'light', 'dark'];
+  const NAMES = { auto: '自動', light: 'ライト', dark: 'ダーク' };
+  let mode = localStorage.getItem('tds-theme') || 'auto';
+  const browserTheme = () => window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  const applyResolved = (theme) => {
+    root.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+    root.dataset.themeMode = 'auto';
+  };
+  function resolveSystemTheme() { applyResolved(browserTheme()); }
+  function apply() {
+    if (mode === 'auto') resolveSystemTheme();
+    else { root.dataset.theme = mode; root.dataset.themeMode = mode; }
+    label.textContent = NAMES[mode];
+  }
+  btn.addEventListener('click', () => {
+    mode = SEQ[(SEQ.indexOf(mode) + 1) % SEQ.length];
+    localStorage.setItem('tds-theme', mode);
+    apply();
+  });
+  apply();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+version: 1
+defaults:
+  timeout_seconds: 20
+  max_response_bytes: 2097152
+  lookback_hours: 72
+  max_items_per_source: 100
+
+sources:
+  - id: apple-developer-news
+    kind: html-index
+    url: "https://developer.apple.com/news/"
+    allowed_hosts: ["developer.apple.com"]
+    priority: 100
+    required: true
+    adapter: apple_news
+
+  - id: apple-developer-releases
+    kind: html-index
+    url: "https://developer.apple.com/news/releases/"
+    allowed_hosts: ["developer.apple.com"]
+    priority: 100
+    required: true
+    adapter: apple_releases
+
+  - id: openai-news
+    kind: feed
+    url: "https://openai.com/news/rss.xml"
+    allowed_hosts: ["openai.com"]
+    priority: 90
+    required: true
+
+  - id: anthropic-newsroom
+    kind: html-index
+    url: "https://www.anthropic.com/news"
+    allowed_hosts: ["www.anthropic.com", "anthropic.com"]
+    priority: 90
+    required: true
+    adapter: anthropic_news
+
+  - id: swift-releases
+    kind: github-releases
+    repository: "swiftlang/swift"
+    events: ["release"]
+    priority: 80
+    required: false

@@ -1,0 +1,21 @@
+{% extends "base.html.j2" %}
+{% block body_view %}archive{% endblock %}
+{% block title %}{{ month }} のエントリ{% endblock %}
+{% block content %}
+<header class="hero">
+<p class="eyebrow">{{ month }}</p>
+<h1>{{ month }} のエントリ</h1>
+</header>
+<main class="entries-list" role="list">
+{% for e in entries %}
+<article class="entry-card" role="listitem">
+<h2 class="entry-header"><a href="{{ url('entry', e.id + '.html') }}">{{ e.title }}</a></h2>
+<div class="entry-meta">
+<time datetime="{{ e.published_at }}">{{ e.published_at[:10] }}</time>
+{% if e.tags %}{% for t in e.tags %}<span class="tag-pill">{{ t }}</span>{% endfor %}{% endif %}
+</div>
+<div class="entry-body"><p>{{ e.summary }}</p></div>
+</article>
+{% endfor %}
+</main>
+{% endblock %}

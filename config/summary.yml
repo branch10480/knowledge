@@ -1,0 +1,13 @@
+provider: local-openai-compatible
+base_url: "http://127.0.0.1:18080/v1"
+model: "deepseek-v4-flash"
+fallback_model: "qwen3.6-35b-a3b"
+allow_fallback: true
+temperature: 0
+seed: 10480
+max_candidates_per_run: 8
+max_input_bytes_per_candidate: 24576
+max_total_input_bytes: 524288
+max_output_tokens_per_candidate: 700
+request_timeout_seconds: 100
+max_retries: 1

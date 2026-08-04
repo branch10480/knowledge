@@ -1,0 +1,30 @@
+{% extends "base.html.j2" %}
+{% block body_view %}home{% endblock %}
+{% block content %}
+<header class="hero">
+<p class="eyebrow">Knowledge Base</p>
+<h1>技術情報・学習ノート</h1>
+<p class="abstract">iOS / Apple 開発、AI 業界動向、技術学習メモを蓄積していく知識ベースです。</p>
+</header>
+<div class="toolbar">
+<div class="search-row">
+<input type="search" id="search-input" placeholder="タイトル・本文から検索..." aria-label="エントリを検索" autocomplete="off">
+<span id="result-count"></span>
+</div>
+<div class="archive-row" id="archive-links"><span class="archive-label">月別:</span></div>
+<div class="filter-row"><span class="filter-label">タグ:</span><div id="tag-filters"></div></div>
+</div>
+<main class="entries-list" id="entries-container" role="list">
+{% for e in index_entries %}
+<article class="entry-card" role="listitem">
+<h2 class="entry-header"><a href="{{ url('entry', e.id + '.html') }}">{{ e.title }}</a></h2>
+<div class="entry-meta">
+<time datetime="{{ e.published_at }}">{{ e.published_at[:10] }}</time>
+{% if e.tags %}{% for t in e.tags %}<span class="tag-pill">{{ t }}</span>{% endfor %}{% endif %}
+</div>
+<div class="entry-body"><p>{{ e.summary }}</p></div>
+</article>
+{% endfor %}
+</main>
+<script type="application/json" id="knowledge-data">{{ data_json }}</script>
+{% endblock %}
