@@ -20,6 +20,7 @@
 
 ## 完了した実装・修正（すべて main へ push 済み）
 コミット履歴（最新順）:
+- `eea123c` fix(builder): prevent double-escaping of embedded JSON in index.html
 - `c77d1cb` fix(ci): exclude .git from check-build manifest verification
 - `3547e42` fix(ci): deploy ジョブに main checkout / Python setup / deps を追加
 - `35448c5` fix(ci): Install dependencies に pytest を追加（CI のテスト実行を可能に）
@@ -28,7 +29,7 @@
 - `5f42294` feat: Knowledge v2 pipeline 実装一式 + v1 生成物削除
 
 ### 前セッションで完了済み（実装）
-1. BLOCKER: github_api の seen 形式を checkpoint Schema 準拠に（collector で candidates から生成）
+1. github_api の seen 形式を checkpoint Schema 準拠に（collector で candidates から生成）
 2. collect.sh: flock→mkdirベースロック（macOS対応）、固定PATH、mktemp -d、clean branch確認、commit/push を build・QA・secret scan の後に移動
 3. 設定ロード: source種別ごとの必須フィールド検証（KeyError回避）
 4. LLM loopback: host完全一致・scheme http・ポート制限
@@ -52,6 +53,7 @@
 1. **完了**: check-build で `.git` を除外し、CI deploy の Verify deployment manifest 失敗を修正（`c77d1cb`）。
 2. **完了**: push 後の CI 再実行で validate-build + deploy の成功を確認。
 3. **完了**: gh-pages の deploy 成功と https://branch10480.github.io/knowledge/ の更新を確認。
+4. **保留**: アーカイブページにページネーションを追加（エントリ増加時のスケーラビリティ対応）。
 
 ## 重要な制約・注意
 - **コミット・push・gh-pages 置換・通知送信は明示的承認が必要**（ユーザーに確認してから）。勝手に push しない。
