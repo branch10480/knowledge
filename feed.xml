@@ -2,9 +2,57 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>https://branch10480.github.io/knowledge/</id>
   <title>Knowledge</title>
-  <updated>2026-08-04T10:40:17Z</updated>
+  <updated>2026-08-04T12:01:24Z</updated>
   <link rel="self" href="https://branch10480.github.io/knowledge/feed.xml"/>
   <link rel="alternate" href="https://branch10480.github.io/knowledge/"/>
+  <entry>
+    <id>urn:knowledge:kn_11bc6b8ce69ab0ce04c2954d</id>
+    <title>テキサス州のアプリ新要件とAppleの対応</title>
+    <published>2026-08-04T12:01:02Z</published>
+    <updated>2026-08-04T12:01:02Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_11bc6b8ce69ab0ce04c2954d.html"/>
+    <summary type="text">2026年1月1日よりテキサス州法SB2420が施行され、アプリ市場に年齢確認要件が導入される。Appleは18歳未満の新アカウントにファミリー共有と保護者の同意を義務付け、開発者向けにDeclared Age Range APIなどのプライバシー保護ツールを提供する。同様の要件がユタ州やルイジアナ州でも導入予定。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_0fc1632597ecd2b5f158fa38</id>
+    <title>日本のiOSにおける変更とMSCA対応</title>
+    <published>2026-08-04T12:01:02Z</published>
+    <updated>2026-08-04T12:01:02Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_0fc1632597ecd2b5f158fa38.html"/>
+    <summary type="text">Appleは日本のモバイルソフトウェア競争法（MSCA）遵守のため、iOS 26.2以降で代替アプリマーケットプレイスの提供や外部決済を可能にする変更を導入する。これによりマルウェアや詐欺のリスクが高まるため、Appleは認可プロセスやノタライゼーションなどの保護策を講じている。2026年3月17日までに、現在のApple Developer Programメンバーは新しいライセンス契約に同意する必要がある。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_0f5345cbca10602c18c9b1a4</id>
+    <title>ベトナムApp Storeにおけるゲーム配信のライセンス要件</title>
+    <published>2026-08-04T12:01:02Z</published>
+    <updated>2026-08-04T12:01:02Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_0f5345cbca10602c18c9b1a4.html"/>
+    <summary type="text">ベトナム情報通信省（MIC）は、App Storeでゲームを配信するにはライセンス取得を義務付けています。ライセンス取得後、App Store Connectでゲームの製品ページ説明文にライセンス番号と関連URLを入力し、App Reviewに更新を提出する必要があります。この情報はベトナムストアのローカライズ表示にのみ必要です。詳細は関連規制をご確認ください。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_0b90a704f779a19d3479d5b6</id>
+    <title>iOS 26など最新OS向けApp Store提出が開始</title>
+    <published>2026-08-04T12:01:02Z</published>
+    <updated>2026-08-04T12:01:02Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_0b90a704f779a19d3479d5b6.html"/>
+    <summary type="text">AppleはiOS 26、iPadOS 26、macOS Tahoe 26、tvOS 26、visionOS 26、watchOS 26向けにApp Storeへのアプリ提出を開始したと発表した。開発者はXcode 26 Release Candidateと最新SDKを使用してアプリを構築し、TestFlightでテスト後、App Storeに提出できる。2026年4月以降、各プラットフォームのSDK 26以降でのビルドが必須となる。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_0b3d7fc9a80f5301e013a087</id>
+    <title>Apple Developer Program License Agreementの更新（ブラジル向けiOSアプリ規定）</title>
+    <published>2026-08-04T12:01:02Z</published>
+    <updated>2026-08-04T12:01:02Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_0b3d7fc9a80f5301e013a087.html"/>
+    <summary type="text">Apple Developer Program License AgreementのAttachment 12が改訂され、ブラジルにおけるiOSアプリの代替配布、代替決済、アプリ内提供、およびコアテクノロジーコミッションに関する条項が明文化されました。開発者はアカウントにログインして更新された条項を受諾する必要があります。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_059730adb287c9284c6e7ba4</id>
+    <title>App Store Connectの更新情報</title>
+    <published>2026-08-04T12:01:02Z</published>
+    <updated>2026-08-04T12:01:02Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_059730adb287c9284c6e7ba4.html"/>
+    <summary type="text">Apple Developerのページには、2026年6月18日付のApp Store Connectの更新に関するリリースノートへのリンクが含まれています。また、Apple Developerアプリの入手や、利用規約、プライバシーポリシー、契約とガイドラインへのアクセス情報も提供されています。</summary>
+  </entry>
   <entry>
     <id>urn:knowledge:kn_0adab5a833632fb607ce2371</id>
     <title>最新ベータ版リリースへの対応準備</title>
