@@ -4,6 +4,7 @@
 dist/
 __pycache__/
 *.pyc
+data/*.bak
 .hermes/
 .codex-*.md
 HANDOFF.md

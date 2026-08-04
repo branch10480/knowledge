@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.."
 REPO=$(pwd)
 
 # ---- 固定 PATH（外部ツールを信用しない）----
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export PATH="/etc/profiles/per-user/${USER:-unknown}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 PY="$REPO/.venv/bin/python"
 export PYTHONPATH="$REPO/src"
