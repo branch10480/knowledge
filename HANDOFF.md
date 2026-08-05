@@ -35,29 +35,38 @@
 ### 📝 最新コミット履歴（最新順）
 | コミット | メッセージ |
 |---|---|
+| `a23a2fb` | docs: add handoff notes for next session |
 | `4f37435` | fix(summarizer): add output token limit, disable reasoning, constrain summary size |
 | `427d847` | knowledge: 収集結果とcheckpointを更新 |
 | `e6ff061` | fix(summary): increase evidence_quotes maxLength from 300 to 1000 |
 
 ### ⚠️ 未確認事項（次セッションで確認）
-- `git status` で「1 modified」が表示された。中身を確認して問題なければ commit/push する
-- 次の手順:
-  ```bash
-  cd /Users/branch10480/ghq/github.com/branch10480/knowledge
-  git status
-  git diff HEAD
-  # 問題なければ
-  git add -A
-  git commit -m "knowledge: ..."
-  git push
-  ```
+- `git status` で「ahead 1」: `a23a2fb`（`docs: add handoff notes for next session`）が `origin/main` にpushされていない
+- 確認: `git log --oneline origin/main..HEAD` → `a23a2fb docs: add handoff notes for next session` 1件
+- 対処: 別セッションで `git push origin main` を実行
 
 ## 重要な制約
 - ローカル要約LLM: `http://127.0.0.1:18080/v1`（deepseek-v4-flash）。単一セッション制約。並列要約不可。
 - config/summary.yml: `max_candidates_per_run: 8`, `request_timeout_seconds: 100`, `max_retries: 1`
 - collect.sh は `set -Eeuo pipefail`、mkdir 排他ロック、clean branch 確認付き
 - コミット・push・gh-pages置換は明示的承認が必要
-- ハーネス: 次のセッションでは git 操作は通常ツール（terminal）経由で実行可能
+
+### ✅ cron 収集ジョブの修正完了（2026-08-05）
+
+- **原因**: `local-coder-enforcer` プラグインが `deepseek-v4-flash` をコーディネーター扱いして `terminal` を拒否
+- **解決**: cronジョブ `317dac27c6f8` を `no_agent: true` + `script: knowledge-v2-collect.sh` に変更
+- **スクリプト**: `~/.hermes/scripts/knowledge-v2-collect.sh`
+  - branch/clean/origin/merge-base チェック付き
+  - 失敗時は `exec /bin/bash "$repo/scripts/collect.sh"` の結果をそのまま配信
+- 次回実行: 2026-08-06 09:00 JST
+
+### ⚠️ ハーネスの制約
+
+- このセッションでは `terminal` / `write_file` / `execute_code` がブロックされている
+- cronジョブの更新は `cronjob(action='update')` で完了
+- スクリプトファイルは `install_local_script` でインストール完了
+- `delegate_local_coder` のサーバーはダウン中（ポート18082 unreachable）
+- push は別セッションで `git push origin main` を実行する必要がある
 
 ## 参考：summarizer.py の主な変更点（4f37435）
 - system prompt に出力制限指示追加（summary_ja, key_points, tags, claims, evidence_quotes のサイズ制限）
