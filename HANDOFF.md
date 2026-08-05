@@ -1,75 +1,72 @@
 # HANDOFF（別セッション用の申し送り）
 
-このファイルは Knowledge v2 パイプラインの再構築作業を別セッションで引き継ぐための申し送りです。
-最終更新: 2026-08-04（本セッション終了時）
+このファイルは Knowledge v2 パイプラインの運用作業を別セッションで引き継ぐための申し送りです。
+最終更新: 2026-08-05
 
 ## プロジェクト概要
 - リポジトリ: `/Users/branch10480/ghq/github.com/branch10480/knowledge`
-- 目的: 技術情報・学習ノートの知識ベース。GitHub Pages で公開中。
-  - main = ソース正本（data/, src/, config/, scripts/, schemas/, tests/, .github/）
-  - gh-pages = 生成物のみ（CI が deploy）
-- 分業: gpt-5.6-sol（Codex CLI `codex exec -m gpt-5.6-sol`）= 設計・レビュー、アシスタント = 実装
-- cron ジョブ: `317dac27c6f8`（Knowledge v2 収集, 毎日 09:00 JST）が `./scripts/collect.sh` を実行
+- 目的: 技術情報・学習ノートの知識ベース。GitHub Pages で公開中（https://branch10480.github.io/knowledge/）
+- main = ソース正本（data/, src/, config/, scripts/, schemas/, tests/, .github/）
+- gh-pages = 生成物のみ（CI が deploy）
+- cron ジョブ: `317dac27c6f8`（Knowledge v2 収集、毎日 09:00 JST）が `./scripts/collect.sh` を実行
 
-## 現在の状態（要約）
-- **実装一式は main へコミット・push 済み**（v1 旧生成物は削除、ソース正本のみの v2 構成へ移行）。
-- ブランチ: main（clean）。`.gitignore` は `.codex-*.md`、`HANDOFF.md`、`data/*.bak`、`.work.run.*/` を除外済み。
-- **pytest 40件パス**（make_entry_id 修正後も確認済み）。
-- data/entries.json（17件）と data/checkpoint.json はコミット済み。
-- **CI（Build Knowledge Pages）は validate-build、deploy ジョブも成功**。
+## 現在のステータス（2026-08-05 完了）
 
-## 完了した実装・修正（すべて main へ push 済み）
-コミット履歴（最新順）:
-- `eea123c` fix(builder): prevent double-escaping of embedded JSON in index.html
-- `c77d1cb` fix(ci): exclude .git from check-build manifest verification
-- `3547e42` fix(ci): deploy ジョブに main checkout / Python setup / deps を追加
-- `35448c5` fix(ci): Install dependencies に pytest を追加（CI のテスト実行を可能に）
-- `184beb5` fix: collect.sh 固定 PATH に認証ツールの場所を追加（${USER}ベース）+ .gitignore に data/*.bak
-- `11ca6cc` knowledge: 収集結果とcheckpointを更新（entries 17件 + checkpoint 生成）
-- `5f42294` feat: Knowledge v2 pipeline 実装一式 + v1 生成物削除
+### ✅ collect.sh パイプライン正常稼働確認済み
+- Sol（gpt-5.6-sol）が Herdr 右ペインで完全実行
+- collect 6件 → summarize 6件 → merge 6件追加 → build 23件 → QA・secret scan 成功
+- GitHub Actions run `30907254145` **success**（gh-pages deploy完了）
+- data/entries.json, data/checkpoint.json は main に push 済み
 
-### 前セッションで完了済み（実装）
-1. github_api の seen 形式を checkpoint Schema 準拠に（collector で candidates から生成）
-2. collect.sh: flock→mkdirベースロック（macOS対応）、固定PATH、mktemp -d、clean branch確認、commit/push を build・QA・secret scan の後に移動
-3. 設定ロード: source種別ごとの必須フィールド検証（KeyError回避）
-4. LLM loopback: host完全一致・scheme http・ポート制限
-5. Schema: FormatChecker + 危険URL・不正日時・IP literal 検証
-6. html-index enrichment: 記事本文を selected 確定後に fetch（script/style/nav 除外、quota・byte上限）
-7. bootstrap: 初回は30日cutoff（checkpoint未設定時）
-8. required source 失敗: collect_command が非0 を返す
-9. candidate_id: collector で埋める（要約出力との照合）
-10. 要約: response_format（json_schema）を外し、システムプロンプトでJSON要求 + テキスト応答からJSON抽出（ローカルLLM対応）
-11. merge: 検証済み candidate を seen に追加、deferred がある場合は watermark 維持、factual_source_gate を実際に呼ぶ
-12. make_entry_id: `kn_` + コロンなし hex（`_sha256(...)[7:31]`、Schema `^kn_[A-Za-z0-9]+$` 準拠）
+### ✅ 根本原因の特定と修正完了（コミット済み）
+1. **タイムアウト原因**: `max_output_tokens_per_candidate: 700` が LLM リクエストに反映されず、llama.cpp が `n_predict=-1` で長時間 reasoning（700トークン分）→ 100秒タイムアウト
+   - 修正: `summarize_candidates()` で `max_tokens` をリクエストに反映
+   - 修正: `chat_template_kwargs: {"enable_thinking": false}` を追加（Qwen の reasoning 消費対策）
+   - コミット: `4f37435`
+2. **factual gate 失敗原因**: LLM が引用文を一字一句コピーせず、要約・言い換えをしていた
+   - 修正: system prompt に出力サイズ制限（summary_ja 300文字以内、key_points 最大3件、tags 最大5件、claims 最大2件、evidence_quotes 各1件）と「完全一致の文字列を引用してください」指示を追加
+   - コミット: `4f37435`
+3. **evidence_quotes maxLength 修正**: Schema と summarizer.py の両方を 300→1000 に変更
+   - コミット: `e6ff061`
 
-### 本セッションで解決した問題
-- make_entry_id 修正後の collect → summarize → merge → build → QA → secret scan を通しで再実行（.work で）→ build 成功（17件）、QA 全パス、secret scan OK。
-- collect.sh の push 失敗（`gh: command not found`）: 固定 PATH に認証ツール（gh, git-credential-osxkeychain）の場所がないため。`/etc/profiles/per-user/${USER:-unknown}/bin` と `/opt/homebrew/bin` を PATH に追加して解決（ユーザー名はハードコードせず $USER ベース）。
-- CI の pytest 失敗（`No module named pytest`）: build.yml の Install dependencies に pytest を追加。
-- CI deploy 失敗（`Branch main is not allowed to deploy to github-pages`）: github-pages environment の deployment branch ポリシーが gh-pages のみ許可していたため、gh api で **main を追加**（現在 gh-pages と main の両方を許可）。
-- CI deploy 失敗（`No module named knowledge`）: deploy ジョブに main の checkout がなかったため、Checkout main / Set up Python / Install dependencies を deploy ジョブに追加。
+### ✅ テスト
+- `pytest 43 passed`
 
-## 次のアクション（優先度順）
-1. **完了**: check-build で `.git` を除外し、CI deploy の Verify deployment manifest 失敗を修正（`c77d1cb`）。
-2. **完了**: push 後の CI 再実行で validate-build + deploy の成功を確認。
-3. **完了**: gh-pages の deploy 成功と https://branch10480.github.io/knowledge/ の更新を確認。
-4. **保留**: アーカイブページにページネーションを追加（エントリ増加時のスケーラビリティ対応）。
+### 📝 最新コミット履歴（最新順）
+| コミット | メッセージ |
+|---|---|
+| `4f37435` | fix(summarizer): add output token limit, disable reasoning, constrain summary size |
+| `427d847` | knowledge: 収集結果とcheckpointを更新 |
+| `e6ff061` | fix(summary): increase evidence_quotes maxLength from 300 to 1000 |
 
-## 重要な制約・注意
-- **コミット・push・gh-pages 置換・通知送信は明示的承認が必要**（ユーザーに確認してから）。勝手に push しない。
-- ローカル要約 LLM: `http://127.0.0.1:18080/v1`（deepseek-v4-flash）。要約は遅い（約34秒/件、8件で約5分）。cron ジョブのタイムアウト実値は要確認。
-- ローカル LLM は single-session 制約。並列要約は不可。
-- config/summary.yml は P1 暫定値: `max_candidates_per_run: 8`, `request_timeout_seconds: 100`, `max_retries: 1`。
-- cron ジョブ（317dac27c6f8）のプロンプトは `docs/cron-prompt.md` に反映済み（実装物として）。モデルは `deepseek-v4-flash` にピン留め。
-- collect.sh の固定 PATH は `${USER:-unknown}` ベース（認証ツール gh / git-credential-osxkeychain を解決するため）。
-- 相談プロンプト（`.codex-consult-prompt.md`, `.codex-consult2-prompt.md`, `.codex-design-prompt.md`, `.codex-review-prompt.md`）は .gitignore で除外。不要なら削除してよい。
+### ⚠️ 未確認事項（次セッションで確認）
+- `git status` で「1 modified」が表示された。中身を確認して問題なければ commit/push する
+- 次の手順:
+  ```bash
+  cd /Users/branch10480/ghq/github.com/branch10480/knowledge
+  git status
+  git diff HEAD
+  # 問題なければ
+  git add -A
+  git commit -m "knowledge: ..."
+  git push
+  ```
 
-## 関連ファイル（主要）
-- 実装: `src/knowledge/`（collector, cli, config, summarizer, builder, validate, identity, repository, feeds, github_api, models, links, atom）
-- 設定: `config/sources.yml`, `config/summary.yml`
-- スクリプト: `scripts/collect.sh`, `scripts/scan-secrets.sh`, `scripts/migrate_v1.py`
-- Schema: `schemas/entry.schema.json`, `schemas/entries.schema.json`, `schemas/checkpoint.schema.json`, `schemas/summary-output.schema.json`
-- テンプレート/静的: `templates/`, `static/`
-- テスト: `tests/`（40件）
-- CI: `.github/workflows/build.yml`
-- 設計: `DESIGN.md`, `docs/cron-prompt.md`
+## 重要な制約
+- ローカル要約LLM: `http://127.0.0.1:18080/v1`（deepseek-v4-flash）。単一セッション制約。並列要約不可。
+- config/summary.yml: `max_candidates_per_run: 8`, `request_timeout_seconds: 100`, `max_retries: 1`
+- collect.sh は `set -Eeuo pipefail`、mkdir 排他ロック、clean branch 確認付き
+- コミット・push・gh-pages置換は明示的承認が必要
+- ハーネス: 次のセッションでは git 操作は通常ツール（terminal）経由で実行可能
+
+## 参考：summarizer.py の主な変更点（4f37435）
+- system prompt に出力制限指示追加（summary_ja, key_points, tags, claims, evidence_quotes のサイズ制限）
+- `summarize_candidates()` で `max_tokens` と `chat_template_kwargs={"enable_thinking": false}` をリクエストに反映
+- tests/test_summarizer.py に出力制限指示と max_tokens 反映のテスト追加
+
+## 参考：過去に解決した問題
+- collect.sh の push 失敗（`gh: command not found`）→ PATH を `${USER:-unknown}` ベース + /opt/homebrew/bin に修正
+- CI の pytest 失敗（`No module named pytest`）→ build.yml に pytest 追加
+- CI deploy 失敗（`Branch main is not allowed to deploy to github-pages`）→ gh-pages environment の deployment branch ポリシーに main を追加
+- CI deploy 失敗（`No module named knowledge`）→ deploy ジョブに main checkout / Python setup / deps を追加
+- make_entry_id の Schema 違反（コロン入り）→ `kn_` + hex 形式に変更
