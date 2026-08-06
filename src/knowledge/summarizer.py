@@ -3,12 +3,17 @@
 - 固定 provider/model、JSON Schema mode、temperature 0、固定 seed
 - 接続先は loopback の固定 model endpoint のみ（任意ネットワークへは出ない）
 - tool calling を無効化し、shell / filesystem / Git / 通知を公開しない
-- 上限：候補 40、1 件 24 KiB、run 合計 512 KiB、1 件 700 output tokens
-- malformed JSON、ID 不一致、未知フィールド、制御文字、HTML tag を拒否
+- 上限：候補 40、1 件 24 KiB、run 合計 512 KiB、1 件 1200 output tokens
+- stream: false 明示、finish_reason 分類（stop=通常 / length=出力上限不足）
+- エラー種別を分離：HTTP / timeout・接続 / 外側JSON破損 / 内側JSON破損 / ID不一致 / Schema違反
+- retry は timeout・接続切断のみ。Schema違反・ID不一致・JSON破損・length は再試行しない
+- 正規化は string→[string] のみ（dict/number/boolean/null/空文字列は Schema で失敗させる）
 """
 from __future__ import annotations
 import json
 import re
+import socket
+import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -23,7 +28,11 @@ _SCHEMA = Path(__file__).resolve().parents[2] / "schemas" / "summary-output.sche
 
 
 class SummaryError(Exception):
-    pass
+    """要約失敗。retryable=True のもののみ再試行する（既定は再試行しない）。"""
+
+    def __init__(self, message: str, *, retryable: bool = False):
+        super().__init__(message)
+        self.retryable = retryable
 
 
 @dataclass(frozen=True)
@@ -39,6 +48,20 @@ class SummaryOutput:
 
 def _load_schema() -> dict:
     return json.loads(_SCHEMA.read_text(encoding="utf-8"))
+
+
+def _coerce_string_to_list(value: object) -> object:
+    """LLM が string を配列でなく単一文字列で返す場合のみ 1 要素配列へ変換する。
+
+    既存 list はそのまま。string 以外（dict/number/boolean/null）は正規化せず、
+    既存 Schema で失敗させる。空文字列も [""] にすると minLength:1 で落ちるため
+    そのまま残して Schema に失敗させる。正規化は「狭く」保つ。
+    """
+    if isinstance(value, list):
+        return value
+    if isinstance(value, str):
+        return [value]
+    return value
 
 
 def _truncate_input(candidate: Candidate, *, max_bytes: int) -> dict:
@@ -85,6 +108,7 @@ def build_summary_request(candidate: Candidate, *, prompt_version: str) -> dict:
             {"role": "user", "content": user},
         ],
         "chat_template_kwargs": {"enable_thinking": False},
+        "thinking": {"type": "disabled"},  # DS4 サーバーは thinking で非思考を選択する（enable_thinking は無視される）
     }
 
 
@@ -103,7 +127,17 @@ def validate_summary_output(raw: bytes, candidate: Candidate) -> SummaryOutput:
         raise SummaryError("output not an object")
     if obj.get("candidate_id") != candidate.candidate_id:
         raise SummaryError("candidate_id mismatch")
-    jsonschema_validate(obj, _load_schema())
+    # 正規化は string→[string] のみ。claims 自体の dict→list 変換は行わない（広く受け入れるのを避ける）
+    for field in ("key_points", "tags"):
+        if field in obj:
+            obj[field] = _coerce_string_to_list(obj[field])
+    for claim in obj.get("claims", []) or []:
+        if isinstance(claim, dict):
+            claim["evidence_quotes"] = _coerce_string_to_list(claim["evidence_quotes"])
+    try:
+        jsonschema_validate(obj, _load_schema())
+    except Exception as e:  # jsonschema.ValidationError / SchemaError
+        raise SummaryError(f"schema violation: {e}") from e
     # HTML / 制御文字を拒否
     for field in ("title_ja", "summary_ja"):
         v = obj.get(field, "")
@@ -118,6 +152,27 @@ def validate_summary_output(raw: bytes, candidate: Candidate) -> SummaryOutput:
         claims=tuple(obj.get("claims", [])),
         insufficient_evidence=bool(obj.get("insufficient_evidence", False)),
     )
+
+
+def _parse_chat_response(body_bytes: bytes) -> bytes:
+    """外側 HTTP JSON と finish_reason を検証し、message.content を返す。
+
+    - 外側 JSON 破損 → SummaryError（非再試行）
+    - finish_reason=length → 出力上限不足として分類（非再試行）
+    - content 空 → SummaryError（非再試行）
+    """
+    try:
+        data = json.loads(body_bytes.decode("utf-8"))
+    except json.JSONDecodeError as e:
+        raise SummaryError("outer json corrupt") from e
+    choice = (data.get("choices") or [{}])[0]
+    finish = choice.get("finish_reason")
+    content = choice.get("message", {}).get("content", "")
+    if not content:
+        raise SummaryError(f"empty llm response: finish={finish}")
+    if finish == "length":
+        raise SummaryError("output truncated: finish_reason=length")
+    return content.encode("utf-8")
 
 
 class RestrictedLlmClient:
@@ -141,6 +196,7 @@ class RestrictedLlmClient:
     def chat(self, request: dict) -> bytes:
         payload = dict(request)
         payload["model"] = self.model
+        payload["stream"] = False
         if self.seed is not None:
             payload["seed"] = self.seed
         body = json.dumps(payload).encode("utf-8")
@@ -150,15 +206,12 @@ class RestrictedLlmClient:
         )
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
+                body_bytes = resp.read()
         except urllib.error.HTTPError as e:
             raise SummaryError(f"llm http {e.code}") from e
-        except urllib.error.URLError as e:
-            raise SummaryError(str(e)) from e
-        content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-        if not content:
-            raise SummaryError("empty llm response")
-        return content.encode("utf-8")
+        except (urllib.error.URLError, socket.timeout, TimeoutError) as e:
+            raise SummaryError("llm timeout/connect", retryable=True) from e
+        return _parse_chat_response(body_bytes)
 
 
 def summarize_candidates(
@@ -175,17 +228,21 @@ def summarize_candidates(
     for c in candidates[: config.max_candidates_per_run]:
         req = build_summary_request(c, prompt_version=prompt_version)
         req["max_tokens"] = config.max_output_tokens_per_candidate
-        # llama.cpp/Qwen の reasoning が全トークンを消費して content が空になるのを防ぐ。
-        req["chat_template_kwargs"] = {"enable_thinking": False}
-        raw: bytes | None = None
+        # DS4 サーバーはデフォルト高努力 thinking になり、思考がトークンを消費して
+        # content が途中で切れる。thinking={"type":"disabled"} で非思考を明示する。
+        req["thinking"] = {"type": "disabled"}
         last_err: Exception | None = None
         for _ in range(config.max_retries + 1):
             try:
                 raw = client.chat(req)
                 out.append(validate_summary_output(raw, c))
+                last_err = None
                 break
             except SummaryError as e:
                 last_err = e
+                # Schema違反・ID不一致・JSON破損・length は同じリクエストを再試行しない
+                if not e.retryable:
+                    break
         if last_err is not None:
             raise SummaryError(f"summary failed for {c.candidate_id}: {last_err}")
     return out

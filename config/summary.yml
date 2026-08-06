@@ -8,6 +8,6 @@ seed: 10480
 max_candidates_per_run: 8
 max_input_bytes_per_candidate: 24576
 max_total_input_bytes: 524288
-max_output_tokens_per_candidate: 700
+max_output_tokens_per_candidate: 1200
 request_timeout_seconds: 100
 max_retries: 1
