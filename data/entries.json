@@ -2,6 +2,170 @@
   "schema_version": 2,
   "entries": [
     {
+      "id": "kn_1893546f1ad6f1ab499e727f",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=gvnljl3f",
+      "canonical_url": "https://developer.apple.com/news/?id=gvnljl3f",
+      "published_at": "2026-08-06T01:52:53Z",
+      "collected_at": "2026-08-06T01:52:53Z",
+      "title": "アプリ、アプリ内購入、サブスクリプションの価格更新（2026年1月29日）",
+      "summary": "Appleは2026年1月29日、税制変更や為替レート変動に伴い、対象アプリとアプリ内購入の手取り金額を調整しました。対象国はブータン（GST 5%導入）、フィンランド（VAT 14%→13.5%）、ガーナ（COVID-19健康回復税撤廃）、カザフスタン（VAT 12%→16%）、リトアニア（VAT 9%→5%）、モーリシャス（VAT 15%導入）、ロシア（VAT 20%→22%）、トルコ（DST 7.5%→5%）、ジンバブエ（VAT 15%→15.5%）です。2月16日からは、モーリシャスを基準ストアフロントに設定していない場合、アプリとアプリ内購入の価格が更新されます。自動更新サブスクリプションと手動価格管理のストアフロントは価格変更されません。",
+      "key_points": [
+        "2026年1月29日付で、税制変更や為替変動により対象アプリとアプリ内購入の手取り金額が調整された。",
+        "対象国はブータン、フィンランド、ガーナ、カザフスタン、リトアニア、モーリシャス、ロシア、トルコ、ジンバブエの9か国。",
+        "2026年2月16日から、モーリシャスを基準ストアフロントに設定していない場合、アプリとアプリ内購入の価格が更新される。"
+      ],
+      "tags": [
+        "価格更新",
+        "税制",
+        "アプリ内購入",
+        "サブスクリプション",
+        "Apple Developer"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:3db355887fd00b00653cfaed47fc217a043fc35ff8fb8ff59794770a6b72ad48",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-06T01:52:53Z"
+      }
+    },
+    {
+      "id": "kn_188e1c914efec93742a6943f",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=tlur8uvi",
+      "canonical_url": "https://developer.apple.com/news/?id=tlur8uvi",
+      "published_at": "2026-08-06T01:52:53Z",
+      "collected_at": "2026-08-06T01:52:53Z",
+      "title": "年齢レーティング質問票にソーシャルメディアに関する質問が追加",
+      "summary": "Appleは、iOS 27、iPadOS 27、macOS 27以降で導入されるTime Allowances機能に対応するため、App Store Connectの年齢レーティング質問票にソーシャルメディア機能に関する質問を追加しました。ソーシャルメディア機能は、ユーザー生成コンテンツをソーシャルフィード等で再配布、増幅、または相互作用する能力と定義されます。該当アプリはApp Storeの製品ページに新しいソーシャルメディアコンテンツ記述子が表示されます。13歳未満で無効化されている場合は、そのカテゴリから除外されます。2026年9月から新規アプリやアップデート提出時に回答が必須となります。",
+      "key_points": [
+        "Time Allowances機能をサポートするため、年齢レーティング質問票にソーシャルメディア機能に関する質問が追加された",
+        "ソーシャルメディア機能はユーザー生成コンテンツの再配布・増幅・相互作用能力と定義され、該当アプリには新記述子が表示される",
+        "2026年9月から新規アプリ提出やアップデート時に回答が必須となる"
+      ],
+      "tags": [
+        "Apple",
+        "App Store",
+        "年齢レーティング",
+        "ソーシャルメディア",
+        "Time Allowances"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:100b0ad36880b2a68836a6b861b31742b98483d7903a4ac5b6a8b2c072db89c6",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-06T01:52:53Z"
+      }
+    },
+    {
+      "id": "kn_17cfc5ad46adaacb694c9c6a",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=pnfbj8je",
+      "canonical_url": "https://developer.apple.com/news/?id=pnfbj8je",
+      "published_at": "2026-08-06T01:52:53Z",
+      "collected_at": "2026-08-06T01:52:53Z",
+      "title": "iOSおよびiPadOS 26のデザインキットが公開",
+      "summary": "Appleは、FigmaおよびSketch向けのUIデザインキットをiOSおよびiPadOS 26向けに公開しました。このキットは、Apple Design Resourcesとして提供され、開発者が最新のOS向けのアプリやインターフェースを設計する際に利用できます。",
+      "key_points": [
+        "iOSおよびiPadOS 26向けのUIデザインキットがFigmaとSketchで利用可能になった",
+        "Apple Design Resourcesとして提供される",
+        "開発者は最新OS向けの設計に活用できる"
+      ],
+      "tags": [
+        "iOS",
+        "iPadOS",
+        "デザインキット",
+        "Figma",
+        "Sketch"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:ced5f353a86ce8fee1bd6ffd9dd7629372e12e4f3a2115b257ba904b49b40dac",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-06T01:52:53Z"
+      }
+    },
+    {
+      "id": "kn_1202b2f71e95360f9eebbdc0",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=yts4l6mh",
+      "canonical_url": "https://developer.apple.com/news/?id=yts4l6mh",
+      "published_at": "2026-08-06T01:52:53Z",
+      "collected_at": "2026-08-06T01:52:53Z",
+      "title": "Apple Developer、bilibiliとLinkedInで情報発信を開始",
+      "summary": "Apple Developerは、開発者コミュニティ向けの最新ニュース、発表、動画、イベント（WWDCやMeet with Apple活動を含む）を発信するため、bilibiliとLinkedInでの公式アカウント運用を開始しました。開発者はこれらのプラットフォームでフォローできます。",
+      "key_points": [
+        "Apple DeveloperがbilibiliとLinkedInで情報発信を開始",
+        "最新ニュース、発表、動画、イベント（WWDC、Meet with Apple）を提供",
+        "開発者コミュニティ向けにフォローが可能"
+      ],
+      "tags": [
+        "Apple Developer",
+        "bilibili",
+        "LinkedIn",
+        "WWDC",
+        "開発者向け"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:f014538c9311d02c7699b99c0d3da5a4be6bec87f489eecc1ffba43267c205bf",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-06T01:52:53Z"
+      }
+    },
+    {
+      "id": "kn_0e965e9320521f80d10b8e73",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=kug6m2ea",
+      "canonical_url": "https://developer.apple.com/news/?id=kug6m2ea",
+      "published_at": "2026-08-06T01:52:53Z",
+      "collected_at": "2026-08-06T01:52:53Z",
+      "title": "App Store向け新クリエイティブアセットの準備",
+      "summary": "Appleは2026年8月5日、App Storeでアプリやゲームをマーケティングする新しい方法を導入すると発表しました。新しいアセットを使うことで、ブランドや季節の提供、新コンテンツなどを強調できます。これらのアセットは、製品ページのヘッダー、検索結果、アプリ内イベントなどで使用可能です。秋の開始に向けて、画像や動画を計画するためのベストプラクティスと、Figma、Photoshop、Pixelmator用のデザインテンプレートが提供されます。",
+      "key_points": [
+        "新しいクリエイティブアセットでブランド、季節の提供、新コンテンツを強調できる",
+        "アセットは製品ページのヘッダー、検索結果、アプリ内イベントなどで使用可能",
+        "ベストプラクティスとデザインテンプレートが提供される"
+      ],
+      "tags": [
+        "App Store",
+        "クリエイティブアセット",
+        "マーケティング",
+        "デザインテンプレート"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:aa2aca58ecd56e6703d3153cf95690411570d852177cad70e3ffd1d6ff7c9f43",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-06T01:52:53Z"
+      }
+    },
+    {
       "id": "kn_11bc6b8ce69ab0ce04c2954d",
       "source_id": "apple-developer-news",
       "external_id": "https://developer.apple.com/news/?id=btkirlj8",
