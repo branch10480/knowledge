@@ -2,9 +2,49 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>https://branch10480.github.io/knowledge/</id>
   <title>Knowledge</title>
-  <updated>2026-08-05T04:03:15Z</updated>
+  <updated>2026-08-06T01:53:09Z</updated>
   <link rel="self" href="https://branch10480.github.io/knowledge/feed.xml"/>
   <link rel="alternate" href="https://branch10480.github.io/knowledge/"/>
+  <entry>
+    <id>urn:knowledge:kn_1893546f1ad6f1ab499e727f</id>
+    <title>アプリ、アプリ内購入、サブスクリプションの価格更新（2026年1月29日）</title>
+    <published>2026-08-06T01:52:53Z</published>
+    <updated>2026-08-06T01:52:53Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_1893546f1ad6f1ab499e727f.html"/>
+    <summary type="text">Appleは2026年1月29日、税制変更や為替レート変動に伴い、対象アプリとアプリ内購入の手取り金額を調整しました。対象国はブータン（GST 5%導入）、フィンランド（VAT 14%→13.5%）、ガーナ（COVID-19健康回復税撤廃）、カザフスタン（VAT 12%→16%）、リトアニア（VAT 9%→5%）、モーリシャス（VAT 15%導入）、ロシア（VAT 20%→22%）、トルコ（DST 7.5%→5%）、ジンバブエ（VAT 15%→15.5%）です。2月16日からは、モーリシャスを基準ストアフロントに設定していない場合、アプリとアプリ内購入の価格が更新されます。自動更新サブスクリプションと手動価格管理のストアフロントは価格変更されません。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_188e1c914efec93742a6943f</id>
+    <title>年齢レーティング質問票にソーシャルメディアに関する質問が追加</title>
+    <published>2026-08-06T01:52:53Z</published>
+    <updated>2026-08-06T01:52:53Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_188e1c914efec93742a6943f.html"/>
+    <summary type="text">Appleは、iOS 27、iPadOS 27、macOS 27以降で導入されるTime Allowances機能に対応するため、App Store Connectの年齢レーティング質問票にソーシャルメディア機能に関する質問を追加しました。ソーシャルメディア機能は、ユーザー生成コンテンツをソーシャルフィード等で再配布、増幅、または相互作用する能力と定義されます。該当アプリはApp Storeの製品ページに新しいソーシャルメディアコンテンツ記述子が表示されます。13歳未満で無効化されている場合は、そのカテゴリから除外されます。2026年9月から新規アプリやアップデート提出時に回答が必須となります。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_17cfc5ad46adaacb694c9c6a</id>
+    <title>iOSおよびiPadOS 26のデザインキットが公開</title>
+    <published>2026-08-06T01:52:53Z</published>
+    <updated>2026-08-06T01:52:53Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_17cfc5ad46adaacb694c9c6a.html"/>
+    <summary type="text">Appleは、FigmaおよびSketch向けのUIデザインキットをiOSおよびiPadOS 26向けに公開しました。このキットは、Apple Design Resourcesとして提供され、開発者が最新のOS向けのアプリやインターフェースを設計する際に利用できます。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_1202b2f71e95360f9eebbdc0</id>
+    <title>Apple Developer、bilibiliとLinkedInで情報発信を開始</title>
+    <published>2026-08-06T01:52:53Z</published>
+    <updated>2026-08-06T01:52:53Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_1202b2f71e95360f9eebbdc0.html"/>
+    <summary type="text">Apple Developerは、開発者コミュニティ向けの最新ニュース、発表、動画、イベント（WWDCやMeet with Apple活動を含む）を発信するため、bilibiliとLinkedInでの公式アカウント運用を開始しました。開発者はこれらのプラットフォームでフォローできます。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_0e965e9320521f80d10b8e73</id>
+    <title>App Store向け新クリエイティブアセットの準備</title>
+    <published>2026-08-06T01:52:53Z</published>
+    <updated>2026-08-06T01:52:53Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_0e965e9320521f80d10b8e73.html"/>
+    <summary type="text">Appleは2026年8月5日、App Storeでアプリやゲームをマーケティングする新しい方法を導入すると発表しました。新しいアセットを使うことで、ブランドや季節の提供、新コンテンツなどを強調できます。これらのアセットは、製品ページのヘッダー、検索結果、アプリ内イベントなどで使用可能です。秋の開始に向けて、画像や動画を計画するためのベストプラクティスと、Figma、Photoshop、Pixelmator用のデザインテンプレートが提供されます。</summary>
+  </entry>
   <entry>
     <id>urn:knowledge:kn_11bc6b8ce69ab0ce04c2954d</id>
     <title>テキサス州のアプリ新要件とAppleの対応</title>
