@@ -1,7 +1,7 @@
 # HANDOFF（別セッション用の申し送り）
 
 このファイルは Knowledge v2 パイプラインの運用作業を別セッションで引き継ぐための申し送りです。
-最終更新: 2026-08-05
+最終更新: 2026-08-07
 
 ## プロジェクト概要
 - リポジトリ: `/Users/branch10480/ghq/github.com/branch10480/knowledge`
@@ -31,6 +31,18 @@
 
 ### ✅ テスト
 - `pytest 43 passed`
+
+### ✅ summarize の JSON 破損修正完了（2026-08-07, commit `1a066ce0920c`）
+
+- **原因**: ローカル要約 LLM（deepseek-v4-flash）が稀に `"summary_ja": Appleは...` と**文字列値を引用符なし（裸の文字列）で返し**、JSON が壊れて `malformed json: Expecting value: line 1 column 154` で `summarize` ステップが停止。checkpoint の `last_success_at` は `1970-01-01` のまま一度も成功していなかった。
+- **修正**（`src/knowledge/summarizer.py`）:
+  1. `_repair_json` を追加 — 引用符なしの文字列値（`"key": 裸の文字列`）を引用符で囲み、末尾カンマを除去
+  2. `validate_summary_output` で `json.loads` 失敗時に修復を試行、成功すれば検証を続行
+  3. 修復できない壊れ方は `retryable=True` に変更（transient なモデル出力品質として再試行可能に）
+  4. 再試行時にシードを `config.seed + attempt` と変更（固定シードだと同じ壊れた出力が返るため）
+- **テスト**: `tests/test_summarizer.py` に修復・再試行シードの回帰テスト追加。`pytest 54 passed`
+- **検証**: 実候補での summarize 成功（以前失敗した候補も要約成功）、パイプライン全体（merge → build → QA → secret scan）成功
+- **教訓**: ローカル量子化 LLM の JSON 出力は不安定。修復 + シード変更再試行で耐性を持たせる。
 
 ### 📝 最新コミット履歴（最新順）
 | コミット | メッセージ |
