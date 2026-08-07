@@ -2,6 +2,136 @@
   "schema_version": 2,
   "entries": [
     {
+      "id": "kn_257c69e5137a8a3c497ae2d5",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=06092026a",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=06092026a",
+      "published_at": "2026-08-07T12:02:25Z",
+      "collected_at": "2026-08-07T12:02:25Z",
+      "title": "AirPods ベータ版 (9A292e) リリース",
+      "summary": "Apple Developer サイトで、AirPods ベータ版 (9A292e) が2026年6月9日に公開されました。インストール手順の確認や関連ニュースの閲覧が可能です。",
+      "key_points": [
+        "AirPods ベータ版 (9A292e) がリリースされた。",
+        "公開日は2026年6月9日。",
+        "インストール手順はサイトで確認できる。"
+      ],
+      "tags": [
+        "AirPods",
+        "ベータ版",
+        "Apple Developer",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:5cf9d5ffa48d8017256064e702d5701127f804fbe16495b1483efd27ec7e15a5",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-07T12:02:25Z"
+      }
+    },
+    {
+      "id": "kn_1f9181bf2e2ba0291505f697",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=f0jfy9py",
+      "canonical_url": "https://developer.apple.com/news/?id=f0jfy9py",
+      "published_at": "2026-08-07T12:02:25Z",
+      "collected_at": "2026-08-07T12:02:25Z",
+      "title": "Apple Developer Centers、ベルリンに拡大",
+      "summary": "Appleは2026年後半、欧州の開発者コミュニティ向けに5番目のDeveloper Centerをベルリンに開設します。この施設は、対面式の開発者セッション、ラボ、ワークショップ、1対1のアポイントメントの拠点となり、複数言語でのAppleエキスパートによるハンズオンサポートを提供します。既存のセンターはクパチーノ、上海、ベンガルール、シンガポールにあります。\"",
+      "key_points": [
+        "Appleは2026年後半にベルリンに5番目のDeveloper Centerを開設する",
+        "ベルリンセンターは対面式セッション、ワークショップ、1対1のアポイントメントの拠点となる",
+        "複数言語でのAppleエキスパートによるハンズオンサポートを提供する"
+      ],
+      "tags": [
+        "Apple",
+        "Developer Center",
+        "ベルリン",
+        "開発者",
+        "イベント"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:fa22777da28a91427ed7b7b541bf32f642888f7cf40b51bf9caa3c4dec85a730",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-07T12:02:25Z"
+      }
+    },
+    {
+      "id": "kn_1b7494b11b37847bbb321255",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=einwn76m",
+      "canonical_url": "https://developer.apple.com/news/?id=einwn76m",
+      "published_at": "2026-08-07T12:02:25Z",
+      "collected_at": "2026-08-07T12:02:25Z",
+      "title": "EU圏でトレーダー情報のないアプリがApp Storeから削除される",
+      "summary": "2025年2月17日より、EUのデジタルサービス法（DSA）に基づき、トレーダー情報が未登録のアプリは、情報が提供・検証されるまでEUのApp Storeから削除されます。Apple Developer ProgramのAccount HolderまたはAdminは、App Store Connectでトレーダー情報を入力する必要があります。",
+      "key_points": [
+        "2025年2月17日から、EU圏のApp Storeでトレーダー情報のないアプリが削除される",
+        "EUのデジタルサービス法（DSA）への準拠が必要",
+        "Apple Developer ProgramのAccount HolderまたはAdminがApp Store Connectでトレーダー情報を入力する必要がある"
+      ],
+      "tags": [
+        "Apple",
+        "App Store",
+        "EU",
+        "デジタルサービス法",
+        "トレーダー情報"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:2e2da68f2579bf9ffca51fea4f8fd8d7ae17abb907c5a228dfb73b83284121eb",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-07T12:02:25Z"
+      }
+    },
+    {
+      "id": "kn_130d8e0c370e60cd4a29c577",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=05122026a",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=05122026a",
+      "published_at": "2026-08-07T12:02:25Z",
+      "collected_at": "2026-08-07T12:02:25Z",
+      "title": "App Store Connect API 4.3.1 リリース",
+      "summary": "Apple Developer が App Store Connect API 4.3.1 をリリースしました。リリース日は2026年5月12日です。リリースノートのダウンロードが可能です。",
+      "key_points": [
+        "App Store Connect API 4.3.1 がリリースされた",
+        "リリース日は2026年5月12日",
+        "リリースノートをダウンロードできる"
+      ],
+      "tags": [
+        "App Store Connect",
+        "API",
+        "Apple Developer",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:6497f2d26c1bf7fd3f81d19a9d3d4383039c47c1c39431598a58c8ddfdc9c37c",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-07T12:02:25Z"
+      }
+    },
+    {
       "id": "kn_1893546f1ad6f1ab499e727f",
       "source_id": "apple-developer-news",
       "external_id": "https://developer.apple.com/news/?id=gvnljl3f",
