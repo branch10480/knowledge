@@ -44,7 +44,7 @@ def test_build_request_contains_output_limit_instructions():
 
 def test_summarize_candidates_applies_output_token_limit():
     class RecordingClient:
-        def chat(self, request: dict) -> bytes:
+        def chat(self, request: dict, *, seed: int | None = None) -> bytes:
             assert request["max_tokens"] == 17
             assert request["thinking"] == {"type": "disabled"}
             return json.dumps({
@@ -151,7 +151,7 @@ def test_retry_only_on_retryable_errors():
     # Schema違反・ID不一致（非再試行）は client を 1 回だけ呼ぶ
     class FailingSchema:
         calls = 0
-        def chat(self, request: dict) -> bytes:
+        def chat(self, request: dict, *, seed: int | None = None) -> bytes:
             FailingSchema.calls += 1
             raise summarizer.SummaryError("candidate_id mismatch")
 
@@ -165,7 +165,7 @@ def test_retry_only_on_retryable_errors():
     # timeout・接続（retryable=True）は max_retries+1 回再試行する
     class FailingTimeout:
         calls = 0
-        def chat(self, request: dict) -> bytes:
+        def chat(self, request: dict, *, seed: int | None = None) -> bytes:
             FailingTimeout.calls += 1
             raise summarizer.SummaryError("llm timeout/connect", retryable=True)
 
@@ -176,7 +176,7 @@ def test_retry_only_on_retryable_errors():
     # retryable エラー後に成功すれば成功する（blind retry で重ねない）
     class FlakyThenOk:
         calls = 0
-        def chat(self, request: dict) -> bytes:
+        def chat(self, request: dict, *, seed: int | None = None) -> bytes:
             FlakyThenOk.calls += 1
             if FlakyThenOk.calls == 1:
                 raise summarizer.SummaryError("llm timeout/connect", retryable=True)
@@ -196,6 +196,66 @@ def test_validate_rejects_malformed_and_mismatch():
            "tags": [], "insufficient_evidence": False}
     with pytest.raises(summarizer.SummaryError):
         summarizer.validate_summary_output(json.dumps(bad).encode("utf-8"), _cand())
+
+
+def test_repair_json_unquoted_string_value():
+    # LLM が "summary_ja": の値を引用符なし（裸の文字列）で返すケースを修復する
+    bad = ('{"candidate_id": "c1", "title_ja": "t", '
+           '"summary_ja": Appleは2026年後半、ベルリンに開設します。, '
+           '"key_points": ["k"], "tags": ["a"], "claims": [], '
+           '"insufficient_evidence": false}')
+    fixed = summarizer._repair_json(bad)
+    obj = json.loads(fixed)
+    assert obj["summary_ja"] == "Appleは2026年後半、ベルリンに開設します。"
+    assert obj["key_points"] == ["k"]
+
+
+def test_repair_json_trailing_comma():
+    bad = '{"candidate_id": "c1", "title_ja": "t", "summary_ja": "s", "tags": ["a",], "claims": [], "insufficient_evidence": false,}'
+    fixed = summarizer._repair_json(bad)
+    obj = json.loads(fixed)
+    assert obj["tags"] == ["a"]
+
+
+def test_validate_repairs_unquoted_string_value():
+    # 引用符なしの文字列値は修復して検証を通過する（回帰テスト）
+    bad = ('{"candidate_id": "c1", "title_ja": "t", '
+           '"summary_ja": Appleは2026年後半、ベルリンに開設します。, '
+           '"key_points": ["k"], "tags": ["a"], "claims": [], '
+           '"insufficient_evidence": false}')
+    parsed = summarizer.validate_summary_output(bad.encode("utf-8"), _cand())
+    assert parsed.summary_ja == "Appleは2026年後半、ベルリンに開設します。"
+
+
+def test_validate_unrepairable_malformed_is_retryable():
+    # 修復できない壊れ方は retryable=True で分類される（transient なモデル出力品質）
+    bad = '{"candidate_id": "c1", "title_ja": "t", "summary_ja": "s", "tags": [}'
+    with pytest.raises(summarizer.SummaryError) as ei:
+        summarizer.validate_summary_output(bad.encode("utf-8"), _cand())
+    assert "malformed json" in str(ei.value)
+    assert ei.value.retryable
+
+
+def test_retry_uses_different_seed():
+    # retryable エラー後の再試行は別シードで呼ばれる（同じシードだと同じ出力になるため）
+    seen_seeds = []
+
+    class SeedRecordingClient:
+        def chat(self, request: dict, *, seed: int | None = None) -> bytes:
+            seen_seeds.append(seed)
+            if len(seen_seeds) == 1:
+                raise summarizer.SummaryError("malformed json: x", retryable=True)
+            return json.dumps({
+                "candidate_id": "c1", "title_ja": "タイトル", "summary_ja": "要約",
+                "key_points": [], "tags": [], "claims": [], "insufficient_evidence": False,
+            }).encode("utf-8")
+
+    cfg = models.SummaryConfig(provider="local-openai-compatible",
+                               base_url="http://127.0.0.1:18080/v1", model="m",
+                               seed=10480, max_retries=1)
+    outs = summarizer.summarize_candidates((_cand(),), cfg, client=SeedRecordingClient())
+    assert len(outs) == 1
+    assert seen_seeds == [10480, 10481]  # 初回 seed、再試行 seed+1
 
 
 def test_validate_rejects_html():

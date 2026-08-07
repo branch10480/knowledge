@@ -64,6 +64,61 @@ def _coerce_string_to_list(value: object) -> object:
     return value
 
 
+def _repair_json(text: str) -> str:
+    """LLM が返す JSON のよくある壊れ方を修復する（best-effort）。
+
+    - 文字列値を引用符なしで返す（"key": 裸の文字列）→ 引用符で囲む
+    - 配列/オブジェクト末尾の余分なカンマ → 除去
+    修復できない場合は元の text をそのまま返す（呼び出し側で再試行に回す）。
+    """
+    # 1) 末尾カンマ除去（例: [1, 2,] → [1, 2]）
+    text = re.sub(r",\s*([}\]])", r"\1", text)
+    # 2) 引用符なしの文字列値の修復
+    out: list[str] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        ch = text[i]
+        if ch == '"':
+            # キー文字列の終端を探す
+            j = i + 1
+            while j < n and text[j] != '"':
+                j += 1
+            if j >= n:
+                out.append(text[i:])
+                break
+            k = j + 1
+            while k < n and text[k] in " \t\n":
+                k += 1
+            if k < n and text[k] == ":":
+                k += 1
+                while k < n and text[k] in " \t\n":
+                    k += 1
+                # 値の開始文字が裸の文字列（JSON 値の開始文字でない）なら修復
+                if k < n and text[k] not in '"{[\\-0123456789tfn':
+                    depth = 0
+                    end = k
+                    while end < n:
+                        c = text[end]
+                        if c in "{[":
+                            depth += 1
+                        elif c in "}]":
+                            depth -= 1
+                        elif c == "," and depth == 0:
+                            break
+                        elif c == "}" and depth == 0:
+                            break
+                        end += 1
+                    val = text[k:end].replace("\\", "\\\\").replace('"', '\\"')
+                    out.append(text[i:k])
+                    out.append('"' + val + '"')
+                    i = end
+                    continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 def _truncate_input(candidate: Candidate, *, max_bytes: int) -> dict:
     """入力は上限内へ切った candidate JSON だけ。source_text を切り詰める。"""
     text = candidate.source_text
@@ -122,7 +177,13 @@ def validate_summary_output(raw: bytes, candidate: Candidate) -> SummaryOutput:
     try:
         obj = json.loads(text[start : end + 1])
     except json.JSONDecodeError as e:
-        raise SummaryError(f"malformed json: {e}") from e
+        # LLM が引用符なしの文字列値などを返す場合、修復を試みる
+        repaired = _repair_json(text[start : end + 1])
+        try:
+            obj = json.loads(repaired)
+        except json.JSONDecodeError:
+            # 修復できない場合は transient なモデル出力品質の問題として再試行可能にする
+            raise SummaryError(f"malformed json: {e}", retryable=True) from e
     if not isinstance(obj, dict):
         raise SummaryError("output not an object")
     if obj.get("candidate_id") != candidate.candidate_id:
@@ -193,11 +254,14 @@ class RestrictedLlmClient:
         self.timeout = timeout
         self.seed = seed
 
-    def chat(self, request: dict) -> bytes:
+    def chat(self, request: dict, *, seed: int | None = None) -> bytes:
         payload = dict(request)
         payload["model"] = self.model
         payload["stream"] = False
-        if self.seed is not None:
+        # seed 上書き（再試行時は別シードで異なる出力を得る）。未指定なら self.seed を使う
+        if seed is not None:
+            payload["seed"] = seed
+        elif self.seed is not None:
             payload["seed"] = self.seed
         body = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
@@ -232,9 +296,11 @@ def summarize_candidates(
         # content が途中で切れる。thinking={"type":"disabled"} で非思考を明示する。
         req["thinking"] = {"type": "disabled"}
         last_err: Exception | None = None
-        for _ in range(config.max_retries + 1):
+        for attempt in range(config.max_retries + 1):
             try:
-                raw = client.chat(req)
+                # 再試行時は別シードで異なる出力を得る（初回は config.seed）
+                retry_seed = config.seed + attempt if config.seed is not None else None
+                raw = client.chat(req, seed=retry_seed)
                 out.append(validate_summary_output(raw, c))
                 last_err = None
                 break
