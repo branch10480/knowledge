@@ -12,6 +12,13 @@
 
 ## 現在のステータス（2026-08-05 完了）
 
+### ✅ DS4競合と孤立生成の防止（2026-08-07、未commit）
+
+- `collect.sh`はprocess lock作成後に18080/18082のESTABLISHED接続を検査し、busyなら終了コード75で延期する
+- castle の共有 proxy は生存中の `.work/lock/pid` を排他予約として扱い、Knowledge 専用 alias だけを直列実行して新規 Hermes 推論を 503 で拒否する
+- TUI切断時は共有proxyがbackend responseも閉じ、見えない生成と自動retryの重複を防ぐ
+- 要約timeoutは、排他実行でも出力揺れを吸収できるよう100秒から180秒へ変更した
+
 ### ✅ collect.sh パイプライン正常稼働確認済み
 - Sol（gpt-5.6-sol）が Herdr 右ペインで完全実行
 - collect 6件 → summarize 6件 → merge 6件追加 → build 23件 → QA・secret scan 成功
@@ -58,8 +65,8 @@
 - 対処: 別セッションで `git push origin main` を実行
 
 ## 重要な制約
-- ローカル要約LLM: `http://127.0.0.1:18080/v1`（deepseek-v4-flash）。単一セッション制約。並列要約不可。
-- config/summary.yml: `max_candidates_per_run: 8`, `request_timeout_seconds: 100`, `max_retries: 1`
+- ローカル要約 LLM: `http://127.0.0.1:18082/v1`（`deepseek-v4-flash-knowledge` alias → backend `deepseek-v4-flash`）。単一セッション制約。並列要約不可。
+- config/summary.yml: `max_candidates_per_run: 8`, `request_timeout_seconds: 180`, `max_retries: 1`
 - collect.sh は `set -Eeuo pipefail`、mkdir 排他ロック、clean branch 確認付き
 - コミット・push・gh-pages置換は明示的承認が必要
 

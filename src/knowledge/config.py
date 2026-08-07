@@ -49,7 +49,7 @@ def load_summary(path: Path) -> SummaryConfig:
     d = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     return SummaryConfig(
         provider=d.get("provider", "local-openai-compatible"),
-        base_url=d.get("base_url", "http://127.0.0.1:18080/v1"),
+        base_url=d.get("base_url", "http://127.0.0.1:18082/v1"),
         model=d.get("model", ""),
         fallback_model=d.get("fallback_model"),
         allow_fallback=d.get("allow_fallback", False),

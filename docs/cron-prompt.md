@@ -1,7 +1,7 @@
 # Hermes cron 用プロンプト（Knowledge v2 収集）
 
 これは `~/.hermes/cron/jobs.json` のジョブ `317dac27c6f8`（Knowledge v2 収集）に登録した完全プロンプトの実装物です。
-DESIGN.md §6 と一致します。モデルは `provider=custom / model=deepseek-v4-flash / base_url=http://127.0.0.1:18080/v1` にピン留め済みです。
+DESIGN.md §6 と一致します。モデルは `provider=custom / model=deepseek-v4-flash-knowledge / base_url=http://127.0.0.1:18082/v1` にピン留め済みです。共有 proxy はこの alias を backend の `deepseek-v4-flash` へ固定変換します。
 
 ```text
 あなたは Knowledge v2 の定期実行オーケストレーターです。
@@ -41,15 +41,17 @@ allowlist 済み公式 RSS/Atom と GitHub REST API から新着を収集し、�
 3. git pull --ff-only origin main を実行する。失敗時は停止する。
 4. run 開始時刻 T0 は scripts/collect.sh が UTC で一度だけ採取する。あなたが .lastrun や checkpoint を編集してはならない。
 5. ./scripts/collect.sh を 1 回だけ実行する。このスクリプトは以下を順番に行う:
-   a. previous_success_at に 72 時間 lookback を加味して (previous, T0] の候補を決定的に収集
-   b. ETag/GUID/canonical URL/GitHub ID で重複排除
-   c. 権限なしローカル LLM で Schema 準拠要約
-   d. HTTPS、Schema、HTML 禁止、factual/source gate を検証
-   e. temp directory で entries と checkpoint を準備
-   f. clean build、Atom、内部リンク、件数、重複、pytest、git diff --check を検証
-   g. scripts/scan-secrets.sh を実行
-   h. 成功時だけ data/entries.json と data/checkpoint.json を atomic replace
-   i. 2 ファイルだけを同一 commit にし git push origin HEAD:main
+   a. process lock を取得し、18080/18082 に既存推論があれば終了コード 75 でデータと checkpoint を変えず延期
+   b. lock PID が生きている間は共有 proxy の Knowledge 専用 alias だけを通し、DS4 の 1 session を排他予約
+   c. previous_success_atに72時間lookbackを加味して(previous, T0]の候補を決定的に収集
+   d. ETag/GUID/canonical URL/GitHub IDで重複排除
+   e. 権限なしローカルLLMでSchema準拠要約
+   f. HTTPS、Schema、HTML禁止、factual/source gateを検証
+   g. temp directoryでentriesとcheckpointを準備
+   h. clean build、Atom、内部リンク、件数、重複、pytest、git diff --checkを検証
+   i. scripts/scan-secrets.shを実行
+   j. 成功時だけdata/entries.jsonとdata/checkpoint.jsonをatomic replace
+   k. 2ファイルだけを同一commitにしgit push origin HEAD:main
 6. 終了 code 0 の場合、stdout の構造化 RunSummary から件数、source 別件数、commit SHA を読み、Signal と Telegram に「収集・検証完了。Pages 公開は CI 実行中」と通知する。
 7. 終了 code が非 0 の場合、再実行や手動修復を試みない。正本と checkpoint が開始時 Git SHA と一致することを確認し、失敗 stage、終了 code、log path だけを Signal と Telegram に通知する。secret や記事本文は通知しない。
 

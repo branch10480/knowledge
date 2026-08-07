@@ -32,14 +32,15 @@ gh-pages ブランチ（生成物のみ・編集不要）
 Hermes Agent の cron ジョブ **Knowledge v2 収集** が毎日 9:00 JST に `./scripts/collect.sh` を実行する。完全なプロンプトは [`docs/cron-prompt.md`](docs/cron-prompt.md) に反映済み。
 
 ```text
-1. allowlist 済み公式 RSS/Atom + GitHub REST API から (previous, T0] の候補を決定的に収集
-2. 権限なしローカル固定 LLM で Schema 準拠要約（JSON Schema mode）
-3. HTTPS / Schema / HTML 禁止 / factual gate を検証
-4. temp directory で entries と checkpoint を準備 → atomic replace
-5. clean build、Atom、内部リンク、件数、重複、pytest、git diff --check を検証
-6. scripts/scan-secrets.sh を実行（必須ゲート）
-7. 成功時だけ data/entries.json と data/checkpoint.json を同一 commit で git push origin HEAD:main
-8. Signal + Telegram に短い結果を通知
+1. process lock を取得し、DS4 が busy なら終了コード 75 でデータと checkpoint を変えず延期
+2. allowlist済み公式RSS/Atom + GitHub REST APIから(previous, T0]の候補を決定的に収集
+3. 排他 lock 中は専用 alias だけを共有 proxy へ通し、固定 LLM で Schema 準拠要約
+4. HTTPS / Schema / HTML禁止 / factual gateを検証
+5. temp directoryでentriesとcheckpointを準備 → atomic replace
+6. clean build、Atom、内部リンク、件数、重複、pytest、git diff --checkを検証
+7. scripts/scan-secrets.shを実行（必須ゲート）
+8. 成功時だけdata/entries.jsonとdata/checkpoint.jsonを同一commitでgit push origin HEAD:main
+9. Signal + Telegramに短い結果を通知
 ```
 
 **禁止操作**（cron オーケストレーターがしてはならないこと）:

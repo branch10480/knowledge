@@ -270,3 +270,6 @@ def test_restricted_client_requires_loopback():
         summarizer.RestrictedLlmClient("https://example.com/v1", "m")
     # loopback は OK
     summarizer.RestrictedLlmClient("http://127.0.0.1:18080/v1", "m")
+    summarizer.RestrictedLlmClient("http://127.0.0.1:18082/v1", "m")
+    with pytest.raises(summarizer.SummaryError):
+        summarizer.RestrictedLlmClient("http://127.0.0.1:18081/v1", "m")

@@ -232,18 +232,18 @@ sources:
 
 ```yaml
 provider: local-openai-compatible
-base_url: "http://127.0.0.1:8080/v1"
-model: "deepseek-v4-flash"
+base_url: "http://127.0.0.1:18082/v1"
+model: "deepseek-v4-flash-knowledge"
 fallback_model: "qwen3.6-35b-a3b"
 allow_fallback: true
 temperature: 0
 seed: 10480
-max_candidates_per_run: 40
+max_candidates_per_run: 8
 max_input_bytes_per_candidate: 24576
 max_total_input_bytes: 524288
-max_output_tokens_per_candidate: 700
-request_timeout_seconds: 120
-max_retries: 2
+max_output_tokens_per_candidate: 1200
+request_timeout_seconds: 180
+max_retries: 1
 ```
 
 provider と model は設定に固定し、cron prompt や記事本文から上書きできない。fallback は明示したローカルモデルだけに限定し、クラウド endpoint への自動 fallback は禁止する。
@@ -650,15 +650,17 @@ allowlist 済み公式 RSS/Atom と GitHub REST API から新着を収集し、�
 3. `git pull --ff-only origin main` を実行する。失敗時は停止する。
 4. run 開始時刻 T0 は scripts/collect.sh が UTC で一度だけ採取する。あなたが .lastrun や checkpoint を編集してはならない。
 5. `./scripts/collect.sh` を 1 回だけ実行する。このスクリプトは以下を順番に行う:
-   a. previous_success_at に 72 時間 lookback を加味して (previous, T0] の候補を決定的に収集
-   b. ETag/GUID/canonical URL/GitHub ID で重複排除
-   c. 権限なしローカル LLM で Schema 準拠要約
-   d. HTTPS、Schema、HTML 禁止、factual/source gate を検証
-   e. temp directory で entries と checkpoint を準備
-   f. clean build、Atom、内部リンク、件数、重複、pytest、git diff --check を検証
-   g. scripts/scan-secrets.sh を実行
-   h. 成功時だけ data/entries.json と data/checkpoint.json を atomic replace
-   i. 2 ファイルだけを同一 commit にし `git push origin HEAD:main`
+   a. process lock を取得し、18080/18082 に既存推論があれば終了コード 75 でデータと checkpoint を変えず延期
+   b. lock PID が生きている間は共有 proxy の Knowledge 専用 alias だけを通し、DS4 の 1 session を排他予約
+   c. previous_success_atに72時間lookbackを加味して(previous, T0]の候補を決定的に収集
+   d. ETag/GUID/canonical URL/GitHub IDで重複排除
+   e. 権限なしローカルLLMでSchema準拠要約
+   f. HTTPS、Schema、HTML禁止、factual/source gateを検証
+   g. temp directoryでentriesとcheckpointを準備
+   h. clean build、Atom、内部リンク、件数、重複、pytest、git diff --checkを検証
+   i. scripts/scan-secrets.shを実行
+   j. 成功時だけdata/entries.jsonとdata/checkpoint.jsonをatomic replace
+   k. 2ファイルだけを同一commitにし`git push origin HEAD:main`
 6. 終了 code 0 の場合、stdout の構造化 RunSummary から件数、source 別件数、commit SHA を読み、Signal と Telegram に「収集・検証完了。Pages 公開は CI 実行中」と通知する。
 7. 終了 code が非 0 の場合、再実行や手動修復を試みない。正本と checkpoint が開始時 Git SHA と一致することを確認し、失敗 stage、終了 code、log path だけを Signal と Telegram に通知する。secret や記事本文は通知しない。
 
@@ -671,7 +673,7 @@ allowlist 済み公式 RSS/Atom と GitHub REST API から新着を収集し、�
 source 取得、要約、Schema、factual gate、build、test、Atom、link、件数、secret scan、commit、push のどれか 1 つでも失敗した場合。失敗後は push、checkpoint 更新、成功通知を行わない。
 ```
 
-`scripts/collect.sh` 自体は `set -Eeuo pipefail`、固定 PATH、`umask 077`、process lock、trap を使う。同時 run は lock 取得に失敗して終了する。LLM 入出力と log は `mktemp -d` 配下へ置き、終了時に削除する。push 後に停止して通知だけ失敗した場合は Git SHA を見て再 push せず、通知のみ再送できる run receipt をローカル非追跡領域に残す。
+`scripts/collect.sh` 自体は `set -Eeuo pipefail`、固定 PATH、`umask 077`、process lock、trap を使う。同時 run は lock 取得に失敗して終了する。lock PID は共有 proxy の排他予約にも使い、既存推論があれば終了コード 75、Knowledge 専用 alias 以外の新規 proxy 推論は lock 解放まで 503 とする。Knowledge の要約も共有 proxy 経由なので、lock 作成直前に開始した推論とは同じ 1 session gate で直列化される。LLM 入出力と log は `mktemp -d` 配下へ置き、終了時に削除する。push 後に停止して通知だけ失敗した場合は Git SHA を見て再 push せず、通知のみ再送できる run receipt をローカル非追跡領域に残す。
 
 ## 7. CI ワークフロー
 
@@ -939,4 +941,3 @@ jobs:
 - 0 件正常 run では checkpoint が T0 に進み、次回も 72 時間 lookback で遅延記事を取得できる。
 - CI が `main` の source SHA に対応する完全な `gh-pages` snapshot を deploy し、`feed.xml`、`entry/`、`archive/` の欠落がない。
 - cron とローカル credential から `gh-pages` へ直接 push できない。
-

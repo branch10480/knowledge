@@ -49,6 +49,11 @@ echo $$ > "$LOCK/pid"
 WORK_DIR=$(mktemp -d "$REPO/.work.run.XXXXXX")
 trap 'rm -rf "$WORK_DIR" "$LOCK" 2>/dev/null || true' EXIT
 
+# ---- shared DS4 admission gate ----
+# lock/pid を共有 proxy が排他予約として読む。既存推論があれば一時失敗として延期する。
+echo "== [0/6] inference idle gate =="
+"$PY" -m knowledge.cli check-inference-idle
+
 # T0 を UTC で一度だけ採取
 T0=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 

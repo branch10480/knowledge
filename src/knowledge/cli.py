@@ -11,7 +11,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import builder, collector, config, identity, models, repository, summarizer, validate
+from . import builder, collector, config, identity, inference, models, repository, summarizer, validate
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -260,6 +260,23 @@ def validate_data_command(entries_path: Path) -> int:
     return 0
 
 
+def check_inference_idle_command() -> int:
+    try:
+        busy_ports = inference.busy_inference_ports()
+    except inference.InferenceCheckError:
+        print(json.dumps({"ok": False, "error": "inference idle check failed"}))
+        return 1
+    if busy_ports:
+        print(json.dumps({
+            "ok": False,
+            "error": "local inference is busy; retry later",
+            "busy_ports": list(busy_ports),
+        }))
+        return 75
+    print(json.dumps({"ok": True, "inference_idle": True}))
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="knowledge")
     sub = parser.add_subparsers(dest="cmd")
@@ -299,6 +316,8 @@ def main(argv=None) -> int:
     p_data = sub.add_parser("validate-data")
     p_data.add_argument("--entries", type=Path, default=REPO_ROOT / "data/entries.json")
 
+    sub.add_parser("check-inference-idle")
+
     args = parser.parse_args(argv)
     cmd = args.cmd
     if cmd == "collect":
@@ -321,6 +340,8 @@ def main(argv=None) -> int:
         return validate_atom_command(args.feed)
     if cmd == "validate-data":
         return validate_data_command(args.entries)
+    if cmd == "check-inference-idle":
+        return check_inference_idle_command()
     parser.print_help()
     return 2
 

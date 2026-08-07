@@ -247,7 +247,7 @@ class RestrictedLlmClient:
         host = (parsed.hostname or "").lower()
         if host not in ("127.0.0.1", "::1", "localhost"):
             raise SummaryError("base_url must be loopback host")
-        if parsed.port not in (None, 80, 8080, 18080):
+        if parsed.port not in (None, 80, 8080, 18080, 18082):
             raise SummaryError(f"unexpected port: {parsed.port}")
         self.base_url = base_url.rstrip("/")
         self.model = model
