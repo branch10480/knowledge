@@ -2,9 +2,17 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>https://branch10480.github.io/knowledge/</id>
   <title>Knowledge</title>
-  <updated>2026-08-08T04:30:30Z</updated>
+  <updated>2026-08-08T04:32:35Z</updated>
   <link rel="self" href="https://branch10480.github.io/knowledge/feed.xml"/>
   <link rel="alternate" href="https://branch10480.github.io/knowledge/"/>
+  <entry>
+    <id>urn:knowledge:kn_28aee465b9d2c4e4cfa995a9</id>
+    <title>オーストラリアにおけるソーシャルメディアアプリの新要件</title>
+    <published>2026-08-08T04:32:17Z</published>
+    <updated>2026-08-08T04:32:17Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_28aee465b9d2c4e4cfa995a9.html"/>
+    <summary type="text">2025年12月10日から、オーストラリアの新法により、特定のソーシャルメディアプラットフォームは16歳未満のユーザーにアカウント作成を許可しないことが義務付けられます。影響を受ける開発者は、16歳未満の既存アカウントの無効化や新規登録の監視など、法律の要件を遵守する責任があります。Appleは、Declared Age Range API、App Storeの説明文、アプリ内コントロール、年齢評価の引き上げ、Age Suitability URLなどのツールを提供しています。</summary>
+  </entry>
   <entry>
     <id>urn:knowledge:kn_257c69e5137a8a3c497ae2d5</id>
     <title>AirPods ベータ版 (9A292e) リリース</title>
