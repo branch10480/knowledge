@@ -13,7 +13,7 @@ allowlist 済み公式 RSS/Atom と GitHub REST API から新着を収集し、�
 - workdir: /Users/branch10480/ghq/github.com/branch10480/knowledge
 - branch: main
 - push refspec: HEAD:main
-- 実行コマンド: ./scripts/collect.sh
+- 実行コマンド: ./scripts/cron-collect.sh
 - source allowlist: config/sources.yml
 - summary provider/model: config/summary.yml
 - 通知優先順: Signal, Telegram
@@ -21,7 +21,7 @@ allowlist 済み公式 RSS/Atom と GitHub REST API から新着を収集し、�
 許可する操作:
 - workdir 内で git status / branch / rev-parse / diff を読む
 - git pull --ff-only origin main
-- ./scripts/collect.sh を 1 回実行する
+- ./scripts/cron-collect.sh を 1 回実行する。この entrypoint だけが終了コード 75 を最大4回・10分間隔で再試行できる
 - スクリプト成功後、指定済み通知コマンドで短い結果を送る
 
 禁止する操作:
@@ -39,9 +39,9 @@ allowlist 済み公式 RSS/Atom と GitHub REST API から新着を収集し、�
 1. cd /Users/branch10480/ghq/github.com/branch10480/knowledge を実行する。workdir が一致しなければ停止する。
 2. 現在 branch が main であり、tracked file に未コミット変更がないことを確認する。違えば何も変更せず失敗通知して停止する。
 3. git pull --ff-only origin main を実行する。失敗時は停止する。
-4. run 開始時刻 T0 は scripts/collect.sh が UTC で一度だけ採取する。あなたが .lastrun や checkpoint を編集してはならない。
-5. ./scripts/collect.sh を 1 回だけ実行する。このスクリプトは以下を順番に行う:
-   a. process lock を取得し、18080/18082 に既存推論があれば終了コード 75 でデータと checkpoint を変えず延期
+4. `scripts/cron-collect.sh` は main の同期後、`scripts/collect.sh` を呼ぶ。終了コード 75 のときだけ10分待って再実行し、初回を含め最大4回（最大30分待機）で打ち切る。それ以外の非0終了は再試行しない。
+5. 各 `scripts/collect.sh` attempt の開始時刻 T0 は UTC で一度だけ採取する。あなたが .lastrun や checkpoint を編集してはならない。このスクリプトは以下を順番に行う:
+   a. attempt ごとに process lock を取得し、18080/18082 に既存推論があれば終了コード 75 でデータと checkpoint を変えず一時延期。attempt 終了時に lock を解放してから待つ
    b. lock PID が生きている間は共有 proxy の Knowledge 専用 alias だけを通し、DS4 の 1 session を排他予約
    c. previous_success_atに72時間lookbackを加味して(previous, T0]の候補を決定的に収集
    d. ETag/GUID/canonical URL/GitHub IDで重複排除
@@ -53,7 +53,7 @@ allowlist 済み公式 RSS/Atom と GitHub REST API から新着を収集し、�
    j. 成功時だけdata/entries.jsonとdata/checkpoint.jsonをatomic replace
    k. 2ファイルだけを同一commitにしgit push origin HEAD:main
 6. 終了 code 0 の場合、stdout の構造化 RunSummary から件数、source 別件数、commit SHA を読み、Signal と Telegram に「収集・検証完了。Pages 公開は CI 実行中」と通知する。
-7. 終了 code が非 0 の場合、再実行や手動修復を試みない。正本と checkpoint が開始時 Git SHA と一致することを確認し、失敗 stage、終了 code、log path だけを Signal と Telegram に通知する。secret や記事本文は通知しない。
+7. entrypoint の終了 code が非 0 の場合、追加の再実行や手動修復を試みない。正本と checkpoint が開始時 Git SHA と一致することを確認し、失敗 stage、終了 code、log path だけを Signal と Telegram に通知する。secret や記事本文は通知しない。
 
 成功条件:
 - 新着 0 件でも、全 source と全 gate が成功し checkpoint を T0 へ進めた main commit が push されれば成功。

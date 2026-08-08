@@ -14,7 +14,8 @@ main ブランチ（ソース正本）
 ├── config/sources.yml    ← source allowlist（公式 RSS/Atom + GitHub API、LLM 不使用）
 ├── config/summary.yml    ← 要約 LLM の固定 provider/model
 ├── schemas/              ← entry / entries / checkpoint / summary-output の JSON Schema
-├── scripts/collect.sh    ← cron が実行する収集パイプライン本体
+├── scripts/cron-collect.sh ← cron entrypoint（exit 75だけ最大4回・10分間隔で再試行）
+├── scripts/collect.sh    ← 1 attempt 分の収集パイプライン本体
 ├── scripts/scan-secrets.sh ← 公開前 secret scan（必須ゲート）
 ├── templates/ static/    ← Jinja2 テンプレートと静的アセット
 ├── tests/                ← pytest
@@ -29,10 +30,10 @@ gh-pages ブランチ（生成物のみ・編集不要）
 
 ### cron ジョブ（自動収集）
 
-Hermes Agent の cron ジョブ **Knowledge v2 収集** が毎日 9:00 JST に `./scripts/collect.sh` を実行する。完全なプロンプトは [`docs/cron-prompt.md`](docs/cron-prompt.md) に反映済み。
+Hermes Agent の cron ジョブ **Knowledge v2 収集** が毎日 9:00 JST に `./scripts/cron-collect.sh` を実行する。完全なプロンプトは [`docs/cron-prompt.md`](docs/cron-prompt.md) に反映済み。
 
 ```text
-1. process lock を取得し、DS4 が busy なら終了コード 75 でデータと checkpoint を変えず延期
+1. process lock を取得し、DS4 が busy ならデータと checkpoint を変えず終了コード 75。lock を解放して10分後に再試行（最大4回・最大30分待機）
 2. allowlist済み公式RSS/Atom + GitHub REST APIから(previous, T0]の候補を決定的に収集
 3. 排他 lock 中は専用 alias だけを共有 proxy へ通し、固定 LLM で Schema 準拠要約
 4. HTTPS / Schema / HTML禁止 / factual gateを検証
@@ -93,4 +94,4 @@ git push origin HEAD:main
 - `data/entries.json` を直接編集しても OK。編集後は `validate-data` と `build` で検証する
 - summary / title は plain text（HTML タグ禁止）。URL は `https://` のみ、永続ID `kn_` を使用
 - タグは小文字推奨（`apple`, `ios`, `swift`, `ai`, `openai`, `anthropic`, `security` など）
-- 収集は cron の `collect.sh` が担当し、Web 検索や全 ghq 走査はしない
+- cron は `cron-collect.sh`、1 attempt の収集は `collect.sh` が担当し、Web 検索や全 ghq 走査はしない
