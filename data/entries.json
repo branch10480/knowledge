@@ -2,6 +2,39 @@
   "schema_version": 2,
   "entries": [
     {
+      "id": "kn_28aee465b9d2c4e4cfa995a9",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=y1bckxf8",
+      "canonical_url": "https://developer.apple.com/news/?id=y1bckxf8",
+      "published_at": "2026-08-08T04:32:17Z",
+      "collected_at": "2026-08-08T04:32:17Z",
+      "title": "オーストラリアにおけるソーシャルメディアアプリの新要件",
+      "summary": "2025年12月10日から、オーストラリアの新法により、特定のソーシャルメディアプラットフォームは16歳未満のユーザーにアカウント作成を許可しないことが義務付けられます。影響を受ける開発者は、16歳未満の既存アカウントの無効化や新規登録の監視など、法律の要件を遵守する責任があります。Appleは、Declared Age Range API、App Storeの説明文、アプリ内コントロール、年齢評価の引き上げ、Age Suitability URLなどのツールを提供しています。",
+      "key_points": [
+        "2025年12月10日から、オーストラリアの新法により16歳未満のソーシャルメディアアカウント作成が禁止される",
+        "開発者は16歳未満の既存アカウントの無効化と新規登録の監視を求められる",
+        "AppleはDeclared Age Range APIなど、法律遵守を支援する複数のツールを提供する"
+      ],
+      "tags": [
+        "オーストラリア",
+        "ソーシャルメディア",
+        "年齢制限",
+        "Apple",
+        "法律"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:c352a755e56b6c1a5ae2656108890bf875e7d57b49124ec2b0e4039fa047c597",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-08T04:32:17Z"
+      }
+    },
+    {
       "id": "kn_257c69e5137a8a3c497ae2d5",
       "source_id": "apple-developer-releases",
       "external_id": "https://developer.apple.com/news/releases/?id=06092026a",
