@@ -2,9 +2,25 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>https://branch10480.github.io/knowledge/</id>
   <title>Knowledge</title>
-  <updated>2026-08-08T04:32:35Z</updated>
+  <updated>2026-08-09T00:01:53Z</updated>
   <link rel="self" href="https://branch10480.github.io/knowledge/feed.xml"/>
   <link rel="alternate" href="https://branch10480.github.io/knowledge/"/>
+  <entry>
+    <id>urn:knowledge:kn_30b5d8193511172ad470d08b</id>
+    <title>TestFlight 4.3 リリース</title>
+    <published>2026-08-09T00:01:30Z</published>
+    <updated>2026-08-09T00:01:30Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_30b5d8193511172ad470d08b.html"/>
+    <summary type="text">Apple Developer のリリース情報として、TestFlight 4.3 が2026年7月21日に公開されました。アプリのダウンロードとリリースノートの閲覧が可能です。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_307f00cc73466ee7a3efb027</id>
+    <title>Apple、韓国開発者向けにSign in with Appleのサーバー間通知エンドポイントを2026年1月1日から必須化</title>
+    <published>2026-08-09T00:01:30Z</published>
+    <updated>2026-08-09T00:01:30Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_307f00cc73466ee7a3efb027.html"/>
+    <summary type="text">Appleは、韓国を拠点とする開発者に対し、2026年1月1日から、Sign in with Appleを使用するアプリのウェブサイト連携において、新しいServices IDの登録または既存の更新時に、サーバー間通知エンドポイントの提供を必須とすると発表しました。この通知により、メール転送設定の変更、アプリ内アカウント削除、Appleアカウントの完全削除などの重要な更新が届きます。開発者は通知受信後、関連データを直ちに更新し、ユーザーの個人データ管理を強化する必要があります。</summary>
+  </entry>
   <entry>
     <id>urn:knowledge:kn_28aee465b9d2c4e4cfa995a9</id>
     <title>オーストラリアにおけるソーシャルメディアアプリの新要件</title>
