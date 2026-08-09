@@ -2,6 +2,70 @@
   "schema_version": 2,
   "entries": [
     {
+      "id": "kn_30b5d8193511172ad470d08b",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=07212026b",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=07212026b",
+      "published_at": "2026-08-09T00:01:30Z",
+      "collected_at": "2026-08-09T00:01:30Z",
+      "title": "TestFlight 4.3 リリース",
+      "summary": "Apple Developer のリリース情報として、TestFlight 4.3 が2026年7月21日に公開されました。アプリのダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "TestFlight 4.3 が2026年7月21日にリリースされた。",
+        "アプリのダウンロードとリリースノートの閲覧が可能。",
+        "Apple Developer アプリで最新ニュースを確認できる。"
+      ],
+      "tags": [
+        "TestFlight",
+        "Apple Developer",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:148f5a35bd566d0b68859c8a553c7185f8357b61d4db334297a1b27d5b334196",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-09T00:01:30Z"
+      }
+    },
+    {
+      "id": "kn_307f00cc73466ee7a3efb027",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=j9zukcr6",
+      "canonical_url": "https://developer.apple.com/news/?id=j9zukcr6",
+      "published_at": "2026-08-09T00:01:30Z",
+      "collected_at": "2026-08-09T00:01:30Z",
+      "title": "Apple、韓国開発者向けにSign in with Appleのサーバー間通知エンドポイントを2026年1月1日から必須化",
+      "summary": "Appleは、韓国を拠点とする開発者に対し、2026年1月1日から、Sign in with Appleを使用するアプリのウェブサイト連携において、新しいServices IDの登録または既存の更新時に、サーバー間通知エンドポイントの提供を必須とすると発表しました。この通知により、メール転送設定の変更、アプリ内アカウント削除、Appleアカウントの完全削除などの重要な更新が届きます。開発者は通知受信後、関連データを直ちに更新し、ユーザーの個人データ管理を強化する必要があります。",
+      "key_points": [
+        "2026年1月1日より、韓国拠点の開発者はServices ID登録・更新時にサーバー間通知エンドポイントの提供が必須となる",
+        "通知にはメール転送設定の変更、アプリ内アカウント削除、Appleアカウントの完全削除が含まれる",
+        "通知受信後はアプリ内の関連データとサーバー基盤を直ちに更新し、ユーザーの個人データ管理を強化する"
+      ],
+      "tags": [
+        "Apple",
+        "Sign in with Apple",
+        "サーバー間通知",
+        "韓国",
+        "プライバシー"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:9cff48e7c286897ad2d9404d348875ecf99f1b7cce49f23a3da73c7d7cb5fcfd",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-09T00:01:30Z"
+      }
+    },
+    {
       "id": "kn_28aee465b9d2c4e4cfa995a9",
       "source_id": "apple-developer-news",
       "external_id": "https://developer.apple.com/news/?id=y1bckxf8",
