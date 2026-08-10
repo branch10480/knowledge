@@ -25,12 +25,13 @@ def _utc_parse(s: str) -> datetime:
     s = s.replace("Z", "+00:00")
     if re.match(r"^\d{4}-\d{2}-\d{2}$", s):
         return datetime.fromisoformat(s + "T00:00:00+00:00")
-    # 'Mon D, YYYY'（例: Jul 24, 2026）形式
+    # 'Mon D, YYYY'（例: Jul 24, 2026 / August 5, 2026）形式
     m = re.match(r"^([A-Za-z]{3,9}) (\d{1,2}), (\d{4})$", s)
     if m:
         import calendar
         try:
             month = {v: i for i, v in enumerate(calendar.month_abbr)}
+            month.update({v: i for i, v in enumerate(calendar.month_name)})
             mm = month.get(m.group(1).title())
             if mm is not None:
                 return datetime(int(m.group(3)), mm, int(m.group(2)), tzinfo=timezone.utc)
@@ -40,7 +41,10 @@ def _utc_parse(s: str) -> datetime:
         return datetime.fromisoformat(s)
     except ValueError:
         from email.utils import parsedate_to_datetime
-        dt = parsedate_to_datetime(s)
+        try:
+            dt = parsedate_to_datetime(s)
+        except Exception:
+            return datetime(1970, 1, 1, tzinfo=timezone.utc)
         if dt is None:
             return datetime(1970, 1, 1, tzinfo=timezone.utc)
         return dt.astimezone(timezone.utc)
@@ -89,73 +93,145 @@ def _with_cid(c: Candidate) -> Candidate:
 def _collect_html_index(
     payload: bytes, source: SourceConfig, *, retrieved_at: str
 ) -> tuple[Candidate, ...]:
-    """html-index（apple_releases 等）から記事リンクと日付を抽出する汎用 adapter。"""
+    """html-index（apple_releases 等）から記事リンクと日付を抽出する汎用 adapter。
+
+    Apple の news/releases ページは日付を <p class="article-date"> に持ち、<time> は使わない。
+    Anthropic 等は <time> を使う。複数の <article> ブロックがあるページはブロック単位で
+    リンクと日付を対応付け、ブロックが無い（または単一ラッパーの）ページは従来の index 順
+    対応にフォールバックする。
+    """
     text = payload.decode("utf-8", errors="replace")
 
     class _Parser(HTMLParser):
         def __init__(self):
             super().__init__()
-            self.hrefs: list[str] = []          # 記事リンク候補
-            self.dates: list[str] = []          # <time> 日付（出現順）
-            self._in_time = False
-            self._time_buf = []
+            self.blocks: list[dict] = []   # 確定済み article ブロック: {"links","date"}
+            self._cur: dict | None = None  # 現在の article ブロック
             self._skip_nav = 0
+            self._in_time = False
+            self._time_buf: list[str] = []
+            self._date_depth = 0
+            self._date_buf: list[str] = []
+            # フォールバック（<article> 無し/単一ラッパー）用のグローバル収集
+            self.fb_links: list[str] = []
+            self.fb_dates: list[str] = []
 
         def handle_starttag(self, tag, attrs):
             if tag == "nav":
                 self._skip_nav += 1
                 return
-            if tag == "a" and self._skip_nav == 0:
+            if tag == "article":
+                self._cur = {"links": [], "date": ""}
+                return
+            if self._skip_nav:
+                return
+            if tag == "a":
                 href = None
                 for k, v in attrs:
-                    if k == "href" and v.startswith(("https://", "/")):
+                    if k == "href" and v and v.startswith(("https://", "/")):
                         href = v
                         break
                 if href:
-                    self.hrefs.append(href)
-            elif tag == "time" and self._skip_nav == 0:
+                    self.fb_links.append(href)
+                    if self._cur is not None:
+                        self._cur["links"].append(href)
+            else:
+                # Apple releases 等は記事 URL を share ボタンの data-href に持つ
+                dhref = None
+                for k, v in attrs:
+                    if k == "data-href" and v and v.startswith(("https://", "/")):
+                        dhref = v
+                        break
+                if dhref:
+                    self.fb_links.append(dhref)
+                    if self._cur is not None:
+                        self._cur["links"].append(dhref)
+            if tag == "time":
                 self._in_time = True
                 self._time_buf = []
+            else:
+                cls = ""
+                for k, v in attrs:
+                    if k == "class":
+                        cls = v
+                        break
+                if cls and "article-date" in cls:
+                    self._date_depth += 1
+                    self._date_buf = []
 
         def handle_endtag(self, tag):
             if tag == "nav" and self._skip_nav > 0:
                 self._skip_nav -= 1
                 return
+            if tag == "article" and self._cur is not None:
+                self.blocks.append(self._cur)
+                self._cur = None
+                return
+            if self._skip_nav:
+                return
             if tag == "time" and self._in_time:
                 self._in_time = False
-                self.dates.append("".join(self._time_buf).strip())
+                d = "".join(self._time_buf).strip()
+                self.fb_dates.append(d)
+                if self._cur is not None and not self._cur["date"]:
+                    self._cur["date"] = d
+            elif self._date_depth > 0:
+                self._date_depth -= 1
+                if self._date_depth == 0:
+                    d = "".join(self._date_buf).strip()
+                    self.fb_dates.append(d)
+                    if self._cur is not None and not self._cur["date"]:
+                        self._cur["date"] = d
 
         def handle_data(self, data):
             if self._in_time:
                 self._time_buf.append(data)
+            elif self._date_depth > 0:
+                self._date_buf.append(data)
 
     p = _Parser()
     p.feed(text)
     p.close()
 
-    # 記事リンク（外部サイトでなく /news 等）を絞る
-    article_hrefs = []
-    for h in p.hrefs:
-        if h.startswith("https://"):
-            continue
-        if h.startswith("/"):
-            article_hrefs.append(h)
-    # 相対リンクを絶対化（source.url の origin 基準）
     from urllib.parse import urljoin
     source_url = source.url or ""
     base = source_url if source_url.startswith("https://") else "https://" + (source.allowed_hosts[0] if source.allowed_hosts else "")
-    abs_hrefs = [urljoin(base, h) for h in article_hrefs]
 
-    # 日付不明は空文字。記事リンクに日付を近接で対応付ける（同一数なら順対応）
+    def _pick_link(links: list[str]) -> str:
+        # 記事リンクらしいもの（/news/ を含む）を優先。無ければ最初のリンク。
+        for l in links:
+            if "/news/" in l:
+                return l
+        return links[0] if links else ""
+
     out: list[Candidate] = []
-    for i, u in enumerate(abs_hrefs[: source.max_items_per_source]):
-        date = p.dates[i] if i < len(p.dates) else ""
-        out.append(Candidate(
-            candidate_id="", source_id=source.id, source_kind=source.kind,
-            external_id=u, canonical_url=u, title="",
-            published_at=date, updated_at=date, retrieved_at=retrieved_at,
-            priority=source.priority,
-        ))
+    # 1) 複数の <article> ブロックがあるページ（Apple 等）はブロック単位で対応付け
+    if len(p.blocks) >= 2:
+        for b in p.blocks[: source.max_items_per_source]:
+            link = _pick_link(b.get("links", []))
+            if not link:
+                continue
+            u = urljoin(base, link)
+            out.append(Candidate(
+                candidate_id="", source_id=source.id, source_kind=source.kind,
+                external_id=u, canonical_url=u, title="",
+                published_at=b.get("date", ""), updated_at=b.get("date", ""),
+                retrieved_at=retrieved_at, priority=source.priority,
+            ))
+    # 2) フォールバック: <article> 無し/単一ラッパーのページ（Anthropic 等）は index 順対応
+    else:
+        # 記事リンクらしいもの（/news/ 等のコンテンツパス）だけに絞る（root / nav を除外）
+        article_hrefs = [h for h in p.fb_links
+                         if h.startswith("/") and re.search(r"/(news|features|blog|posts|articles|releases)/", h)]
+        abs_hrefs = [urljoin(base, h) for h in article_hrefs]
+        for i, u in enumerate(abs_hrefs[: source.max_items_per_source]):
+            date = p.fb_dates[i] if i < len(p.fb_dates) else ""
+            out.append(Candidate(
+                candidate_id="", source_id=source.id, source_kind=source.kind,
+                external_id=u, canonical_url=u, title="",
+                published_at=date, updated_at=date, retrieved_at=retrieved_at,
+                priority=source.priority,
+            ))
     return tuple(out)
 
 

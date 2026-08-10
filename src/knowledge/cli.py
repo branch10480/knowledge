@@ -88,8 +88,11 @@ def summarize_command(*, candidates_path: Path, output_path: Path, config_path: 
 
 
 def _entry_from(candidate: models.Candidate, s: summarizer.SummaryOutput, collected_at: str,
-                allowed_hosts: tuple[str, ...]) -> models.Entry:
+                allowed_hosts: tuple[str, ...]) -> models.Entry | None:
     from .validate import validate_url, factual_source_gate
+    # 公開日不明の記事を「最近収集」として誤って表示しない（collected_at を公開日に偽装しない）
+    if not candidate.published_at:
+        return None
     canonical = candidate.canonical_url
     if not canonical:
         raise ValueError("candidate has no canonical_url")
@@ -106,7 +109,7 @@ def _entry_from(candidate: models.Candidate, s: summarizer.SummaryOutput, collec
         source_id=candidate.source_id,
         external_id=candidate.external_id,
         canonical_url=canonical,
-        published_at=candidate.published_at or collected_at,
+        published_at=candidate.published_at,
         collected_at=collected_at,
         title=s.title_ja,
         summary=s.summary_ja,
@@ -145,7 +148,11 @@ def merge_command(*, entries_path: Path, checkpoint_path: Path,
             continue
         if identity.is_known(c, doc, cp):
             continue
-        additions.append(_entry_from(c, s, _utcnow(), host_map.get(c.source_id, ())))
+        e = _entry_from(c, s, _utcnow(), host_map.get(c.source_id, ()))
+        if e is None:
+            # 公開日不明（published_at 空）は「最近収集」として追加しない
+            continue
+        additions.append(e)
         # 検証・追加まで完了した candidate を seen に記録（次の run で再処理しない）
         seen_by_source.setdefault(c.source_id, []).append({
             "external_id_hash": "sha256:" + hashlib.sha256(c.external_id.encode("utf-8")).hexdigest(),

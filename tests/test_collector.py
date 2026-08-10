@@ -214,3 +214,95 @@ def test_collect_all_enriches_selected_and_defers_rest():
     # deferred 1 件は watermark を進めない（last_success_at 維持）
     assert len(res.deferred_candidate_ids) == 1
     assert res.proposed_checkpoint.last_success_at == "2026-08-01T00:00:00Z"
+
+
+def test_utc_parse_full_month_name():
+    # Apple の news ページは "August 5, 2026" のような完全月名を使う（<time> ではなく article-date）
+    dt = collector._utc_parse("August 5, 2026")
+    assert dt.isoformat().startswith("2026-08-05")
+    dt2 = collector._utc_parse("Jul 24, 2026")
+    assert dt2.isoformat().startswith("2026-07-24")
+
+
+def test_html_index_apple_article_date_extraction():
+    # Apple 形式: 日付は <p class="article-date"> にあり <time> は無い。ブロック単位で抽出し、
+    # window フィルタが古い記事を除外する。
+    index_body = (
+        b'<html><nav><a href="/about">nav</a></nav>'
+        b'<article><a href="/news/?id=1">One</a><p class="lighter article-date">August 5, 2026</p></article>'
+        b'<article><a href="/news/?id=2">Two</a><p class="lighter article-date">July 20, 2026</p></article>'
+        b'<article><a href="/news/?id=3">Three</a><p class="lighter article-date">June 23, 2026</p></article>'
+        b'</html>'
+    )
+    http = FakeHttp({"https://example.com/": index_body})
+    src = _src(kind="html-index", url="https://example.com/")
+    # window: 2026-07-11 〜 2026-08-10 → August 5 と July 20 のみ通過、June 23 は除外
+    c = collector._fetch_feed(
+        src, http,
+        collector.CollectionWindow("2026-07-11T00:00:00Z", "2026-07-11T00:00:00Z", "2026-08-10T00:00:00Z"),
+        retrieved_at="2026-08-10T00:00:00Z",
+    )
+    assert len(c) == 2
+    urls = {x.canonical_url for x in c}
+    assert urls == {"https://example.com/news/?id=1", "https://example.com/news/?id=2"}
+    # 日付が正しく抽出されている（空でない）
+    assert all(x.published_at for x in c)
+    by_url = {x.canonical_url: x.published_at for x in c}
+    assert by_url["https://example.com/news/?id=1"] == "August 5, 2026"
+
+
+def test_html_index_releases_data_href_link():
+    # Apple releases は記事 URL を share ボタンの data-href に持つ（<a href> は /download/ 等）。
+    # /news/ を含むリンクを優先して正しい記事 URL を選ぶ。
+    index_body = (
+        b'<html>'
+        b'<article>'
+        b'<a href="/download/">iOS 26.6</a>'
+        b'<button data-href="https://developer.apple.com/news/releases/?id=07272026a"></button>'
+        b'<p class="lighter article-date">July 27, 2026</p>'
+        b'</article>'
+        b'<article>'
+        b'<a href="/download/">iOS 26.5</a>'
+        b'<button data-href="https://developer.apple.com/news/releases/?id=07272026b"></button>'
+        b'<p class="lighter article-date">July 27, 2026</p>'
+        b'</article>'
+        b'</html>'
+    )
+    http = FakeHttp({"https://developer.apple.com/news/releases/": index_body})
+    src = _src(kind="html-index", url="https://developer.apple.com/news/releases/")
+    c = collector._fetch_feed(
+        src, http,
+        collector.CollectionWindow("2026-07-01T00:00:00Z", "2026-07-01T00:00:00Z", "2026-08-10T00:00:00Z"),
+        retrieved_at="2026-08-10T00:00:00Z",
+    )
+    assert len(c) == 2
+    urls = {x.canonical_url for x in c}
+    assert urls == {"https://developer.apple.com/news/releases/?id=07272026a",
+                    "https://developer.apple.com/news/releases/?id=07272026b"}
+    assert all(x.published_at == "July 27, 2026" for x in c)
+
+
+def test_html_index_fallback_filters_nav_and_pairs_dates():
+    # <article> が単一ラッパーのページ（Anthropic 等）は index 順対応にフォールバック。
+    # root / nav リンクを除外し、記事リンクと <time> 日付を順対応で正しく対応付ける。
+    index_body = (
+        b'<html>'
+        b'<a href="/">Home</a><a href="/research">Research</a>'
+        b'<a href="/news/claude-opus-5">Opus 5</a><time>Jul 24, 2026</time>'
+        b'<a href="/news/hard-questions">Hard Q</a><time>Jul 9, 2026</time>'
+        b'</html>'
+    )
+    http = FakeHttp({"https://www.anthropic.com/news": index_body})
+    src = _src(kind="html-index", url="https://www.anthropic.com/news")
+    c = collector._fetch_feed(
+        src, http,
+        collector.CollectionWindow("2026-07-01T00:00:00Z", "2026-07-01T00:00:00Z", "2026-08-10T00:00:00Z"),
+        retrieved_at="2026-08-10T00:00:00Z",
+    )
+    assert len(c) == 2
+    urls = {x.canonical_url for x in c}
+    assert urls == {"https://www.anthropic.com/news/claude-opus-5",
+                    "https://www.anthropic.com/news/hard-questions"}
+    by_url = {x.canonical_url: x.published_at for x in c}
+    assert by_url["https://www.anthropic.com/news/claude-opus-5"] == "Jul 24, 2026"
+    assert by_url["https://www.anthropic.com/news/hard-questions"] == "Jul 9, 2026"
