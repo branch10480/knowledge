@@ -93,6 +93,9 @@ def _entry_from(candidate: models.Candidate, s: summarizer.SummaryOutput, collec
     # 公開日不明の記事を「最近収集」として誤って表示しない（collected_at を公開日に偽装しない）
     if not candidate.published_at:
         return None
+    # 生の日付文字列（"July 20, 2026" 等）を ISO8601 UTC に正規化（validate が要求）
+    from .collector import _utc_parse, _utc_str
+    published_at = _utc_str(_utc_parse(candidate.published_at))
     canonical = candidate.canonical_url
     if not canonical:
         raise ValueError("candidate has no canonical_url")
@@ -109,7 +112,7 @@ def _entry_from(candidate: models.Candidate, s: summarizer.SummaryOutput, collec
         source_id=candidate.source_id,
         external_id=candidate.external_id,
         canonical_url=canonical,
-        published_at=candidate.published_at,
+        published_at=published_at,
         collected_at=collected_at,
         title=s.title_ja,
         summary=s.summary_ja,
