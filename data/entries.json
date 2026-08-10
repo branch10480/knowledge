@@ -1,4 +1,261 @@
 {
   "schema_version": 2,
-  "entries": []
+  "entries": [
+    {
+      "id": "kn_0e965e9320521f80d10b8e73",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=kug6m2ea",
+      "canonical_url": "https://developer.apple.com/news/?id=kug6m2ea",
+      "published_at": "2026-08-05T00:00:00Z",
+      "collected_at": "2026-08-10T07:28:55Z",
+      "title": "App Store向け新クリエイティブアセットの準備",
+      "summary": "Appleは2026年6月に発表した通り、App Storeでのアプリ・ゲームのマーケティング方法を刷新します。新しいアセットでは、ブランドや季節の提供、新コンテンツなどを強調でき、製品ページのヘッダー、検索結果、アプリ内イベントなどで使用可能です。秋の開始に備え、ベストプラクティスとFigma、Photoshop、Pixelmator用のデザインテンプレートが提供されます。",
+      "key_points": [
+        "新しいクリエイティブアセットでブランド、季節の提供、新コンテンツを強調可能",
+        "アセットは製品ページヘッダー、検索結果、アプリ内イベントなどで使用",
+        "秋の開始に備え、ベストプラクティスとデザインテンプレートが提供"
+      ],
+      "tags": [
+        "App Store",
+        "クリエイティブアセット",
+        "マーケティング",
+        "デザインテンプレート"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:5c717218c2ae4c0ce500d1848d56b73a262d94eae232df30aaf46930350b882c",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-10T07:28:55Z"
+      }
+    },
+    {
+      "id": "kn_c6067b04321d8dd27fae5578",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=07202026g",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=07202026g",
+      "published_at": "2026-07-20T00:00:00Z",
+      "collected_at": "2026-08-10T07:28:55Z",
+      "title": "iOS 27.0 beta 4 (24A5390f) リリース",
+      "summary": "Apple Developer 向けに iOS 27.0 beta 4 (24A5390f) が 2026年7月20日に公開されました。ダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "iOS 27.0 beta 4 (24A5390f) が公開された",
+        "公開日は 2026年7月20日",
+        "ダウンロードとリリースノートの閲覧が可能"
+      ],
+      "tags": [
+        "iOS",
+        "Apple",
+        "beta",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:67c80bfa4dcfc22a88a1809b2cddb28ad88649f82f8b536f6b369c12bdf69f2a",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-10T07:28:55Z"
+      }
+    },
+    {
+      "id": "kn_8c37ee3677aa6e64e83a3c4a",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=07202026k",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=07202026k",
+      "published_at": "2026-07-20T00:00:00Z",
+      "collected_at": "2026-08-10T07:28:55Z",
+      "title": "visionOS 27.0 beta 4 (24M5326g) リリース",
+      "summary": "Apple Developer 向けに visionOS 27.0 beta 4 (24M5326g) が2026年7月20日に公開されました。ダウンロードとリリースノートが利用可能です。",
+      "key_points": [
+        "visionOS 27.0 beta 4 (24M5326g) が公開",
+        "公開日は2026年7月20日",
+        "ダウンロードとリリースノートが利用可能"
+      ],
+      "tags": [
+        "visionOS",
+        "Apple",
+        "beta",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:ff6ecc18c97c171a3a236251b03db42df72f9a6eb0d5796a10bcd259d98b64be",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-10T07:28:55Z"
+      }
+    },
+    {
+      "id": "kn_71a7a4565483e6d17349a808",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=07202026l",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=07202026l",
+      "published_at": "2026-07-20T00:00:00Z",
+      "collected_at": "2026-08-10T07:28:55Z",
+      "title": "watchOS 27.0 beta 4 (24R5325h) リリース",
+      "summary": "Apple Developer 向けに watchOS 27.0 beta 4 (24R5325h) が2026年7月20日にリリースされました。ダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "watchOS 27.0 beta 4 (24R5325h) がリリースされた",
+        "公開日は2026年7月20日",
+        "ダウンロードとリリースノートの閲覧が可能"
+      ],
+      "tags": [
+        "watchOS",
+        "Apple",
+        "beta",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:d569dc646059353e89361dfff99f0d750995110b5706e2c79c7cbc0b266a2097",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-10T07:28:55Z"
+      }
+    },
+    {
+      "id": "kn_5cfb866bb8fa9c771ca6f99c",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=07202026i",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=07202026i",
+      "published_at": "2026-07-20T00:00:00Z",
+      "collected_at": "2026-08-10T07:28:55Z",
+      "title": "macOS 27.0 beta 4 (26A5388g) リリース",
+      "summary": "Apple Developer サイトで、macOS 27.0 beta 4 (ビルド番号 26A5388g) が 2026年7月20日に公開されたことが記載されています。ダウンロードページとリリースノートへのリンクが提供されています。",
+      "key_points": [
+        "macOS 27.0 beta 4 がリリースされた。",
+        "ビルド番号は 26A5388g。",
+        "公開日は 2026年7月20日。"
+      ],
+      "tags": [
+        "macOS",
+        "beta",
+        "Apple Developer",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:c6185268a8c65b76dfb5c02e5c58491d9ba3798c75ab99aa9e149d7827c46faf",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-10T07:28:55Z"
+      }
+    },
+    {
+      "id": "kn_51f26e48a284760d0f194559",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=07202026j",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=07202026j",
+      "published_at": "2026-07-20T00:00:00Z",
+      "collected_at": "2026-08-10T07:28:55Z",
+      "title": "tvOS 27.0 beta 4 (24J5325d) リリース",
+      "summary": "Apple Developer のリリースページに、tvOS 27.0 beta 4 (24J5325d) が2026年7月20日に公開されたことが記載されています。ダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "tvOS 27.0 beta 4 (24J5325d) が2026年7月20日に公開された",
+        "ダウンロードとリリースノートの閲覧が可能",
+        "Apple Developer サイトで公開されている"
+      ],
+      "tags": [
+        "tvOS",
+        "Apple",
+        "beta",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:452d2ed123be4d19ef50e62fea1e9ad7d188050bd2acc2c5e7efe55611fbc4ad",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-10T07:28:55Z"
+      }
+    },
+    {
+      "id": "kn_2dda0889830dcdd37c3f99f1",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=07202026m",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=07202026m",
+      "published_at": "2026-07-20T00:00:00Z",
+      "collected_at": "2026-08-10T07:28:55Z",
+      "title": "Xcode 27 beta 4 (27A5228h) リリース",
+      "summary": "Apple Developer のリリースページに、Xcode 27 beta 4 (27A5228h) が2026年7月20日に公開されたことが記載されています。ダウンロードページとリリースノートへのリンクが提供されています。",
+      "key_points": [
+        "Xcode 27 beta 4 (27A5228h) が2026年7月20日にリリースされた。",
+        "ダウンロードページとリリースノートへのリンクが提供されている。",
+        "Apple Developer の公式リリース情報として公開されている。"
+      ],
+      "tags": [
+        "Xcode",
+        "Apple Developer",
+        "beta",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:7d34b28e0e9ff872c12bf81f0fc29a3bc0f06fd96604b02c4f983020d4aaf93a",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-10T07:28:55Z"
+      }
+    },
+    {
+      "id": "kn_56458ce0491c1b3bfba524e5",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=07152026a",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=07152026a",
+      "published_at": "2026-07-15T00:00:00Z",
+      "collected_at": "2026-08-10T07:28:55Z",
+      "title": "App Store Connect API 4.4.1 リリース",
+      "summary": "Apple Developer が App Store Connect API 4.4.1 を2026年7月15日にリリースしました。リリースノートのダウンロードが可能です。",
+      "key_points": [
+        "App Store Connect API 4.4.1 が2026年7月15日にリリースされた",
+        "リリースノートをダウンロードできる",
+        "Apple Developer サイトで公開されている"
+      ],
+      "tags": [
+        "App Store Connect",
+        "API",
+        "Apple Developer",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:c248eebe0638d83066282d5d170203562a66a26d226fd702536eb57194410029",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-10T07:28:55Z"
+      }
+    }
+  ]
 }

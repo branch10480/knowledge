@@ -1,5 +1,78 @@
 {
   "schema_version": 1,
   "last_success_at": "1970-01-01T00:00:00Z",
-  "sources": {}
+  "sources": {
+    "apple-developer-news": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": [
+        {
+          "external_id_hash": "sha256:907b299d3a2a02c164dc0bb80744ee042e1440ed64414216f41a90180af3ffac",
+          "canonical_url_hash": "sha256:907b299d3a2a02c164dc0bb80744ee042e1440ed64414216f41a90180af3ffac",
+          "first_seen_at": "2026-08-10T07:28:55Z"
+        }
+      ]
+    },
+    "apple-developer-releases": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": [
+        {
+          "external_id_hash": "sha256:a855d772886941f420ad5bacf4187b2d3d9631a16462e88ac3b38f451aa0ca9c",
+          "canonical_url_hash": "sha256:a855d772886941f420ad5bacf4187b2d3d9631a16462e88ac3b38f451aa0ca9c",
+          "first_seen_at": "2026-08-10T07:28:55Z"
+        },
+        {
+          "external_id_hash": "sha256:cdf47e1a3d3a86756f2dc8a9e2479a1a4f3f2faa0773e5f5b6475422436e0d4f",
+          "canonical_url_hash": "sha256:cdf47e1a3d3a86756f2dc8a9e2479a1a4f3f2faa0773e5f5b6475422436e0d4f",
+          "first_seen_at": "2026-08-10T07:28:55Z"
+        },
+        {
+          "external_id_hash": "sha256:015ad323327993f06f26e832f6fc102c3629b822ede6a49089d45ee16f128cb2",
+          "canonical_url_hash": "sha256:015ad323327993f06f26e832f6fc102c3629b822ede6a49089d45ee16f128cb2",
+          "first_seen_at": "2026-08-10T07:28:55Z"
+        },
+        {
+          "external_id_hash": "sha256:d90ab033fb30313a8ea0c405f434d012ebb1fc52170c908d5a941a10a6232441",
+          "canonical_url_hash": "sha256:d90ab033fb30313a8ea0c405f434d012ebb1fc52170c908d5a941a10a6232441",
+          "first_seen_at": "2026-08-10T07:28:55Z"
+        },
+        {
+          "external_id_hash": "sha256:151f08c9fa1f3530ad39f6b94fc7b6a67f6f6070b5d55047cc23554f0b98360e",
+          "canonical_url_hash": "sha256:151f08c9fa1f3530ad39f6b94fc7b6a67f6f6070b5d55047cc23554f0b98360e",
+          "first_seen_at": "2026-08-10T07:28:55Z"
+        },
+        {
+          "external_id_hash": "sha256:4bee8db890f22c69ef8aefe48409734ed01d3ee2102bbf5ee9eae1ac10b427b3",
+          "canonical_url_hash": "sha256:4bee8db890f22c69ef8aefe48409734ed01d3ee2102bbf5ee9eae1ac10b427b3",
+          "first_seen_at": "2026-08-10T07:28:55Z"
+        },
+        {
+          "external_id_hash": "sha256:bf2c3690c73b27e07983218467fd8ba79af44cbc5c3efdbf866b11eb28a423ec",
+          "canonical_url_hash": "sha256:bf2c3690c73b27e07983218467fd8ba79af44cbc5c3efdbf866b11eb28a423ec",
+          "first_seen_at": "2026-08-10T07:28:55Z"
+        }
+      ]
+    },
+    "openai-news": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": []
+    },
+    "anthropic-newsroom": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": []
+    },
+    "swift-releases": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": []
+    }
+  }
 }
