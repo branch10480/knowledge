@@ -2,6 +2,71 @@
   "schema_version": 2,
   "entries": [
     {
+      "id": "kn_3726bd4ef394c49344180369",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=wafsmat3",
+      "canonical_url": "https://developer.apple.com/news/?id=wafsmat3",
+      "published_at": "2026-08-10T00:00:56Z",
+      "collected_at": "2026-08-10T00:00:56Z",
+      "title": "WWDC25の開催予定について",
+      "summary": "AppleはWWDC25を2025年6月9日から13日までオンラインで開催することを発表しました。この期間はテクノロジーと創造性に焦点を当てた1週間となるとされています。",
+      "key_points": [
+        "WWDC25が2025年6月9日から13日までオンラインで開催される",
+        "テクノロジーと創造性に焦点を当てた1週間になるとされている",
+        "Apple Developerアプリで最新ニュースを確認できる"
+      ],
+      "tags": [
+        "WWDC25",
+        "Apple",
+        "開発者向けイベント",
+        "オンライン開催"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:54646a220ed8e1753c3f8cbdac9bde0865f9de5ded7b86f6fd6101ea986ed1a3",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-10T00:00:56Z"
+      }
+    },
+    {
+      "id": "kn_315601244858808ebaca1db5",
+      "source_id": "apple-developer-news",
+      "external_id": "https://developer.apple.com/news/?id=id45s69d",
+      "canonical_url": "https://developer.apple.com/news/?id=id45s69d",
+      "published_at": "2026-08-10T00:00:56Z",
+      "collected_at": "2026-08-10T00:00:56Z",
+      "title": "App Store Award 受賞者が発表されました",
+      "summary": "Apple Developerの最新ニュースとして、2025年12月4日にApp Store Awardの受賞者が発表されました。世界中の開発者の優れた業績を称える内容で、受賞者を紹介しています。詳細は公式ページで確認できます。",
+      "key_points": [
+        "2025年12月4日にApp Store Award受賞者が発表された",
+        "世界中の開発者の優れた業績を称える",
+        "受賞者の詳細は公式ページで紹介されている"
+      ],
+      "tags": [
+        "App Store",
+        "Apple",
+        "受賞",
+        "開発者",
+        "ニュース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:b149d7ade37d76b17a332f4bb11bc8dcee0e057954c40fccec89f755149611ee",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-10T00:00:56Z"
+      }
+    },
+    {
       "id": "kn_30b5d8193511172ad470d08b",
       "source_id": "apple-developer-releases",
       "external_id": "https://developer.apple.com/news/releases/?id=07212026b",
