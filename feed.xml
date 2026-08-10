@@ -2,9 +2,25 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>https://branch10480.github.io/knowledge/</id>
   <title>Knowledge</title>
-  <updated>2026-08-09T00:01:53Z</updated>
+  <updated>2026-08-10T00:01:17Z</updated>
   <link rel="self" href="https://branch10480.github.io/knowledge/feed.xml"/>
   <link rel="alternate" href="https://branch10480.github.io/knowledge/"/>
+  <entry>
+    <id>urn:knowledge:kn_3726bd4ef394c49344180369</id>
+    <title>WWDC25の開催予定について</title>
+    <published>2026-08-10T00:00:56Z</published>
+    <updated>2026-08-10T00:00:56Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_3726bd4ef394c49344180369.html"/>
+    <summary type="text">AppleはWWDC25を2025年6月9日から13日までオンラインで開催することを発表しました。この期間はテクノロジーと創造性に焦点を当てた1週間となるとされています。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_315601244858808ebaca1db5</id>
+    <title>App Store Award 受賞者が発表されました</title>
+    <published>2026-08-10T00:00:56Z</published>
+    <updated>2026-08-10T00:00:56Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_315601244858808ebaca1db5.html"/>
+    <summary type="text">Apple Developerの最新ニュースとして、2025年12月4日にApp Store Awardの受賞者が発表されました。世界中の開発者の優れた業績を称える内容で、受賞者を紹介しています。詳細は公式ページで確認できます。</summary>
+  </entry>
   <entry>
     <id>urn:knowledge:kn_30b5d8193511172ad470d08b</id>
     <title>TestFlight 4.3 リリース</title>
