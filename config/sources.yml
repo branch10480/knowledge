@@ -43,3 +43,39 @@ sources:
     events: ["release"]
     priority: 80
     required: false
+
+  # ---- Local AI video generation (Apple Silicon / mlx) ----
+  - id: mlx-video-releases
+    kind: github-releases
+    repository: "Blaizzy/mlx-video"
+    events: ["release"]
+    priority: 70
+    required: false
+
+  - id: mlx-serve-releases
+    kind: github-releases
+    repository: "ddalcu/mlx-serve"
+    events: ["release"]
+    priority: 70
+    required: false
+
+  - id: minimax-h3-releases
+    kind: github-releases
+    repository: "MiniMaxAI/MiniMax-H3"
+    events: ["release"]
+    priority: 70
+    required: false
+
+  - id: wan-releases
+    kind: github-releases
+    repository: "Wan-Video/Wan2.1"
+    events: ["release"]
+    priority: 60
+    required: false
+
+  - id: ltx-video-releases
+    kind: github-releases
+    repository: "Lightricks/LTX-Video"
+    events: ["release"]
+    priority: 60
+    required: false
