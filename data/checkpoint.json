@@ -93,6 +93,36 @@
           "external_id_hash": "sha256:37876004332b311a1eb8357821b2a3411873afc743896024c9937cdca50b766d",
           "canonical_url_hash": "sha256:37876004332b311a1eb8357821b2a3411873afc743896024c9937cdca50b766d",
           "first_seen_at": "2026-08-11T00:03:35Z"
+        },
+        {
+          "external_id_hash": "sha256:4bc1ee769d562fb97fa0f190cbc4eb6423e784d301b31f731e10eaad3fedf954",
+          "canonical_url_hash": "sha256:4bc1ee769d562fb97fa0f190cbc4eb6423e784d301b31f731e10eaad3fedf954",
+          "first_seen_at": "2026-08-11T07:20:02Z"
+        },
+        {
+          "external_id_hash": "sha256:8cbd93cfd71e158825fad8dd33d5a71edf9cc794c3c01a29c69c8d8aabd542d8",
+          "canonical_url_hash": "sha256:8cbd93cfd71e158825fad8dd33d5a71edf9cc794c3c01a29c69c8d8aabd542d8",
+          "first_seen_at": "2026-08-11T07:20:02Z"
+        },
+        {
+          "external_id_hash": "sha256:ee725516cbe8a8ae459be1cf2b10daf8f8402c5e013980725bccd5250309ead7",
+          "canonical_url_hash": "sha256:ee725516cbe8a8ae459be1cf2b10daf8f8402c5e013980725bccd5250309ead7",
+          "first_seen_at": "2026-08-11T07:20:02Z"
+        },
+        {
+          "external_id_hash": "sha256:2e57a49d37fc26976f9f744eb8e5db610c55b6b4df51d5254fe18728b2ec37b0",
+          "canonical_url_hash": "sha256:2e57a49d37fc26976f9f744eb8e5db610c55b6b4df51d5254fe18728b2ec37b0",
+          "first_seen_at": "2026-08-11T07:20:02Z"
+        },
+        {
+          "external_id_hash": "sha256:95eefaa4007b9174d92139a8f1c31e8b7600e9ce023681d9baccdd781248c7fd",
+          "canonical_url_hash": "sha256:95eefaa4007b9174d92139a8f1c31e8b7600e9ce023681d9baccdd781248c7fd",
+          "first_seen_at": "2026-08-11T07:20:02Z"
+        },
+        {
+          "external_id_hash": "sha256:90ef153325ba2e0b39656d972d05b6103ee72aadf014327cb3ef7190d56b2a49",
+          "canonical_url_hash": "sha256:90ef153325ba2e0b39656d972d05b6103ee72aadf014327cb3ef7190d56b2a49",
+          "first_seen_at": "2026-08-11T07:20:02Z"
         }
       ]
     },
@@ -109,6 +139,30 @@
       "seen": []
     },
     "swift-releases": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": []
+    },
+    "mlx-video-releases": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": []
+    },
+    "mlx-serve-releases": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": []
+    },
+    "wan-releases": {
+      "etag": null,
+      "last_modified": null,
+      "last_commit_sha": null,
+      "seen": []
+    },
+    "ltx-video-releases": {
       "etag": null,
       "last_modified": null,
       "last_commit_sha": null,

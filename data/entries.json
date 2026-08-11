@@ -2,6 +2,135 @@
   "schema_version": 2,
   "entries": [
     {
+      "id": "kn_e4132c87cf96030ce4a4fa6e",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026g",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026g",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T07:20:02Z",
+      "title": "iPadOS 27.0 beta 5 (24A5408d) リリース",
+      "summary": "Apple Developer 向けに iPadOS 27.0 beta 5 (24A5408d) が2026年8月10日に公開されました。ダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "iPadOS 27.0 beta 5 (24A5408d) がリリースされた",
+        "公開日は2026年8月10日",
+        "Apple Developer サイトでダウンロードとリリースノートを確認できる"
+      ],
+      "tags": [
+        "iPadOS",
+        "beta",
+        "Apple Developer",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:985523d00afff05a790ea188408fec39bda135696cfb7e354f8148880d093b8c",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T07:20:02Z"
+      }
+    },
+    {
+      "id": "kn_b32c19e637990544e9b3ef82",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026i",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026i",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T07:20:02Z",
+      "title": "tvOS 27.0 beta 5 (24J5346a) リリース",
+      "summary": "AppleがtvOS 27.0のベータ版第5弾（ビルド番号24J5346a）を2026年8月10日にリリースしました。ダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "tvOS 27.0 beta 5 (24J5346a) がリリースされた",
+        "リリース日は2026年8月10日",
+        "ダウンロードとリリースノートの閲覧が可能"
+      ],
+      "tags": [
+        "tvOS",
+        "Apple",
+        "ベータ版",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:c422c3840a51af9bdecea970baa4cf9b6efd7d2ace3e42b4fb6f8cdfd794ccb6",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T07:20:02Z"
+      }
+    },
+    {
+      "id": "kn_ae265d871f6723f06e235b4f",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026l",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026l",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T07:20:02Z",
+      "title": "Xcode 27 beta 5 (27A5237l) リリース",
+      "summary": "AppleがXcode 27のベータ版5（ビルド番号27A5237l）を2026年8月10日にリリースしました。リリースノートとダウンロードが提供されています。",
+      "key_points": [
+        "Xcode 27 beta 5 (27A5237l)が2026年8月10日にリリースされた",
+        "ダウンロードとリリースノートが利用可能",
+        "Apple Developerサイトで公開されている"
+      ],
+      "tags": [
+        "Xcode",
+        "Apple",
+        "開発ツール",
+        "ベータ版",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:b3210f9fdd0df1b062c6f2999085c21d33b56e5acbba972506f62e8054758154",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T07:20:02Z"
+      }
+    },
+    {
+      "id": "kn_91f906fe5aff3f40d514eaed",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026k",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026k",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T07:20:02Z",
+      "title": "watchOS 27.0 beta 5 (24R5347a) リリース",
+      "summary": "Apple Developer 向けに watchOS 27.0 beta 5 (24R5347a) がリリースされました。公開日は2026年8月10日です。ダウンロードとリリースノートを閲覧できます。",
+      "key_points": [
+        "watchOS 27.0 beta 5 (24R5347a) がリリースされた",
+        "公開日は2026年8月10日",
+        "ダウンロードとリリースノートが利用可能"
+      ],
+      "tags": [
+        "watchOS",
+        "Apple",
+        "beta",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:14fd3d764484e66a76f5a49a891e6a3c126ef3031abf012c49df70bae79c3b7b",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T07:20:02Z"
+      }
+    },
+    {
       "id": "kn_85265fd2b6d2e576e525a787",
       "source_id": "apple-developer-releases",
       "external_id": "https://developer.apple.com/news/releases/?id=08102026d",
@@ -284,6 +413,69 @@
       "review": {
         "factual_gate": "passed",
         "checked_at": "2026-08-10T07:28:55Z"
+      }
+    },
+    {
+      "id": "kn_609d3474ef587cd61a71de41",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=07272026f",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=07272026f",
+      "published_at": "2026-07-27T00:00:00Z",
+      "collected_at": "2026-08-11T07:20:02Z",
+      "title": "watchOS 26.6 (23U67) リリース",
+      "summary": "Apple Developer サイトで、watchOS 26.6 (23U67) が2026年7月27日にリリースされたことが公開されています。ダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "watchOS 26.6 (23U67) が2026年7月27日にリリースされた",
+        "ダウンロードとリリースノートを閲覧できる",
+        "Apple Developer サイトで公開されている"
+      ],
+      "tags": [
+        "watchOS",
+        "Apple",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:25a614f353b3c20bf7241fbf50746338ad31753cb296efcfb6cc606a28e62543",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T07:20:02Z"
+      }
+    },
+    {
+      "id": "kn_294ec414798e49d027b18ace",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=07272026e",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=07272026e",
+      "published_at": "2026-07-27T00:00:00Z",
+      "collected_at": "2026-08-11T07:20:02Z",
+      "title": "visionOS 26.6 (23O770) リリース",
+      "summary": "Apple Developer のリリースページに、visionOS 26.6 (23O770) が2026年7月27日に公開されたことが記載されています。ダウンロードビューとリリースノートビューが提供されています。",
+      "key_points": [
+        "visionOS 26.6 (23O770) が2026年7月27日にリリースされた。",
+        "ダウンロードとリリースノートの閲覧が可能。",
+        "Apple Developer サイトで公開されている。"
+      ],
+      "tags": [
+        "visionOS",
+        "Apple",
+        "リリース",
+        "アップデート"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:3314a95605e829fc9602392808a4b726a34cf83199f5e40c81487636884f3a18",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T07:20:02Z"
       }
     },
     {
