@@ -2,9 +2,41 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>https://branch10480.github.io/knowledge/</id>
   <title>Knowledge</title>
-  <updated>2026-08-11T06:03:37Z</updated>
+  <updated>2026-08-11T07:20:18Z</updated>
   <link rel="self" href="https://branch10480.github.io/knowledge/feed.xml"/>
   <link rel="alternate" href="https://branch10480.github.io/knowledge/"/>
+  <entry>
+    <id>urn:knowledge:kn_e4132c87cf96030ce4a4fa6e</id>
+    <title>iPadOS 27.0 beta 5 (24A5408d) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_e4132c87cf96030ce4a4fa6e.html"/>
+    <summary type="text">Apple Developer 向けに iPadOS 27.0 beta 5 (24A5408d) が2026年8月10日に公開されました。ダウンロードとリリースノートの閲覧が可能です。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_b32c19e637990544e9b3ef82</id>
+    <title>tvOS 27.0 beta 5 (24J5346a) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_b32c19e637990544e9b3ef82.html"/>
+    <summary type="text">AppleがtvOS 27.0のベータ版第5弾（ビルド番号24J5346a）を2026年8月10日にリリースしました。ダウンロードとリリースノートの閲覧が可能です。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_ae265d871f6723f06e235b4f</id>
+    <title>Xcode 27 beta 5 (27A5237l) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_ae265d871f6723f06e235b4f.html"/>
+    <summary type="text">AppleがXcode 27のベータ版5（ビルド番号27A5237l）を2026年8月10日にリリースしました。リリースノートとダウンロードが提供されています。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_91f906fe5aff3f40d514eaed</id>
+    <title>watchOS 27.0 beta 5 (24R5347a) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_91f906fe5aff3f40d514eaed.html"/>
+    <summary type="text">Apple Developer 向けに watchOS 27.0 beta 5 (24R5347a) がリリースされました。公開日は2026年8月10日です。ダウンロードとリリースノートを閲覧できます。</summary>
+  </entry>
   <entry>
     <id>urn:knowledge:kn_85265fd2b6d2e576e525a787</id>
     <title>iOS 18.7.10 (22H373) リリース</title>
@@ -76,6 +108,22 @@
     <updated>2026-08-05T00:00:00Z</updated>
     <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_0e965e9320521f80d10b8e73.html"/>
     <summary type="text">Appleは2026年6月に発表した通り、App Storeでのアプリ・ゲームのマーケティング方法を刷新します。新しいアセットでは、ブランドや季節の提供、新コンテンツなどを強調でき、製品ページのヘッダー、検索結果、アプリ内イベントなどで使用可能です。秋の開始に備え、ベストプラクティスとFigma、Photoshop、Pixelmator用のデザインテンプレートが提供されます。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_609d3474ef587cd61a71de41</id>
+    <title>watchOS 26.6 (23U67) リリース</title>
+    <published>2026-07-27T00:00:00Z</published>
+    <updated>2026-07-27T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_609d3474ef587cd61a71de41.html"/>
+    <summary type="text">Apple Developer サイトで、watchOS 26.6 (23U67) が2026年7月27日にリリースされたことが公開されています。ダウンロードとリリースノートの閲覧が可能です。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_294ec414798e49d027b18ace</id>
+    <title>visionOS 26.6 (23O770) リリース</title>
+    <published>2026-07-27T00:00:00Z</published>
+    <updated>2026-07-27T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_294ec414798e49d027b18ace.html"/>
+    <summary type="text">Apple Developer のリリースページに、visionOS 26.6 (23O770) が2026年7月27日に公開されたことが記載されています。ダウンロードビューとリリースノートビューが提供されています。</summary>
   </entry>
   <entry>
     <id>urn:knowledge:kn_c6067b04321d8dd27fae5578</id>
