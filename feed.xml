@@ -2,9 +2,73 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>https://branch10480.github.io/knowledge/</id>
   <title>Knowledge</title>
-  <updated>2026-08-10T07:30:26Z</updated>
+  <updated>2026-08-11T00:03:58Z</updated>
   <link rel="self" href="https://branch10480.github.io/knowledge/feed.xml"/>
   <link rel="alternate" href="https://branch10480.github.io/knowledge/"/>
+  <entry>
+    <id>urn:knowledge:kn_85265fd2b6d2e576e525a787</id>
+    <title>iOS 18.7.10 (22H373) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_85265fd2b6d2e576e525a787.html"/>
+    <summary type="text">Apple Developer サイトで、iOS 18.7.10 (22H373) が2026年8月10日にリリースされたことが公開されています。ダウンロードページとリリースノートへのリンクが提供されています。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_76a0de4fff1da4058375d133</id>
+    <title>iOS 27.0 ベータ5 (24A5408d) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_76a0de4fff1da4058375d133.html"/>
+    <summary type="text">Apple Developer サイトで、iOS 27.0 ベータ5 (ビルド番号 24A5408d) が2026年8月10日にリリースされたことが公開されています。ダウンロードページとリリースノートへのリンクが提供されています。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_755f6fed2f94c2e091fc1145</id>
+    <title>macOS 26.6.2 (25G82) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_755f6fed2f94c2e091fc1145.html"/>
+    <summary type="text">Apple Developer サイトで macOS 26.6.2 (25G82) が2026年8月10日にリリースされたことが公開されています。ダウンロードとリリースノートの閲覧が可能です。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_6d2cc784097151494640eac9</id>
+    <title>visionOS 27.0 beta 5 (24M5348b) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_6d2cc784097151494640eac9.html"/>
+    <summary type="text">Apple Developer 向けに visionOS 27.0 beta 5 (24M5348b) が2026年8月10日に公開されました。ダウンロードとリリースノートの閲覧が可能です。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_65ccfac5b0ec3aedd3c9a506</id>
+    <title>iPadOS 26.6.1 (23G82) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_65ccfac5b0ec3aedd3c9a506.html"/>
+    <summary type="text">Apple Developer サイトで、iPadOS 26.6.1 (23G82) が2026年8月10日にリリースされたことが公開されています。ダウンロードとリリースノートの閲覧が可能です。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_5b7922e008237764b9f1392e</id>
+    <title>macOS 27.0 beta 5 (26A5406e) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_5b7922e008237764b9f1392e.html"/>
+    <summary type="text">Apple Developer サイトで、macOS 27.0 beta 5 (ビルド番号 26A5406e) が 2026年8月10日に公開されたことが記載されています。ダウンロードとリリースノートの閲覧が可能です。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_55a0ce004e38fd11c9e915f1</id>
+    <title>iPadOS 18.7.10 (22H373) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_55a0ce004e38fd11c9e915f1.html"/>
+    <summary type="text">Apple Developer サイトにて、iPadOS 18.7.10 (22H373) が2026年8月10日にリリースされたことが公開されています。ダウンロードページとリリースノートへのリンクが提供されています。</summary>
+  </entry>
+  <entry>
+    <id>urn:knowledge:kn_1bdd55fded4814a75a997d5f</id>
+    <title>iOS 26.6.1 (23G82) リリース</title>
+    <published>2026-08-10T00:00:00Z</published>
+    <updated>2026-08-10T00:00:00Z</updated>
+    <link rel="alternate" href="https://branch10480.github.io/knowledge/entry/kn_1bdd55fded4814a75a997d5f.html"/>
+    <summary type="text">Apple Developer 向けに iOS 26.6.1 (23G82) がリリースされました。公開日は2026年8月10日です。ダウンロードとリリースノートの閲覧が可能です。</summary>
+  </entry>
   <entry>
     <id>urn:knowledge:kn_0e965e9320521f80d10b8e73</id>
     <title>App Store向け新クリエイティブアセットの準備</title>
