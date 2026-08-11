@@ -2,6 +2,259 @@
   "schema_version": 2,
   "entries": [
     {
+      "id": "kn_85265fd2b6d2e576e525a787",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026d",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026d",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T00:03:35Z",
+      "title": "iOS 18.7.10 (22H373) リリース",
+      "summary": "Apple Developer サイトで、iOS 18.7.10 (22H373) が2026年8月10日にリリースされたことが公開されています。ダウンロードページとリリースノートへのリンクが提供されています。",
+      "key_points": [
+        "iOS 18.7.10 (22H373) が2026年8月10日にリリースされた",
+        "ダウンロードとリリースノートのページが用意されている",
+        "Apple Developer サイトで公開されている"
+      ],
+      "tags": [
+        "iOS",
+        "Apple",
+        "リリース",
+        "アップデート"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:559ba375860facefe56d1a657b66bac6a8bcb82c64b85f3bcb70577448f2f8b0",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T00:03:35Z"
+      }
+    },
+    {
+      "id": "kn_76a0de4fff1da4058375d133",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026f",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026f",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T00:03:35Z",
+      "title": "iOS 27.0 ベータ5 (24A5408d) リリース",
+      "summary": "Apple Developer サイトで、iOS 27.0 ベータ5 (ビルド番号 24A5408d) が2026年8月10日にリリースされたことが公開されています。ダウンロードページとリリースノートへのリンクが提供されています。",
+      "key_points": [
+        "iOS 27.0 ベータ5 (24A5408d) がリリースされた。",
+        "公開日は2026年8月10日。",
+        "ダウンロードとリリースノートのリンクが提供されている。"
+      ],
+      "tags": [
+        "iOS",
+        "ベータ",
+        "Apple",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:eda5fea543fcedbdb1e033181cebc23134129a69277b4f4a127af3f65cfc4787",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T00:03:35Z"
+      }
+    },
+    {
+      "id": "kn_755f6fed2f94c2e091fc1145",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026c",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026c",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T00:03:35Z",
+      "title": "macOS 26.6.2 (25G82) リリース",
+      "summary": "Apple Developer サイトで macOS 26.6.2 (25G82) が2026年8月10日にリリースされたことが公開されています。ダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "macOS 26.6.2 (25G82) が2026年8月10日にリリースされた",
+        "ダウンロードとリリースノートの閲覧が可能",
+        "Apple Developer サイトで公開されている"
+      ],
+      "tags": [
+        "macOS",
+        "Apple Developer",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:6339be795f41fa49e7a545c8549be7af5bcdb512405ac289ca6b76eb79d06d3c",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T00:03:35Z"
+      }
+    },
+    {
+      "id": "kn_6d2cc784097151494640eac9",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026j",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026j",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T00:03:35Z",
+      "title": "visionOS 27.0 beta 5 (24M5348b) リリース",
+      "summary": "Apple Developer 向けに visionOS 27.0 beta 5 (24M5348b) が2026年8月10日に公開されました。ダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "visionOS 27.0 beta 5 (24M5348b) が公開",
+        "公開日は2026年8月10日",
+        "ダウンロードとリリースノートの閲覧が可能"
+      ],
+      "tags": [
+        "visionOS",
+        "Apple",
+        "beta",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:b3290503c239004676f3d3f1af766188f3941465cdb7cbbca0e656defcc17eab",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T00:03:35Z"
+      }
+    },
+    {
+      "id": "kn_65ccfac5b0ec3aedd3c9a506",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026b",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026b",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T00:03:35Z",
+      "title": "iPadOS 26.6.1 (23G82) リリース",
+      "summary": "Apple Developer サイトで、iPadOS 26.6.1 (23G82) が2026年8月10日にリリースされたことが公開されています。ダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "iPadOS 26.6.1 (23G82) が2026年8月10日にリリースされた",
+        "Apple Developer サイトでダウンロードとリリースノートが提供されている"
+      ],
+      "tags": [
+        "iPadOS",
+        "Apple",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:83748789a76a1af1039918bc327af7f8caae9dcc47132dbc10e04de7b6b1c2ed",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T00:03:35Z"
+      }
+    },
+    {
+      "id": "kn_5b7922e008237764b9f1392e",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026h",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026h",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T00:03:35Z",
+      "title": "macOS 27.0 beta 5 (26A5406e) リリース",
+      "summary": "Apple Developer サイトで、macOS 27.0 beta 5 (ビルド番号 26A5406e) が 2026年8月10日に公開されたことが記載されています。ダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "macOS 27.0 beta 5 (26A5406e) がリリースされた。",
+        "公開日は 2026年8月10日。",
+        "ダウンロードとリリースノートの閲覧が可能。"
+      ],
+      "tags": [
+        "macOS",
+        "beta",
+        "Apple Developer",
+        "リリース"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:c0655c6d98d0880babbd08730d66d5fde34c8d3d183e066c6f6e3ebb8ff84fde",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T00:03:35Z"
+      }
+    },
+    {
+      "id": "kn_55a0ce004e38fd11c9e915f1",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026e",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026e",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T00:03:35Z",
+      "title": "iPadOS 18.7.10 (22H373) リリース",
+      "summary": "Apple Developer サイトにて、iPadOS 18.7.10 (22H373) が2026年8月10日にリリースされたことが公開されています。ダウンロードページとリリースノートへのリンクが提供されています。",
+      "key_points": [
+        "iPadOS 18.7.10 (22H373) が2026年8月10日にリリース",
+        "ダウンロードとリリースノートの閲覧が可能",
+        "Apple Developer サイトで公開"
+      ],
+      "tags": [
+        "iPadOS",
+        "Apple",
+        "リリース",
+        "アップデート"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:b7deb96e887800dc56a0a230f94ef08def93d0de0a0f8bb173c27fa6669cbf34",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T00:03:35Z"
+      }
+    },
+    {
+      "id": "kn_1bdd55fded4814a75a997d5f",
+      "source_id": "apple-developer-releases",
+      "external_id": "https://developer.apple.com/news/releases/?id=08102026a",
+      "canonical_url": "https://developer.apple.com/news/releases/?id=08102026a",
+      "published_at": "2026-08-10T00:00:00Z",
+      "collected_at": "2026-08-11T00:03:35Z",
+      "title": "iOS 26.6.1 (23G82) リリース",
+      "summary": "Apple Developer 向けに iOS 26.6.1 (23G82) がリリースされました。公開日は2026年8月10日です。ダウンロードとリリースノートの閲覧が可能です。",
+      "key_points": [
+        "iOS 26.6.1 (23G82) がリリースされた",
+        "公開日は2026年8月10日",
+        "ダウンロードとリリースノートの閲覧が可能"
+      ],
+      "tags": [
+        "iOS",
+        "Apple",
+        "リリース",
+        "アップデート"
+      ],
+      "language": "ja",
+      "source_digest": "sha256:2406d5b2ebf64feb3b3ab7518cf7527d7b91d4f459ed94439b732a5f065995cd",
+      "summary_model": {
+        "provider": "local-openai-compatible",
+        "model": "deepseek-v4-flash",
+        "prompt_version": "summary-v1"
+      },
+      "review": {
+        "factual_gate": "passed",
+        "checked_at": "2026-08-11T00:03:35Z"
+      }
+    },
+    {
       "id": "kn_0e965e9320521f80d10b8e73",
       "source_id": "apple-developer-news",
       "external_id": "https://developer.apple.com/news/?id=kug6m2ea",
