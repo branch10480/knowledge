@@ -114,6 +114,7 @@ class SourceConfig:
     priority: int
     required: bool
     repository: str | None = None
+    model_id: str | None = None
     events: tuple[str, ...] = ()
     adapter: str | None = None
     timeout_seconds: int = 20

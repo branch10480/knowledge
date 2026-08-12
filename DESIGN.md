@@ -18,6 +18,11 @@
 
 ### 1.2 アーキテクチャ
 
+日次 cron の単発 run に加え、Hermes の会話起点では durable job と
+host-owned `defer_turn` を使う。親ターンと DS4 idle gate の自己競合を避ける設計、
+状態遷移、receipt、cancel / resume の契約は
+[`docs/durable-job-orchestration.md`](docs/durable-job-orchestration.md) を正本とする。
+
 ```mermaid
 flowchart LR
   subgraph Sources[allowlist 済み外部ソース]
@@ -107,6 +112,7 @@ run は次をすべて満たしたときだけ成功とする。
 │       ├── feeds.py
 │       ├── github_api.py
 │       ├── identity.py
+│       ├── jobs.py
 │       ├── summarizer.py
 │       ├── validate.py
 │       ├── repository.py
@@ -139,7 +145,7 @@ run は次をすべて満たしたときだけ成功とする。
 └── DESIGN.md
 ```
 
-`.work/` と `dist/` は `.gitignore` 対象とする。`.work/` は候補、LLM 入出力、生成途中のデータを置く run ごとの一時領域であり、run 終了時に削除する。機密値はリポジトリに置かず、ローカル keychain/環境と GitHub Actions secrets に限定する。
+`.work/` と `dist/` は `.gitignore` 対象とする。従来 run の一時領域は終了時に削除するが、`.work/jobs/<job-id>/` は crash resume、idempotency、監査に必要な state と receipt を保持する。保持期限を過ぎた terminal job だけを、別の bounded cleanup で削除する。機密値はリポジトリに置かず、ローカル keychain/環境と GitHub Actions secrets に限定する。
 
 ### 2.2 `gh-pages` ブランチ
 
@@ -407,6 +413,10 @@ def check_command(*, entries_path: Path, dist_dir: Path) -> int: ...
 ```
 
 すべての command は例外を握りつぶさず非 0 で終了する。JSON log は stdout、診断は stderr に出し、secret や記事全文は log に出さない。
+
+会話起点の `job-start` / `job-run` / `job-status` / `job-cancel` は
+`jobs.py` の durable state machine を使う。`job-start` の collect には DS4 idle gate を
+置かず、`job-run` の要約 request だけを共有 worker proxy へ送る。
 
 ### 5.2 collector (`collector.py`, `feeds.py`, `github_api.py`)
 

@@ -4,6 +4,7 @@ defaults:
   max_response_bytes: 2097152
   lookback_hours: 72
   max_items_per_source: 100
+  max_enrichment_items: 80
 
 sources:
   - id: apple-developer-news
@@ -45,6 +46,7 @@ sources:
     required: false
 
   # ---- Local AI video generation (Apple Silicon / mlx) ----
+  # ユーザー要望: MiniMax-H3 と DwarfStar の最新を確実に候補へ。優先度 90 で quota に収める。
   - id: mlx-video-releases
     kind: github-releases
     repository: "Blaizzy/mlx-video"
@@ -56,26 +58,32 @@ sources:
     kind: github-releases
     repository: "ddalcu/mlx-serve"
     events: ["release"]
-    priority: 70
+    priority: 90
     required: false
 
   - id: minimax-h3-releases
-    kind: github-releases
-    repository: "MiniMaxAI/MiniMax-H3"
-    events: ["release"]
-    priority: 70
+    kind: hf-model
+    model_id: "MiniMaxAI/MiniMax-H3"
+    priority: 100
+    required: false
+
+  - id: ds4-releases
+    kind: github-commits
+    repository: "antirez/ds4"
+    max_items_per_source: 10
+    priority: 100
     required: false
 
   - id: wan-releases
     kind: github-releases
     repository: "Wan-Video/Wan2.1"
     events: ["release"]
-    priority: 60
+    priority: 70
     required: false
 
   - id: ltx-video-releases
     kind: github-releases
     repository: "Lightricks/LTX-Video"
     events: ["release"]
-    priority: 60
+    priority: 70
     required: false

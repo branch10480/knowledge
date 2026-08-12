@@ -11,7 +11,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import builder, collector, config, identity, inference, models, repository, summarizer, validate
+from . import builder, collector, config, identity, inference, jobs, models, repository, summarizer, validate
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -128,7 +128,7 @@ def _entry_from(candidate: models.Candidate, s: summarizer.SummaryOutput, collec
 
 def merge_command(*, entries_path: Path, checkpoint_path: Path,
                   candidates_path: Path, summaries_path: Path, config_path: Path, commit: bool,
-                  merged_output: Path | None = None) -> int:
+                  merged_output: Path | None = None, job_id: str | None = None) -> int:
     doc = _load_document(entries_path)
     cp = _load_checkpoint(checkpoint_path)
     sources = config.load_sources(config_path)
@@ -194,7 +194,10 @@ def merge_command(*, entries_path: Path, checkpoint_path: Path,
         txn_dir = REPO_ROOT / ".work" / f"txn-{_utcnow().replace(':', '')}"
         prep = repository.prepare_transaction(repo_root=REPO_ROOT, merged=merged,
                                               checkpoint=new_cp, transaction_dir=txn_dir)
-        sha = repository.commit_transaction(prep)
+        message = "knowledge: 収集結果とcheckpointを更新"
+        if job_id is not None:
+            message += f"\n\nKnowledge-Job: {job_id}"
+        sha = repository.commit_transaction(prep, message=message)
         print(json.dumps({"ok": True, "added": len(additions), "commit": sha}))
     else:
         if merged_output is not None:
@@ -287,6 +290,297 @@ def check_inference_idle_command() -> int:
     return 0
 
 
+def _job_store() -> jobs.JobStore:
+    return jobs.JobStore(REPO_ROOT / ".work/jobs")
+
+
+def _git_check(*args: str) -> bool:
+    import subprocess
+
+    result = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), *args],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    return result.returncode == 0
+
+
+def _assert_job_repo_ready() -> None:
+    import subprocess
+
+    branch = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "symbolic-ref", "--short", "HEAD"],
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+    )
+    if branch.returncode != 0 or branch.stdout.strip() != "main":
+        raise jobs.JobError("Knowledge job requires the main branch")
+    if not _git_check("diff", "--quiet", "--"):
+        raise jobs.JobError("Knowledge job requires a clean tracked worktree")
+    if not _git_check("diff", "--cached", "--quiet", "--"):
+        raise jobs.JobError("Knowledge job requires an empty staging area")
+    status = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(REPO_ROOT),
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=normal",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    if status.returncode != 0 or status.stdout.strip():
+        raise jobs.JobError("Knowledge job requires a fully clean worktree")
+
+
+def job_start_command(
+    *,
+    idempotency_key: str,
+    origin_session_id: str,
+    origin_turn_id: str,
+    spawn: bool,
+) -> int:
+    store = _job_store()
+    try:
+        existing = store.find_by_idempotency_key(idempotency_key)
+        if existing is None:
+            _assert_job_repo_ready()
+
+        def collect_for_job(output_path: Path, run_started_at: str) -> int:
+            return collect_command(
+                config_path=REPO_ROOT / "config/sources.yml",
+                checkpoint_path=REPO_ROOT / "data/checkpoint.json",
+                output_path=output_path,
+                run_started_at=run_started_at,
+                summary_config_path=REPO_ROOT / "config/summary.yml",
+            )
+
+        state, reused = jobs.prepare_job(
+            repo_root=REPO_ROOT,
+            store=store,
+            idempotency_key=idempotency_key,
+            collect=collect_for_job,
+            origin_session_id=origin_session_id,
+            origin_turn_id=origin_turn_id,
+        )
+        runner_pid = state.get("runner_pid")
+        if (
+            spawn
+            and state.get("phase") == "waiting_for_inference"
+            and not state.get("runner_pid")
+        ):
+            runner_pid = jobs.spawn_job_runner(
+                repo_root=REPO_ROOT,
+                store=store,
+                job_id=state["job_id"],
+            )
+        print(json.dumps({
+            "ok": True,
+            "status": "deferred",
+            "job_id": state["job_id"],
+            "phase": state["phase"],
+            "reused": reused,
+            "runner_pid": runner_pid,
+        }, ensure_ascii=False))
+        return 0
+    except Exception as error:
+        print(json.dumps({
+            "ok": False,
+            "error": type(error).__name__,
+            "message": jobs.safe_error_message(error),
+        }, ensure_ascii=False))
+        return 1
+
+
+def _public_job_state(state: dict) -> dict:
+    return {
+        key: state.get(key)
+        for key in (
+            "job_id",
+            "phase",
+            "created_at",
+            "updated_at",
+            "run_started_at",
+            "selected_candidate_ids",
+            "completed_candidate_ids",
+            "attempts",
+            "cancel_requested",
+            "result",
+            "error",
+            "delivery",
+        )
+    }
+
+
+def job_status_command(*, job_id: str | None) -> int:
+    store = _job_store()
+    try:
+        state = store.load(job_id) if job_id else store.latest()
+        if state is None:
+            print(json.dumps({"ok": True, "job": None}))
+            return 0
+        print(json.dumps({"ok": True, "job": _public_job_state(state)}, ensure_ascii=False))
+        return 0
+    except Exception as error:
+        print(json.dumps({"ok": False, "error": type(error).__name__}, ensure_ascii=False))
+        return 1
+
+
+def job_cancel_command(*, job_id: str) -> int:
+    try:
+        state = jobs.cancel_job(store=_job_store(), job_id=job_id)
+        print(json.dumps({"ok": True, "job": _public_job_state(state)}, ensure_ascii=False))
+        return 0
+    except Exception as error:
+        print(json.dumps({"ok": False, "error": type(error).__name__}, ensure_ascii=False))
+        return 1
+
+
+def _finalize_job(job_dir: Path) -> dict:
+    import subprocess
+
+    store = _job_store()
+    state = store.load(job_dir.name)
+    head = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=True,
+    ).stdout.strip()
+    if head != state.get("starting_head"):
+        raise jobs.JobError("repository HEAD changed while the job was running")
+
+    _assert_job_repo_ready()
+    checkpoint_digest = "sha256:" + hashlib.sha256(
+        (REPO_ROOT / "data/checkpoint.json").read_bytes()
+    ).hexdigest()
+    if checkpoint_digest != state.get("checkpoint_sha256"):
+        raise jobs.JobError("checkpoint changed while the job was running")
+
+    candidates_path = job_dir / "final-candidates.json"
+    candidates_digest = "sha256:" + hashlib.sha256(candidates_path.read_bytes()).hexdigest()
+    if candidates_digest != state.get("final_candidates_sha256"):
+        raise jobs.JobError("final candidates changed while the job was running")
+
+    merged_path = job_dir / "merged.json"
+    dist_dir = job_dir / "dist"
+    merge_status = merge_command(
+        entries_path=REPO_ROOT / "data/entries.json",
+        checkpoint_path=REPO_ROOT / "data/checkpoint.json",
+        candidates_path=candidates_path,
+        summaries_path=job_dir / "summaries.json",
+        config_path=REPO_ROOT / "config/sources.yml",
+        commit=False,
+        merged_output=merged_path,
+    )
+    if merge_status != 0:
+        raise jobs.JobError("merge dry-run failed")
+    if build_command(entries_path=merged_path, output_dir=dist_dir) != 0:
+        raise jobs.JobError("build failed")
+    if validate_atom_command(dist_dir / "feed.xml") != 0:
+        raise jobs.JobError("Atom validation failed")
+    if check_command(entries_path=merged_path, dist_dir=dist_dir) != 0:
+        raise jobs.JobError("build checks failed")
+
+    checks = (
+        ([str(REPO_ROOT / ".venv/bin/python"), "-m", "pytest"], REPO_ROOT),
+        (["git", "diff", "--check"], REPO_ROOT),
+        ([str(REPO_ROOT / "scripts/scan-secrets.sh"), "--paths", "data", str(dist_dir)], REPO_ROOT),
+    )
+    for command, cwd in checks:
+        completed = subprocess.run(command, cwd=cwd, timeout=900, check=False)
+        if completed.returncode != 0:
+            raise jobs.JobError(f"finalization check failed: {Path(command[0]).name}")
+
+    if store.load(job_dir.name).get("cancel_requested"):
+        raise jobs.JobCancelled("job was cancelled before publication readiness")
+    result = {
+        "ready_for_publish": True,
+        "starting_head": head,
+        "merged_sha256": jobs.file_sha256(merged_path),
+        "candidates_sha256": jobs.file_sha256(candidates_path),
+        "summaries_sha256": str(store.load(job_dir.name)["summaries_sha256"]),
+    }
+    jobs.write_finalize_receipt(
+        job_dir=job_dir,
+        job_id=job_dir.name,
+        summaries_sha256=str(store.load(job_dir.name)["summaries_sha256"]),
+        result=result,
+    )
+    return result
+
+
+def _job_summary_callback(job_id: str):
+    state = _job_store().load(job_id)
+    summary_config_path = REPO_ROOT / "config/summary.yml"
+    expected_summary_config = state.get("summary_config_sha256")
+    runtime: dict[str, object] = {}
+
+    def summarize_one(candidate: models.Candidate) -> summarizer.SummaryOutput:
+        if jobs.file_sha256(summary_config_path) != expected_summary_config:
+            raise jobs.JobError("summary config changed while the job was running")
+        if not runtime:
+            summary_cfg = config.load_summary(summary_config_path)
+            if jobs.file_sha256(summary_config_path) != expected_summary_config:
+                raise jobs.JobError("summary config changed while it was loaded")
+            runtime["config"] = summary_cfg
+            runtime["client"] = summarizer.RestrictedLlmClient(
+                summary_cfg.base_url,
+                summary_cfg.model,
+                timeout=summary_cfg.request_timeout_seconds,
+                seed=summary_cfg.seed,
+            )
+        summary_cfg = runtime["config"]
+        client = runtime["client"]
+        outputs = summarizer.summarize_candidates(
+            (candidate,), summary_cfg, client=client
+        )
+        if jobs.file_sha256(summary_config_path) != expected_summary_config:
+            raise jobs.JobError("summary config changed during model inference")
+        if len(outputs) != 1:
+            raise jobs.JobError("summary runner did not return exactly one result")
+        return outputs[0]
+
+    return summarize_one
+
+
+def job_run_command(*, job_id: str) -> int:
+
+    try:
+        state = jobs.run_job(
+            store=_job_store(),
+            job_id=job_id,
+            summarize_one=_job_summary_callback(job_id),
+            finalize=_finalize_job,
+        )
+        print(json.dumps({"ok": True, "job": _public_job_state(state)}, ensure_ascii=False))
+        return 0 if state.get("phase") in {
+            "completed",
+            "cancelled",
+            "ready_for_publish",
+        } else 1
+    except jobs.JobAlreadyRunning:
+        print(json.dumps({"ok": True, "status": "already_running", "job_id": job_id}))
+        return 0
+    except Exception as error:
+        print(json.dumps({
+            "ok": False,
+            "job_id": job_id,
+            "error": type(error).__name__,
+            "message": jobs.safe_error_message(error),
+        }, ensure_ascii=False))
+        return 1
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="knowledge")
     sub = parser.add_subparsers(dest="cmd")
@@ -328,6 +622,21 @@ def main(argv=None) -> int:
 
     sub.add_parser("check-inference-idle")
 
+    p_job_start = sub.add_parser("job-start")
+    p_job_start.add_argument("--idempotency-key", required=True)
+    p_job_start.add_argument("--origin-session-id", default="")
+    p_job_start.add_argument("--origin-turn-id", default="")
+    p_job_start.add_argument("--no-spawn", action="store_true")
+
+    p_job_status = sub.add_parser("job-status")
+    p_job_status.add_argument("--job-id", default=None)
+
+    p_job_cancel = sub.add_parser("job-cancel")
+    p_job_cancel.add_argument("--job-id", required=True)
+
+    p_job_run = sub.add_parser("job-run")
+    p_job_run.add_argument("--job-id", required=True)
+
     args = parser.parse_args(argv)
     cmd = args.cmd
     if cmd == "collect":
@@ -352,6 +661,19 @@ def main(argv=None) -> int:
         return validate_data_command(args.entries)
     if cmd == "check-inference-idle":
         return check_inference_idle_command()
+    if cmd == "job-start":
+        return job_start_command(
+            idempotency_key=args.idempotency_key,
+            origin_session_id=args.origin_session_id,
+            origin_turn_id=args.origin_turn_id,
+            spawn=not args.no_spawn,
+        )
+    if cmd == "job-status":
+        return job_status_command(job_id=args.job_id)
+    if cmd == "job-cancel":
+        return job_cancel_command(job_id=args.job_id)
+    if cmd == "job-run":
+        return job_run_command(job_id=args.job_id)
     parser.print_help()
     return 2
 

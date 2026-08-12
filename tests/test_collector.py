@@ -306,3 +306,42 @@ def test_html_index_fallback_filters_nav_and_pairs_dates():
     by_url = {x.canonical_url: x.published_at for x in c}
     assert by_url["https://www.anthropic.com/news/claude-opus-5"] == "Jul 24, 2026"
     assert by_url["https://www.anthropic.com/news/hard-questions"] == "Jul 9, 2026"
+
+
+def test_collect_github_commits_returns_candidates():
+    # github-commits kind: コミットを候補として返し、last_commit_sha を進める
+    from knowledge import github_api
+
+    captured = {}
+
+    def fake_get(path, *, token, timeout):
+        captured["path"] = path
+        return [
+            {"sha": "abc123", "html_url": "https://github.com/antirez/ds4/commit/abc123",
+             "commit": {"message": "rocm: enable DSpark speculative decoding",
+                        "committer": {"date": "2026-08-09T17:53:31Z"}}},
+            {"sha": "def456", "html_url": "https://github.com/antirez/ds4/commit/def456",
+             "commit": {"message": "build: keep Metal decode changes portable",
+                        "committer": {"date": "2026-08-09T17:53:22Z"}}},
+        ]
+
+    orig = github_api._gh_get
+    github_api._gh_get = fake_get
+    try:
+        src = SourceConfig(
+            id="ds4", kind="github-commits", url="", allowed_hosts=(),
+            priority=70, required=False, repository="antirez/ds4",
+        )
+        res = github_api.collect_github_commits(src, SourceCheckpoint(), timeout=20)
+    finally:
+        github_api._gh_get = orig
+
+    assert captured["path"] == "/repos/antirez/ds4/commits?per_page=100"
+    assert res.ok
+    assert len(res.candidates) == 2
+    assert res.candidates[0].source_kind == "github-commits"
+    assert res.candidates[0].external_id == "abc123"
+    assert res.candidates[0].title == "rocm: enable DSpark speculative decoding"
+    assert res.candidates[0].published_at == "2026-08-09T17:53:31Z"
+    # 最後の sha が last_commit_sha として返る
+    assert res.new_last_commit_sha == "def456"

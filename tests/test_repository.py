@@ -1,6 +1,7 @@
 """repository のテスト：merge の重複排除・ソート、transaction の canonical 書き出し。"""
 from __future__ import annotations
 import json
+import pytest
 
 from knowledge import models, repository
 
@@ -37,3 +38,42 @@ def test_prepare_transaction_writes_canonical(tmp_path):
     raw = json.loads(prep.data_path.read_text(encoding="utf-8"))
     assert raw["schema_version"] == 2
     assert len(raw["entries"]) == 1
+
+
+def test_commit_failure_restores_data_and_index(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    old_entries = '{"schema_version":2,"entries":[]}\n'
+    old_checkpoint = (
+        '{"schema_version":1,"last_success_at":"1970-01-01T00:00:00Z",'
+        '"sources":{}}\n'
+    )
+    (data_dir / "entries.json").write_text(old_entries, encoding="utf-8")
+    (data_dir / "checkpoint.json").write_text(old_checkpoint, encoding="utf-8")
+    prep = repository.prepare_transaction(
+        repo_root=tmp_path,
+        merged=models.EntriesDocument(2, (_entry("kn_a", "2026-08-01T00:00:00Z"),)),
+        checkpoint=models.Checkpoint(1, "2026-08-02T00:00:00Z", {}),
+        transaction_dir=tmp_path / "txn",
+    )
+    calls = []
+
+    def fake_git(_repo_root, *args):
+        calls.append(args)
+        if args[0] == "commit":
+            raise repository.RepositoryError("simulated commit failure")
+        return ""
+
+    monkeypatch.setattr(repository, "_git", fake_git)
+
+    with pytest.raises(repository.RepositoryError, match="rolled back"):
+        repository.commit_transaction(prep)
+
+    assert (data_dir / "entries.json").read_text(encoding="utf-8") == old_entries
+    assert (data_dir / "checkpoint.json").read_text(encoding="utf-8") == old_checkpoint
+    assert (
+        "reset",
+        "--",
+        "data/entries.json",
+        "data/checkpoint.json",
+    ) in calls

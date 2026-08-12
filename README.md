@@ -11,6 +11,7 @@ main ブランチ（ソース正本）
 ├── data/entries.json     ← 全エントリの正本（schema_version 2、日付降順、永続ID）
 ├── data/checkpoint.json  ← 収集の前回成功時刻と source 別 seen 状態
 ├── src/knowledge/        ← パイプライン本体（collect / summarize / merge / build）
+│   └── jobs.py           ← 会話起点の永続ジョブ、receipt、cancel / resume
 ├── config/sources.yml    ← source allowlist（公式 RSS/Atom + GitHub API、LLM 不使用）
 ├── config/summary.yml    ← 要約 LLM の固定 provider/model
 ├── schemas/              ← entry / entries / checkpoint / summary-output の JSON Schema
@@ -43,6 +44,32 @@ Hermes Agent の cron ジョブ **Knowledge v2 収集** が毎日 9:00 JST に `
 8. 成功時だけdata/entries.jsonとdata/checkpoint.jsonを同一commitでgit push origin HEAD:main
 9. Signal + Telegramに短い結果を通知
 ```
+
+### Hermes の会話から収集する場合
+
+会話中の収集は、従来の `collect.sh` を親ターンから直接実行せず、
+Hermes の `knowledge_start` 専用ツールから永続ジョブを作る。collect は LLM を
+使わずに先に保存し、要約だけを共有 worker proxy の 1 slot キューへ渡す。
+これにより、親ターン自身の DS4 接続を idle gate が busy と判定する自己競合を
+避けられる。
+
+```bash
+# Hermes plugin が内部で使う CLI。通常は手動実行しない
+PYTHONPATH=src .venv/bin/python -m knowledge.cli job-start \
+  --idempotency-key hermes:<session-turn-digest> \
+  --origin-session-id <session-id> \
+  --origin-turn-id <turn-id>
+
+PYTHONPATH=src .venv/bin/python -m knowledge.cli job-status --job-id <job-id>
+PYTHONPATH=src .venv/bin/python -m knowledge.cli job-cancel --job-id <job-id>
+```
+
+状態、候補、候補ごとの要約 receipt は `.work/jobs/<job-id>/` に原子的に保存する。
+同じ idempotency key の再送は同じ job を返し、runner crash 後は保存済み receipt を
+再利用する。会話起点の vertical slice は検証後に `READY_FOR_PUBLISH` で止まり、
+background から commit/push しない。job 固有の publication authority を使う公開経路は
+本番切替前の P0 である。詳細は
+[`docs/durable-job-orchestration.md`](docs/durable-job-orchestration.md)。
 
 **禁止操作**（cron オーケストレーターがしてはならないこと）:
 - Web 検索、ブラウザ操作、任意 URL の取得
@@ -95,3 +122,4 @@ git push origin HEAD:main
 - summary / title は plain text（HTML タグ禁止）。URL は `https://` のみ、永続ID `kn_` を使用
 - タグは小文字推奨（`apple`, `ios`, `swift`, `ai`, `openai`, `anthropic`, `security` など）
 - cron は `cron-collect.sh`、1 attempt の収集は `collect.sh` が担当し、Web 検索や全 ghq 走査はしない
+- 会話起点は `knowledge_start` と永続ジョブを使い、親ターンから `collect.sh` を直接実行しない

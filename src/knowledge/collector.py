@@ -13,7 +13,8 @@ from html.parser import HTMLParser
 from typing import Mapping, Sequence
 
 from .feeds import SafeHttpClient, parse_feed, SafeHttpError
-from .github_api import collect_github_releases
+from .github_api import collect_github_releases, collect_github_commits
+from .hf_api import collect_hf_model
 from .identity import make_candidate_id, make_entry_id
 from .models import Checkpoint, SourceCheckpoint, SourceConfig, Candidate
 
@@ -358,6 +359,40 @@ def collect_all(
                                                     last_commit_sha=res.new_last_commit_sha or st.last_commit_sha,
                                                     seen=st.seen)
                 stats.append(SourceStat(src.id, len(fresh), res.ok, res.error))
+            elif src.kind == "github-commits":
+                res = collect_github_commits(src, st, token=github_token, timeout=src.timeout_seconds)
+                sel = res.candidates[: src.max_items_per_source]
+                known_ext = {s.get("external_id_hash") for s in st.seen}
+                known_canon = {s.get("canonical_url_hash") for s in st.seen}
+                fresh = []
+                for c in sel:
+                    pair = (_sha256(c.external_id), _sha256(c.canonical_url))
+                    if pair[0] in known_ext or pair[1] in known_canon:
+                        continue
+                    fresh.append(c)
+                all_cands.extend(_with_cid(c) for c in fresh)
+                proposed[src.id] = SourceCheckpoint(etag=st.etag,
+                                                    last_modified=st.last_modified,
+                                                    last_commit_sha=res.new_last_commit_sha or st.last_commit_sha,
+                                                    seen=st.seen)
+                stats.append(SourceStat(src.id, len(fresh), res.ok, res.error))
+            elif src.kind == "hf-model":
+                res = collect_hf_model(src, st, timeout=src.timeout_seconds)
+                sel = res.candidates[: src.max_items_per_source]
+                known_ext = {s.get("external_id_hash") for s in st.seen}
+                known_canon = {s.get("canonical_url_hash") for s in st.seen}
+                fresh = []
+                for c in sel:
+                    pair = (_sha256(c.external_id), _sha256(c.canonical_url))
+                    if pair[0] in known_ext or pair[1] in known_canon:
+                        continue
+                    fresh.append(c)
+                all_cands.extend(_with_cid(c) for c in fresh)
+                proposed[src.id] = SourceCheckpoint(etag=res.new_etag or st.etag,
+                                                    last_modified=st.last_modified,
+                                                    last_commit_sha=res.new_last_commit_sha or st.last_commit_sha,
+                                                    seen=st.seen)
+                stats.append(SourceStat(src.id, len(fresh), res.ok, res.error))
             else:
                 raise SafeHttpError(f"unknown source kind: {src.kind}")
         except SafeHttpError as e:
@@ -381,7 +416,10 @@ def collect_all(
         if src is None:
             enriched.append(c)
             continue
-        needs_fetch = src.kind == "html-index" or len(c.source_text.strip()) < 50
+        needs_fetch = src.kind in ("html-index", "feed", "atom") or (
+            src.kind not in ("github-releases", "github-commits", "hf-model")
+            and len(c.source_text.strip()) < 50
+        )
         if needs_fetch and not c.canonical_url.startswith("https://"):
             enriched.append(c)
             continue

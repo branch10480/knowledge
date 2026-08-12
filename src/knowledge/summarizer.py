@@ -6,7 +6,7 @@
 - 上限：候補 40、1 件 24 KiB、run 合計 512 KiB、1 件 1200 output tokens
 - stream: false 明示、finish_reason 分類（stop=通常 / length=出力上限不足）
 - エラー種別を分離：HTTP / timeout・接続 / 外側JSON破損 / 内側JSON破損 / ID不一致 / Schema違反
-- retry は timeout・接続切断のみ。Schema違反・ID不一致・JSON破損・length は再試行しない
+- retry は timeout・接続切断と、許可した空文字列の Schema 違反のみ。ID不一致・JSON破損・length は再試行しない
 - 正規化は string→[string] のみ（dict/number/boolean/null/空文字列は Schema で失敗させる）
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping, Sequence
 
-from jsonschema import validate as jsonschema_validate
+from jsonschema import Draft202012Validator, ValidationError
 
 from .models import Candidate, SummaryConfig
 
@@ -62,6 +62,38 @@ def _coerce_string_to_list(value: object) -> object:
     if isinstance(value, str):
         return [value]
     return value
+
+
+def _is_retryable_schema_violation(error: ValidationError) -> bool:
+    """量子化 LLM の一時的な空文字列だけを再試行対象にする。
+
+    型違反・必須項目不足・追加プロパティ・上限超過などは、同じ入力を
+    別シードで投げても恒久的な契約違反になりやすいため再試行しない。
+    ``path`` は出力 Schema の文字列フィールドを明示的に許可リスト化する。
+    """
+    if error.validator != "minLength" or error.validator_value != 1:
+        return False
+    if error.instance != "":
+        return False
+
+    path = tuple(error.path)
+    if path in {("title_ja",), ("summary_ja",)}:
+        return True
+    if (
+        len(path) == 2
+        and path[0] in {"key_points", "tags"}
+        and isinstance(path[1], int)
+    ):
+        return True
+    if len(path) == 3 and path[0] == "claims" and isinstance(path[1], int):
+        return path[2] == "text"
+    return (
+        len(path) == 4
+        and path[0] == "claims"
+        and isinstance(path[1], int)
+        and path[2] == "evidence_quotes"
+        and isinstance(path[3], int)
+    )
 
 
 def _repair_json(text: str) -> str:
@@ -196,9 +228,22 @@ def validate_summary_output(raw: bytes, candidate: Candidate) -> SummaryOutput:
         if isinstance(claim, dict):
             claim["evidence_quotes"] = _coerce_string_to_list(claim["evidence_quotes"])
     try:
-        jsonschema_validate(obj, _load_schema())
-    except Exception as e:  # jsonschema.ValidationError / SchemaError
+        schema = _load_schema()
+        Draft202012Validator.check_schema(schema)
+        schema_errors = list(Draft202012Validator(schema).iter_errors(obj))
+    except Exception as e:
         raise SummaryError(f"schema violation: {e}") from e
+    if schema_errors:
+        # ローカル量子化 LLM が稀に返す空文字列だけは、シード変更で
+        # 解消する可能性があるため、上限付きで再試行する。複数違反が
+        # ある場合は、全てが許可リスト内のときだけ再試行可能にする。
+        retryable = all(
+            _is_retryable_schema_violation(error) for error in schema_errors
+        )
+        error = schema_errors[0]
+        raise SummaryError(
+            f"schema violation: {error}", retryable=retryable
+        ) from error
     # HTML / 制御文字を拒否
     for field in ("title_ja", "summary_ja"):
         v = obj.get(field, "")
@@ -306,7 +351,7 @@ def summarize_candidates(
                 break
             except SummaryError as e:
                 last_err = e
-                # Schema違反・ID不一致・JSON破損・length は同じリクエストを再試行しない
+                # 許可リスト外の Schema 違反・ID不一致・JSON破損・length は再試行しない
                 if not e.retryable:
                     break
         if last_err is not None:

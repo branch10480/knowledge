@@ -24,6 +24,12 @@ def load_sources(path: Path) -> tuple[SourceConfig, ...]:
         elif kind == "github-releases":
             if not s.get("repository"):
                 raise ValueError(f"source {s['id']}: repository required for github-releases")
+        elif kind == "github-commits":
+            if not s.get("repository"):
+                raise ValueError(f"source {s['id']}: repository required for github-commits")
+        elif kind == "hf-model":
+            if not s.get("model_id"):
+                raise ValueError(f"source {s['id']}: model_id required for hf-model")
         else:
             raise ValueError(f"source {s['id']}: unknown kind {kind!r}")
         out.append(SourceConfig(
@@ -32,6 +38,7 @@ def load_sources(path: Path) -> tuple[SourceConfig, ...]:
             priority=s.get("priority", de.get("priority", 0)),
             required=s.get("required", de.get("required", False)),
             repository=s.get("repository"),
+            model_id=s.get("model_id"),
             events=tuple(s.get("events", [])),
             adapter=s.get("adapter"),
             timeout_seconds=s.get("timeout_seconds", de.get("timeout_seconds", 20)),

@@ -80,7 +80,9 @@ def prepare_transaction(
     return PreparedTransaction(data_path=data_path, checkpoint_path=cp_path, repo_root=repo_root)
 
 
-def commit_transaction(prepared: PreparedTransaction) -> str:
+def commit_transaction(
+    prepared: PreparedTransaction, *, message: str | None = None
+) -> str:
     """entries/checkpoint を data/ へ原子的に置換し、同一 commit で main へ push。"""
     data_final = prepared.repo_root / "data" / "entries.json"
     cp_final = prepared.repo_root / "data" / "checkpoint.json"
@@ -93,24 +95,45 @@ def commit_transaction(prepared: PreparedTransaction) -> str:
     if cp_final.exists():
         shutil.copyfile(cp_final, backup_cp)
 
+    committed = False
     try:
         shutil.copyfile(prepared.data_path, data_final)
         shutil.copyfile(prepared.checkpoint_path, cp_final)
-    except Exception:
-        # rollback
-        if backup_data.exists():
-            shutil.copyfile(backup_data, data_final)
-        if backup_cp.exists():
-            shutil.copyfile(backup_cp, cp_final)
-        raise RepositoryError("copy failed, rolled back")
+        # git add（対象固定）
+        _git(prepared.repo_root, "add", "--", "data/entries.json", "data/checkpoint.json")
+        msg = message or "knowledge: 収集結果とcheckpointを更新"
+        _git(prepared.repo_root, "commit", "-m", msg)
+        committed = True
+    except Exception as error:
+        # commit 前の失敗は worktree と index を開始時へ戻す。commit 後の
+        # push 失敗は下で扱い、同じ OID を再送できるよう local commit を残す。
+        if not committed:
+            if backup_data.exists():
+                shutil.copyfile(backup_data, data_final)
+            if backup_cp.exists():
+                shutil.copyfile(backup_cp, cp_final)
+            try:
+                _git(
+                    prepared.repo_root,
+                    "reset",
+                    "--",
+                    "data/entries.json",
+                    "data/checkpoint.json",
+                )
+            except RepositoryError:
+                pass
+        raise RepositoryError("transaction failed before commit; rolled back") from error
 
-    # git add（対象固定）
-    _git(prepared.repo_root, "add", "--", "data/entries.json", "data/checkpoint.json")
-    msg = "knowledge: 収集結果とcheckpointを更新"
-    _git(prepared.repo_root, "commit", "-m", msg)
-    # push origin HEAD:main
+    # push origin HEAD:main。失敗時は local commit と backup を残し、durable
+    # job reconciler が同じ OID を再送する。新しい commit は作らない。
     _git(prepared.repo_root, "push", "origin", "HEAD:main")
-    return _git(prepared.repo_root, "rev-parse", "HEAD").strip()
+    commit = _git(prepared.repo_root, "rev-parse", "HEAD").strip()
+    for backup in (backup_data, backup_cp):
+        try:
+            backup.unlink()
+        except FileNotFoundError:
+            pass
+    return commit
 
 
 def _git(repo_root: Path, *args: str) -> str:

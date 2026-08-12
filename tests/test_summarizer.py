@@ -124,6 +124,75 @@ def test_validate_rejects_non_string_scalars():
             summarizer.validate_summary_output(json.dumps(out).encode("utf-8"), _cand())
 
 
+def test_validate_schema_retry_allowlist_is_narrow():
+    empty_title = {
+        "candidate_id": "c1", "title_ja": "", "summary_ja": "s",
+        "tags": [], "insufficient_evidence": False,
+    }
+    with pytest.raises(summarizer.SummaryError) as ei:
+        summarizer.validate_summary_output(
+            json.dumps(empty_title).encode("utf-8"), _cand()
+        )
+    assert ei.value.retryable
+
+    wrong_type = {
+        "candidate_id": "c1", "title_ja": 42, "summary_ja": "s",
+        "tags": [], "insufficient_evidence": False,
+    }
+    with pytest.raises(summarizer.SummaryError) as ei:
+        summarizer.validate_summary_output(
+            json.dumps(wrong_type).encode("utf-8"), _cand()
+        )
+    assert not ei.value.retryable
+
+    mixed = {**empty_title, "summary_ja": 42}
+    with pytest.raises(summarizer.SummaryError) as ei:
+        summarizer.validate_summary_output(
+            json.dumps(mixed).encode("utf-8"), _cand()
+        )
+    assert not ei.value.retryable
+
+
+def test_validate_wraps_malformed_schema_as_non_retryable(monkeypatch):
+    monkeypatch.setattr(summarizer, "_load_schema", lambda: {"type": "bogus"})
+
+    with pytest.raises(summarizer.SummaryError) as ei:
+        summarizer.validate_summary_output(
+            json.dumps({
+                "candidate_id": "c1", "title_ja": "タイトル", "summary_ja": "要約",
+                "tags": [], "insufficient_evidence": False,
+            }).encode("utf-8"),
+            _cand(),
+        )
+
+    assert not ei.value.retryable
+    assert "schema violation" in str(ei.value)
+
+
+def test_schema_retry_is_bounded_at_max_retries():
+    class AlwaysEmptyTitle:
+        calls = 0
+
+        def chat(self, request: dict, *, seed: int | None = None) -> bytes:
+            AlwaysEmptyTitle.calls += 1
+            return json.dumps({
+                "candidate_id": "c1", "title_ja": "", "summary_ja": "s",
+                "tags": [], "insufficient_evidence": False,
+            }).encode("utf-8")
+
+    cfg = models.SummaryConfig(
+        provider="local-openai-compatible",
+        base_url="http://127.0.0.1:18080/v1",
+        model="m",
+        max_retries=2,
+    )
+    with pytest.raises(summarizer.SummaryError):
+        summarizer.summarize_candidates(
+            (_cand(),), cfg, client=AlwaysEmptyTitle()
+        )
+    assert AlwaysEmptyTitle.calls == cfg.max_retries + 1
+
+
 def test_parse_chat_response_ok_and_classification():
     # 外側JSON正常・content 正常 → bytes を返す
     ok = {"choices": [{"finish_reason": "stop",
@@ -148,7 +217,7 @@ def test_parse_chat_response_ok_and_classification():
 
 
 def test_retry_only_on_retryable_errors():
-    # Schema違反・ID不一致（非再試行）は client を 1 回だけ呼ぶ
+    # ID不一致（非再試行）は client を 1 回だけ呼ぶ
     class FailingSchema:
         calls = 0
         def chat(self, request: dict, *, seed: int | None = None) -> bytes:
@@ -161,6 +230,40 @@ def test_retry_only_on_retryable_errors():
     with pytest.raises(summarizer.SummaryError):
         summarizer.summarize_candidates((_cand(),), cfg, client=FailingSchema())
     assert FailingSchema.calls == 1  # 再試行しない
+
+    # 実際の validate_summary_output 経路で、空文字列 title_ja は retryable
+    # と判定され、シードを変えて再試行した後に成功する。
+    class EmptyTitleThenOk:
+        calls = 0
+        seeds = []
+
+        def chat(self, request: dict, *, seed: int | None = None) -> bytes:
+            EmptyTitleThenOk.calls += 1
+            EmptyTitleThenOk.seeds.append(seed)
+            payload = {
+                "candidate_id": "c1",
+                "title_ja": "" if EmptyTitleThenOk.calls == 1 else "タイトル",
+                "summary_ja": "要約",
+                "key_points": [],
+                "tags": [],
+                "claims": [],
+                "insufficient_evidence": False,
+            }
+            return json.dumps(payload).encode("utf-8")
+
+    retry_cfg = models.SummaryConfig(
+        provider="local-openai-compatible",
+        base_url="http://127.0.0.1:18080/v1",
+        model="m",
+        seed=10480,
+        max_retries=3,
+    )
+    outputs = summarizer.summarize_candidates(
+        (_cand(),), retry_cfg, client=EmptyTitleThenOk()
+    )
+    assert len(outputs) == 1
+    assert EmptyTitleThenOk.calls == 2
+    assert EmptyTitleThenOk.seeds == [10480, 10481]
 
     # timeout・接続（retryable=True）は max_retries+1 回再試行する
     class FailingTimeout:
