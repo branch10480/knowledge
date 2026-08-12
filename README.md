@@ -1,8 +1,31 @@
 # Knowledge
 
-技術情報・学習ノートを蓄積する知識ベース。GitHub Pages で公開中。
+技術情報・学習ノートを蓄積する**個人用の知識ベース**です。Apple・OpenAI・Anthropic などの公式ニュースや GitHub リポジトリのリリースを自動で収集し、ローカルの LLM で日本語に要約して、GitHub Pages に公開しています。
 
-🌐 https://branch10480.github.io/knowledge/
+> 🌐 **公開サイト（よく忘れがちな URL）**
+>
+> **https://branch10480.github.io/knowledge/**
+>
+> リポジトリ: https://github.com/branch10480/knowledge
+
+---
+
+## このリポジトリでやっていること
+
+1. **収集（collect）** — 設定済みの公式 RSS/Atom フィードと GitHub REST API から、新しい記事・リリースを決定的に取得します。LLM は使いません。
+2. **要約（summarize）** — ローカルの LLM（`deepseek-v4-flash`）が各記事を日本語で要約し、要点・タグ・根拠付きの主張を JSON で返します。
+3. **検証（validate）** — 要約が Schema 準拠か、事実が元記事に裏付けられているかを検査します。
+4. **統合（merge）** — 検証済みの要約を `data/entries.json` に追記し、収集状況を `data/checkpoint.json` に記録します。
+5. **公開（build + deploy）** — 静的 HTML サイトを生成し、GitHub Actions が検証後に `gh-pages` ブランチへデプロイします。
+
+つまり、**「毎日自動で集めて、日本語で読みやすくまとめて、Web に公開する」** パイプラインです。手動でエントリを追記することもできます。
+
+## ブランチの役割
+
+| ブランチ | 役割 |
+|---|---|
+| `main` | ソース正本（`data/`, `src/`, `config/`, `scripts/`, `schemas/`, `tests/`, `.github/`） |
+| `gh-pages` | 公開用の生成物のみ（CI が自動生成。手動 push しない） |
 
 ## 構成（Knowledge v2）
 
@@ -19,6 +42,7 @@ main ブランチ（ソース正本）
 ├── scripts/collect.sh    ← 親turnからの直接実行をexit 64で拒否する互換stub
 ├── scripts/scan-secrets.sh ← 公開前 secret scan（必須ゲート）
 ├── templates/ static/    ← Jinja2 テンプレートと静的アセット
+├── docs/                 ← cron プロンプト・永続ジョブ設計の詳細
 ├── tests/                ← pytest
 └── .github/workflows/build.yml ← 検証 + deploy（gh-pages へ完全スナップショット置換）
 
@@ -27,13 +51,21 @@ gh-pages ブランチ（生成物のみ・編集不要）
 └── すべて CI が生成。手動 push しない
 ```
 
+### 収集ソース（`config/sources.yml`）
+
+- **Apple Developer** — News / Releases（HTML インデックス）
+- **OpenAI** — 公式 RSS
+- **Anthropic** — Newsroom（HTML インデックス）
+- **Swift** — GitHub Releases（`swiftlang/swift`）
+- **ローカル AI 動画生成（Apple Silicon / mlx）** — `Blaizzy/mlx-video`, `ddalcu/mlx-serve`, `MiniMaxAI/MiniMax-H3`, `antirez/ds4`, `Wan-Video/Wan2.1`, `Lightricks/LTX-Video` のリリース・コミット
+
 ## 運用
 
 ### cron ジョブ（自動収集）
 
 Hermes Agent の cron ジョブ **Knowledge v2 収集** が毎日 9:00 JST に
-`knowledge_start({})` を1回だけ呼ぶ。完全なプロンプトは
-[`docs/cron-prompt.md`](docs/cron-prompt.md) に反映済み。
+`knowledge_start({})` を1回だけ呼びます。完全なプロンプトは
+[`docs/cron-prompt.md`](docs/cron-prompt.md) に反映済みです。
 
 ```text
 1. `knowledge_start` がLLMを使わず、allowlist済み公式RSS/Atom + GitHub REST APIから候補を収集してdurable jobへ保存
@@ -50,10 +82,10 @@ Hermes Agent の cron ジョブ **Knowledge v2 収集** が毎日 9:00 JST に
 ### Hermes の会話から収集する場合
 
 会話中の収集は、従来の `collect.sh` を親ターンから直接実行せず、
-Hermes の `knowledge_start` 専用ツールから永続ジョブを作る。collect は LLM を
-使わずに先に保存し、要約だけを共有 worker proxy の 1 slot キューへ渡す。
+Hermes の `knowledge_start` 専用ツールから永続ジョブを作ります。collect は LLM を
+使わずに先に保存し、要約だけを共有 worker proxy の 1 slot キューへ渡します。
 これにより、親ターン自身の DS4 接続を idle gate が busy と判定する自己競合を
-避けられる。
+避けられます。
 
 ```bash
 # Hermes plugin が内部で使う CLI。通常は手動実行しない
@@ -69,13 +101,14 @@ PYTHONPATH=src .venv/bin/python -m knowledge.cli job-cancel \
   --job-id <job-id> --origin-session-id <session-id>
 ```
 
-状態、候補、候補ごとの要約 receipt は `.work/jobs/<job-id>/` に原子的に保存する。
+状態、候補、候補ごとの要約 receipt は `.work/jobs/<job-id>/` に原子的に保存します。
 同じ idempotency key の再送は同じ job を返し、runner crash 後は保存済み receipt を
-再利用する。会話起点の vertical slice は検証後に `READY_FOR_PUBLISH` で止まり、
-background から commit/push しない。`knowledge.cli` の `merge --commit` と旧
-`knowledge.host_publish` は廃止した。会話公開はHermes coreが次のdirect user turnへ、
-cron公開はscheduler-proven turnへ発行したopaque one-shot capabilityを使う。
-tokenそのものは保存せず、coreはcanonical manifestの完全一致だけを1回消費する。
+再利用します。会話起点の vertical slice は検証後に `READY_FOR_PUBLISH` で止まり、
+background から commit/push しません。`knowledge.cli` の `merge --commit` と旧
+`knowledge.host_publish` は廃止しました。会話公開は Hermes core が次の direct user
+turn へ、cron 公開は scheduler-proven turn へ発行した opaque one-shot capability を
+使います。token そのものは保存せず、core は canonical manifest の完全一致だけを
+1回消費します。
 
 ```python
 knowledge.cli.publish_ready_job(
@@ -86,18 +119,10 @@ knowledge.cli.publish_ready_job(
 ```
 
 この API は READY job の開始 HEAD・生成物 digest・`origin` URL・`main`・開始時 upstream
-OID・開始時点で空の通常indexを再検証する。隔離Gitはhooksと任意config/helperを無効化し、
-root所有Nix store内の`gh` credential helperだけを固定してexact commit OIDをpushする。
-remote OID検証後は、古い値が開始時OIDと一致する場合だけ`origin/main`もCAS同期する。
-repo-wide lock と `.work/finalize-journal.json` はcanonical replace、private commit/index、
-owned `.git/index.lock`、HEAD/index promotion、push OID 検証、job completion、journal closeを
-記録する。途中停止時はsame-inode ownershipを証明できるGit artifactだけを回復し、
-検証済みbackupへのrollbackまたは同一trailer/tree/outputの同一OID reconcileだけを行う。
-
-Knowledge・Hermes core・castle pluginの契約、root所有Nix store revision bundle、startup sweep、
-real-path E2Eは実装済み。runtime反映はcastle側のpin更新と`nrs`後に有効になる。
-background completion通知はbest-effortであり、Gateway停止をまたぐ配信保証はしない。
-durable job stateと`knowledge_status`を正本にする。詳細は
+OID・開始時点で空の通常 index を再検証します。隔離 Git は hooks と任意 config/helper を
+無効化し、root 所有 Nix store 内の `gh` credential helper だけを固定して exact commit
+OID を push します。remote OID 検証後は、古い値が開始時 OID と一致する場合だけ
+`origin/main` も CAS 同期します。詳細は
 [`docs/durable-job-orchestration.md`](docs/durable-job-orchestration.md)。
 
 **禁止操作**（cron オーケストレーターがしてはならないこと）:
@@ -111,7 +136,7 @@ durable job stateと`knowledge_status`を正本にする。詳細は
 
 ### GitHub Actions（検証 + deploy）
 
-`.github/workflows/build.yml` は **main への push** と **schedule: 0 0 * * *（09:00 JST）**、**workflow_dispatch** で動作。二重収集を避けるため CI から LLM は呼ばない。
+`.github/workflows/build.yml` は **main への push** と **schedule: 0 0 * * *（09:00 JST）**、**workflow_dispatch** で動作します。二重収集を避けるため CI から LLM は呼びません。
 
 ```text
 main ブランチに push / 定期 / 手動
@@ -129,7 +154,7 @@ main ブランチに push / 定期 / 手動
 - `main` — ソース正本（data/, src/, config/, scripts/, .github/）
 - `gh-pages` — デプロイ用（CI が生成した HTML 一式のみ）
 
-cron は gh-pages に書き込まない。公開は GitHub Actions のみが担当する。
+cron は gh-pages に書き込みません。公開は GitHub Actions のみが担当します。
 
 ### 手動でエントリを追加する場合
 
@@ -145,7 +170,7 @@ git push origin HEAD:main
 # 公開は CI が gh-pages へ自動反映する
 ```
 
-### 注意事項
+## 注意事項
 
 - `data/entries.json` を直接編集しても OK。編集後は `validate-data` と `build` で検証する
 - summary / title は plain text（HTML タグ禁止）。URL は `https://` のみ、永続ID `kn_` を使用
