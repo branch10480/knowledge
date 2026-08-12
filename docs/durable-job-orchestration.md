@@ -29,7 +29,7 @@ stateDiagram-v2
     SUMMARIZING --> SUMMARIZING: candidate receipt を1件ずつ保存
     SUMMARIZING --> FINALIZING: 全 selected candidate 完了
     FINALIZING --> READY_FOR_PUBLISH: QA・secret scan 成功
-    READY_FOR_PUBLISH --> COMPLETED: user-authorized publish 成功（target）
+    READY_FOR_PUBLISH --> COMPLETED: direct user または scheduled capability
     COLLECTING --> FAILED
     WAITING_FOR_INFERENCE --> CANCELLED: cancel_requested
     SUMMARIZING --> CANCELLED: candidate 境界で停止
@@ -58,6 +58,7 @@ sequenceDiagram
     P-->>J: DS4 が空き次第応答
     J->>J: receipt・QA・publication manifest を checkpoint
     J-->>H: READY_FOR_PUBLISH を notify_on_complete
+    H->>J: 次のdirect user turnでpublish、またはcron watcherが自動publish
 ```
 
 ## 排他と責務
@@ -79,13 +80,13 @@ sequenceDiagram
 `state.json` は一時ファイルへの `fsync` と `os.replace` で更新する。最低限、次を
 保存する。
 
-- `job_id`、`idempotency_key`、origin session/turn
+- `job_id`、`idempotency_key`、origin session/turn/authority kind
 - `phase`、`created_at`、`updated_at`、`run_started_at`
-- 開始時の HEAD、checkpoint/config の SHA-256
+- 開始時の HEAD、canonical remote URL、remote main OID、checkpoint/config の SHA-256
 - candidates と summary receipt の相対 path と SHA-256
 - selected/completed candidate ID、attempt、retry 時刻
 - runner lease、`cancel_requested`
-- 最終 commit、完了通知の delivery 状態、失敗理由
+- 最終 commit、失敗理由
 
 外部由来の title、本文、モデル出力は `state.json` やログへ入れない。
 候補本文は既存の `candidates.json`、要約は candidate ごとの receipt に限定する。
@@ -115,7 +116,8 @@ defer が成立したら harness は次を必ず行う。
 - cancel: 実行中 HTTP request を強制切断せず、candidate 境界と commit 前で停止する。
 - HEAD/checkpoint drift: canonical data を上書きせず失敗させ、reconciler が新しい
   checkpoint から再収集する。
-- completion event の重複: job の completion/delivery receipt で 1 回に畳む。
+- completion通知: best-effortだけとし、再送ledgerやuser-visible exactly-onceは設けない。
+  job stateと`knowledge_status`を正本にする。
 - conversation job の検証完了: `READY_FOR_PUBLISH` で止め、background から
   commit/push しない。
 
@@ -131,48 +133,52 @@ defer が成立したら harness は次を必ず行う。
 | Hermes core | deferred tool 後に追加 LLM call なし、sibling tool は未実行 |
 | plugin | command/working directory 固定、任意引数不可、session-bound cancel |
 | real-path E2E | 一時 `HERMES_HOME` の実 plugin discovery/registry/SessionDB/runner/defer を通す |
-| completion | background 登録、再起動後 reconcile、通知重複排除 |
+| completion | background 登録、再起動後 reconcile、通知失敗でもdurable stateを保持 |
 
-## 今回の変更境界
+## 実装済み境界
 
-最初の vertical slice は、永続 state、candidate receipt、`knowledge_start/status/cancel`、
-Hermes の generic `defer_turn`、background completion、`READY_FOR_PUBLISH` までとする。
-DS4 の第 2 slot、socket-based の別 idle gate、background commit/push、モデルによる
-「後で再実行」判断は導入しない。
+DS4の第2 slot、socket-basedの別idle gate、モデルによる「後で再実行」判断は導入しない。
+実装済みの安全境界は次のとおり。
 
-現時点で永続なのは Knowledge job と summary/finalize receipt である。Hermes core の
-defer request は、tool result と固定 acknowledgement を SessionDB へ flush するまでの
-短い区間だけ process memory にある。Gateway がその区間で停止した場合は job 自体を
-`knowledge_status` で再発見できるが、親 turn の acknowledgement 再配信は未実装である。
-また、Gateway 再起動時の runner sweep と completion delivery ledger も次段の P0 とし、
-本番切替前に restart/reconcile/重複通知テストを追加する。
+1. **parent turn defer**: `knowledge_start`はLLM-free collectとrunner登録後にだけ
+   core-owned deferを要求する。harnessはtool resultと固定acknowledgementをflushし、
+   追加のLLM callなしでturnを終了する。
+2. **durable recovery**: collect success receipt、candidate/summary/finalize receipt、
+   runner lock、heartbeat、typed bounded retry、startup sweepを使う。lease時刻は診断値で、
+   runner lockを取得できたことをlivenessの根拠にする。
+3. **opaque publication capability**: Hermes coreはraw tokenを保存せずSHA-256だけを保持する。
+   coreはpluginがcanonical化したopaque bytesへだけ束縛する。pluginとKnowledgeがdirect userの
+   publication manifest、またはscheduled job IDと開始HEADのschemaを検証し、1回だけ消費する。
+4. **scheduled convenience**: cronは`knowledge_start({})`だけを呼び、READY後はin-memory
+   watcherが自動公開する。Gateway再起動でtokenを失ったREADY jobは、次回cronが新規収集
+   より先にscheduler-proven capabilityで回収する。要約途中のscheduled jobも再利用し、
+   receipt前に停止したcollectだけは元のdurable origin bindingで再収集する。
+5. **exact Git publication**: 開始時の通常indexは空を要求するがcommit内容の根拠にしない。
+   private indexとGit plumbingでcanonical 2ファイルだけのcommit objectとexact index bytesを
+   作る。private bytesのclaimをhard linkで`.git/index.lock`へ原子的に取得し、通常indexが
+   開始時digestのままか確認してからHEADをCASする。所有するlockだけをindexへrenameし、
+   promotion後に通常の`git add`が新しいindexへ置換済みなら上書きしない。lockだけ失われて
+   通常indexが開始時digestのままならclaimから標準lockを再取得してpromotionを完了する。
+   journalはexact claim digestとsame-inode証明があるartifactだけを削除する。hooks・任意Git config・任意credential
+   helperを無効化し、固定HTTPS URLへexact OIDをpushしてremote OIDを再読する。検証後の
+   `origin/main`は開始時OIDから検証済みOIDへのcompare-and-swapだけを許す。
+6. **legacy closure**: `merge --commit`、`knowledge.host_publish`、旧cron/collect shellは
+   model到達経路から除外またはexit 64。status/cancelはorigin sessionへ束縛し、pluginは
+   terminalからbundle/job API/legacy scriptを直接呼ぶ操作をblockする。
+7. **root-owned revision bundle**: castle setupはcleanなKnowledge `main == remote main`を
+   実remote OIDで検証する。full OIDのsourceとlauncherをNix storeへ追加し、pluginにはその
+   exact store pathもpinする。Hermes UIDから書けないbundleだけをallowlist環境で起動し、
+   pin後のmain子commitはcanonical data 2ファイルだけを許す。
+8. **test gates**: Knowledge全pytest、Hermes公式test wrapper、plugin contract、実plugin
+   discovery/registry/SessionDB/defer E2Eを通す。
 
-### 本番切替前の P0
+## 残る制約
 
-vertical slice を runtime へ反映する前に、次を完了させる。
-
-1. **publication authority**: background job が会話 turn の外で直接 commit/push
-   しない。既定は `READY_FOR_PUBLISH` まで進め、同じ session の次の直接 user turn
-   で exact job/HEAD/output digest に束縛した `knowledge_publish` を実行する。明示的な
-   standing consent を導入する場合も、core-owned authority claim から job 固有の
-   one-shot capability を発行し、terminal から偽造できない契約にする。
-2. **finalize journal**: repo 全体の finalize lock と durable journal を追加する。
-   canonical file の置換前、commit 後、push 検証後を記録し、SIGKILL 後は開始 HEAD と
-   job trailerを照合して rollback または同じ OID の reconcile だけを行う。
-3. **retry / sweep**: proxy の queue timeout、503、接続切断は bounded backoff 付きの
-   `WAITING_FOR_INFERENCE` へ戻す。Gateway/runner 起動時に非 terminal job を sweep し、
-   lease 切れ job だけを再開する。
-4. **delivery ledger**: completion event は event ID と delivery receipt を永続化し、
-   crash 前後の at-least-once 配送を user-visible には 1 回へ畳む。
-5. **core pin**: `defer_turn`、`halt_on_error`、direct-user authority を同時に含む Hermes
-   commit を専用 branch で検証し、castle の expected revision と同じ commit に固定する。
-6. **immutable runner boundary**: Gateway からは clean かつ revision 固定済みの Knowledge
-   package/launcher だけを実行し、継承環境を allowlist にする。mutable な checkout の
-   `src` と `.venv` を Gateway の全環境変数付きで直接実行しない。
-7. **legacy capability closure**: モデル到達可能な `merge --commit` と任意 job ID の
-   `status/cancel` を閉じる。cron publish と会話 publish はそれぞれ host-owned capability
-   へ束縛し、通常 index、remote URL、開始 remote OID を検証する。
-8. **real-path E2E**: 一時 `HERMES_HOME` で実 plugin discovery、registry dispatch、
-   SessionDB flush、host-local runner 起動、成功 defer、error 時 defer 破棄を 1 本で検証する。
-
-これらが未完了の間は setup の core contract を通さず、Gateway へ plugin を配布しない。
+- Hermes coreのdefer requestは、SessionDB flushが終わるまでprocess memoryにある。
+  その短い区間でGatewayが停止してもjobは再発見できるが、親turn acknowledgementの
+  厳密な再配信までは保証しない。
+- background completion通知はbest-effortであり、Gateway停止をまたぐ再送保証はしない。
+  durable job stateと`knowledge_status`を正本にする。
+- scheduled capabilityはprocess memoryだけに置く。Gateway停止時はjobをREADYで止め、
+  tokenをdiskへ保存せず、次回cronの新しいcore-proven authorityで回収する。
+- runtime切替はKnowledge/Hermesのcommit pinをcastleへ反映し、`nrs`を実行した後に有効になる。

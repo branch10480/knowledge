@@ -16,17 +16,24 @@ import re
 import secrets
 import stat
 import subprocess
-import sys
+import threading
+import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping
 
 from . import models
-from .summarizer import SummaryOutput
+from .summarizer import SummaryOutput, TransientInferenceError
 
 
 SCHEMA_VERSION = 1
+RUNNER_LEASE_SECONDS = 300
+RETRY_BASE_SECONDS = 5
+RETRY_MAX_SECONDS = 300
+MAX_INFERENCE_RETRIES = 8
+MAX_INFERENCE_RETRY_ELAPSED_SECONDS = 1800
+LEASE_HEARTBEAT_SECONDS = 30
 TERMINAL_PHASES = frozenset({"completed", "failed", "cancelled", "ready_for_publish"})
 ACTIVE_PHASES = frozenset({
     "collecting",
@@ -48,6 +55,20 @@ class JobAlreadyRunning(JobError):
 
 class JobCancelled(JobError):
     pass
+
+
+class RetryableInferenceError(JobError):
+    """A proxy failure which is safe to retry without changing candidates."""
+
+
+def is_retryable_inference_failure(error: BaseException) -> bool:
+    """Accept only explicit typed transient inference failures."""
+
+    return isinstance(error, (RetryableInferenceError, TransientInferenceError))
+
+
+def _retry_delay(attempt: int) -> int:
+    return min(RETRY_MAX_SECONDS, RETRY_BASE_SECONDS * (2 ** min(max(attempt - 1, 0), 6)))
 
 
 def safe_error_message(error: BaseException) -> str:
@@ -102,7 +123,15 @@ def _open_directory_without_symlinks(path: Path) -> int:
         raise JobError(f"unsafe durable directory: {absolute.name}") from error
 
 
-def _atomic_json(path: Path, value: Mapping[str, Any] | list[Any]) -> None:
+def _canonical_json_bytes(
+    value: Mapping[str, Any] | list[Any], *, sort_keys: bool = True,
+) -> bytes:
+    return (
+        json.dumps(value, ensure_ascii=False, indent=2, sort_keys=sort_keys) + "\n"
+    ).encode("utf-8")
+
+
+def _atomic_write_bytes(path: Path, payload: bytes) -> None:
     path = Path(os.path.abspath(path))
     directory_fd = _open_directory_without_symlinks(path.parent)
     temporary_name = f".{path.name}.{secrets.token_hex(12)}"
@@ -115,9 +144,8 @@ def _atomic_json(path: Path, value: Mapping[str, Any] | list[Any]) -> None:
         os.close(directory_fd)
         raise
     try:
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            json.dump(value, handle, ensure_ascii=False, indent=2, sort_keys=True)
-            handle.write("\n")
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(payload)
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(
@@ -138,6 +166,15 @@ def _atomic_json(path: Path, value: Mapping[str, Any] | list[Any]) -> None:
         except FileNotFoundError:
             pass
         os.close(directory_fd)
+
+
+def _atomic_json(
+    path: Path,
+    value: Mapping[str, Any] | list[Any],
+    *,
+    sort_keys: bool = True,
+) -> None:
+    _atomic_write_bytes(path, _canonical_json_bytes(value, sort_keys=sort_keys))
 
 
 def _read_regular_bytes(path: Path) -> bytes:
@@ -181,6 +218,24 @@ def file_sha256(path: Path) -> str:
     return _sha256_file(path)
 
 
+def read_regular_bytes(path: Path) -> bytes:
+    """Read one regular, single-link file without following symlinks."""
+
+    return _read_regular_bytes(path)
+
+
+def write_json_file(path: Path, value: Mapping[str, Any] | list[Any]) -> None:
+    """Write canonical durable JSON with fsync + atomic replace."""
+
+    _atomic_json(path, value, sort_keys=False)
+
+
+def write_bytes_file(path: Path, payload: bytes) -> None:
+    """Write already-canonical bytes with fsync + atomic replace."""
+
+    _atomic_write_bytes(path, payload)
+
+
 def _absolute_without_symlinks(path: Path) -> Path:
     absolute = Path(os.path.abspath(path))
     current = Path(absolute.anchor)
@@ -215,16 +270,36 @@ def _open_lock_file(path: Path):
 
 
 def _git_head(repo_root: Path) -> str:
-    result = subprocess.run(
-        ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
-        capture_output=True,
-        text=True,
-        timeout=10,
-        check=False,
-    )
-    if result.returncode != 0:
-        raise JobError("could not resolve repository HEAD")
-    return result.stdout.strip()
+    from . import repository
+
+    try:
+        return repository._git(repo_root, "rev-parse", "HEAD").strip()
+    except repository.RepositoryError as error:
+        raise JobError("could not resolve repository HEAD") from error
+
+
+def _git_remote_url(repo_root: Path) -> str:
+    from . import repository
+
+    try:
+        url = repository._git(repo_root, "remote", "get-url", "origin").strip()
+    except repository.RepositoryError as error:
+        raise JobError("could not resolve canonical repository remote URL") from error
+    if not url:
+        raise JobError("could not resolve canonical repository remote URL")
+    return url
+
+
+def _git_remote_oid(repo_root: Path) -> str:
+    from . import repository
+
+    try:
+        oid = repository._remote_oid(repo_root, _git_remote_url(repo_root), "main")
+    except repository.RepositoryError as error:
+        raise JobError("could not resolve starting remote OID") from error
+    if not oid:
+        raise JobError("could not resolve starting remote OID")
+    return oid
 
 
 def _assert_start_snapshot_unchanged(repo_root: Path, state: Mapping[str, Any]) -> None:
@@ -233,6 +308,8 @@ def _assert_start_snapshot_unchanged(repo_root: Path, state: Mapping[str, Any]) 
         ("checkpoint_sha256", _sha256_file(repo_root / "data/checkpoint.json")),
         ("sources_config_sha256", _sha256_file(repo_root / "config/sources.yml")),
         ("summary_config_sha256", _sha256_file(repo_root / "config/summary.yml")),
+        ("canonical_remote_url", _git_remote_url(repo_root)),
+        ("starting_remote_oid", _git_remote_oid(repo_root)),
     )
     for field, current in checks:
         if state.get(field) != current:
@@ -249,6 +326,38 @@ def _validate_idempotency_key(key: str) -> str:
     if not isinstance(key, str) or not _IDEMPOTENCY_KEY.fullmatch(key):
         raise JobError("invalid idempotency key")
     return key
+
+
+def validate_publication_manifest(publication: Mapping[str, Any]) -> None:
+    """Validate the exact canonical capability binding shape."""
+
+    if set(publication) != {
+        "schema_version",
+        "kind",
+        "job_id",
+        "starting_head",
+        "merged_sha256",
+        "checkpoint_output_sha256",
+        "candidates_sha256",
+        "summaries_sha256",
+    }:
+        raise JobError("publication manifest contract is invalid")
+    if (
+        publication.get("schema_version") != 1
+        or publication.get("kind") != "knowledge-publication"
+        or _JOB_ID.fullmatch(str(publication.get("job_id", ""))) is None
+        or re.fullmatch(r"[0-9a-f]{40}", str(publication.get("starting_head", "")))
+        is None
+    ):
+        raise JobError("publication manifest identity is invalid")
+    for field in (
+        "merged_sha256",
+        "checkpoint_output_sha256",
+        "candidates_sha256",
+        "summaries_sha256",
+    ):
+        if re.fullmatch(r"sha256:[0-9a-f]{64}", str(publication.get(field, ""))) is None:
+            raise JobError("publication manifest digest is invalid")
 
 
 def _receipt_name(candidate_id: str) -> str:
@@ -279,6 +388,66 @@ def _summary_json(
         "claims": list(summary.claims),
         "insufficient_evidence": summary.insufficient_evidence,
     }
+
+
+def _collected_candidate_metadata(candidate_data: Any) -> tuple[list[str], list[str]]:
+    candidates = candidate_data.get("candidates") if isinstance(candidate_data, dict) else None
+    selected = candidate_data.get("selected_candidate_ids") if isinstance(candidate_data, dict) else None
+    if not isinstance(candidates, list) or not isinstance(selected, list):
+        raise JobError("collect output does not satisfy the durable job contract")
+    candidate_ids = [
+        item.get("candidate_id") for item in candidates if isinstance(item, dict)
+    ]
+    if len(candidate_ids) != len(candidates) or any(
+        not isinstance(item, str) or not item for item in candidate_ids
+    ):
+        raise JobError("collect output contains an invalid candidate id")
+    if any(not isinstance(item, str) or not item for item in selected):
+        raise JobError("collect output contains an invalid selected candidate id")
+    if not set(selected).issubset(set(candidate_ids)):
+        raise JobError("selected candidates are not present in collect output")
+    return candidate_ids, selected
+
+
+def _write_collect_receipt(
+    *, job_dir: Path, job_id: str, run_started_at: str, candidates_sha256: str,
+) -> dict[str, Any]:
+    """Persist proof that collect returned success for this exact payload."""
+
+    receipt = {
+        "schema_version": SCHEMA_VERSION,
+        "job_id": _validate_job_id(job_id),
+        "run_started_at": run_started_at,
+        "candidates_sha256": candidates_sha256,
+        "status": "succeeded",
+        "written_at": utcnow(),
+    }
+    _atomic_json(job_dir / "collect-receipt.json", receipt)
+    return receipt
+
+
+def _validated_collect_receipt(
+    *, job_dir: Path, state: Mapping[str, Any], candidates_sha256: str,
+) -> dict[str, Any]:
+    receipt = _read_json(job_dir / "collect-receipt.json")
+    if not isinstance(receipt, dict) or set(receipt) != {
+        "schema_version",
+        "job_id",
+        "run_started_at",
+        "candidates_sha256",
+        "status",
+        "written_at",
+    }:
+        raise JobError("collect receipt contract is invalid")
+    if (
+        receipt.get("schema_version") != SCHEMA_VERSION
+        or receipt.get("job_id") != state.get("job_id")
+        or receipt.get("run_started_at") != state.get("run_started_at")
+        or receipt.get("candidates_sha256") != candidates_sha256
+        or receipt.get("status") != "succeeded"
+    ):
+        raise JobError("collect receipt identity mismatch")
+    return receipt
 
 
 class JobStore:
@@ -344,6 +513,15 @@ class JobStore:
         paths = sorted(self.root.glob("job_*/state.json"), reverse=True)
         return self.load(paths[0].parent.name) if paths else None
 
+    def all_states(self) -> Iterator[dict[str, Any]]:
+        if not self.root.exists():
+            return
+        for state_path in sorted(self.root.glob("job_*/state.json")):
+            try:
+                yield self.load(state_path.parent.name)
+            except JobError:
+                continue
+
     @contextmanager
     def start_lock(self) -> Iterator[None]:
         self.root.mkdir(parents=True, exist_ok=True)
@@ -386,16 +564,29 @@ def prepare_job(
     collect: Callable[[Path, str], int],
     origin_session_id: str = "",
     origin_turn_id: str = "",
+    origin_authority_kind: str = "direct_user",
     run_started_at: str | None = None,
+    canonical_remote_url: str | None = None,
+    starting_head: str | None = None,
+    starting_remote_oid: str | None = None,
 ) -> tuple[dict[str, Any], bool]:
     """Create/reuse a job and persist collect output without checking DS4."""
 
     idempotency_key = _validate_idempotency_key(idempotency_key)
+    if origin_authority_kind not in {"direct_user", "scheduled"}:
+        raise JobError("invalid origin authority kind")
     run_started_at = run_started_at or utcnow()
     with store.start_lock():
         existing = store.find_by_idempotency_key(idempotency_key)
         reused = existing is not None
         if existing is not None:
+            if any((
+                existing.get("origin_session_id") != origin_session_id,
+                existing.get("origin_turn_id") != origin_turn_id,
+                existing.get("origin_authority_kind", "direct_user")
+                != origin_authority_kind,
+            )):
+                raise JobError("idempotency key origin binding mismatch")
             recoverable_collect = existing.get("phase") == "collecting" or (
                 existing.get("phase") == "failed"
                 and not existing.get("candidates_sha256")
@@ -426,10 +617,13 @@ def prepare_job(
                 "idempotency_key": idempotency_key,
                 "origin_session_id": origin_session_id,
                 "origin_turn_id": origin_turn_id,
+                "origin_authority_kind": origin_authority_kind,
                 "phase": "collecting",
                 "created_at": utcnow(),
                 "run_started_at": run_started_at,
-                "starting_head": _git_head(repo_root),
+                "starting_head": starting_head or _git_head(repo_root),
+                "canonical_remote_url": canonical_remote_url or _git_remote_url(repo_root),
+                "starting_remote_oid": starting_remote_oid or _git_remote_oid(repo_root),
                 "checkpoint_sha256": _sha256_file(repo_root / "data/checkpoint.json"),
                 "sources_config_sha256": _sha256_file(repo_root / "config/sources.yml"),
                 "summary_config_sha256": _sha256_file(repo_root / "config/summary.yml"),
@@ -439,9 +633,13 @@ def prepare_job(
                 "attempts": 0,
                 "cancel_requested": False,
                 "runner_pid": None,
+                "runner_lease": None,
+                "retry_at_epoch": 0,
+                "inference_retry_count": 0,
+                "inference_retry_started_at_epoch": None,
                 "error": None,
                 "result": None,
-                "delivery": {"status": "pending"},
+                "completion_event_id": None,
             })
 
         candidates_path = store.job_dir(state["job_id"]) / "candidates.json"
@@ -450,37 +648,23 @@ def prepare_job(
             if status != 0:
                 raise JobError(f"collect failed with status {status}")
             candidate_data = _read_json(candidates_path)
-            candidates = (
-                candidate_data.get("candidates")
-                if isinstance(candidate_data, dict)
-                else None
-            )
-            selected = (
-                candidate_data.get("selected_candidate_ids")
-                if isinstance(candidate_data, dict)
-                else None
-            )
-            if not isinstance(candidates, list) or not isinstance(selected, list):
-                raise JobError("collect output does not satisfy the durable job contract")
-            candidate_ids = [
-                item.get("candidate_id")
-                for item in candidates
-                if isinstance(item, dict)
-            ]
-            if any(not isinstance(item, str) or not item for item in candidate_ids):
-                raise JobError("collect output contains an invalid candidate id")
-            if any(not isinstance(item, str) or not item for item in selected):
-                raise JobError("collect output contains an invalid selected candidate id")
-            if not set(selected).issubset(set(candidate_ids)):
-                raise JobError("selected candidates are not present in collect output")
+            candidate_ids, selected = _collected_candidate_metadata(candidate_data)
             # The collector may use an ordinary write. Re-persist its validated
             # payload with the same fsync + replace contract as state.json
             # before advertising waiting_for_inference.
-            _atomic_json(candidates_path, candidate_data)
+            candidate_bytes = _canonical_json_bytes(candidate_data)
+            _atomic_write_bytes(candidates_path, candidate_bytes)
+            candidates_sha256 = "sha256:" + hashlib.sha256(candidate_bytes).hexdigest()
+            _write_collect_receipt(
+                job_dir=store.job_dir(state["job_id"]),
+                job_id=state["job_id"],
+                run_started_at=run_started_at,
+                candidates_sha256=candidates_sha256,
+            )
             state = store.update(
                 state["job_id"],
                 phase="waiting_for_inference",
-                candidates_sha256=_sha256_file(candidates_path),
+                candidates_sha256=candidates_sha256,
                 candidate_ids=candidate_ids,
                 selected_candidate_ids=selected,
             )
@@ -492,31 +676,6 @@ def prepare_job(
                 error=_error_record(error),
             )
             raise
-
-
-def spawn_job_runner(*, repo_root: Path, store: JobStore, job_id: str) -> int:
-    """Start a detached runner for non-Hermes callers.
-
-    Hermes' plugin uses its managed background process registry instead so the
-    originating session receives ``notify_on_complete``.
-    """
-
-    job_id = _validate_job_id(job_id)
-    log_path = store.job_dir(job_id) / "runner.log"
-    environment = os.environ.copy()
-    environment["PYTHONPATH"] = str(repo_root / "src")
-    with log_path.open("ab", buffering=0) as log:
-        process = subprocess.Popen(
-            [sys.executable, "-m", "knowledge.cli", "job-run", "--job-id", job_id],
-            cwd=repo_root,
-            env=environment,
-            stdin=subprocess.DEVNULL,
-            stdout=log,
-            stderr=subprocess.STDOUT,
-            start_new_session=True,
-        )
-    store.update(job_id, runner_pid=process.pid)
-    return process.pid
 
 
 def cancel_job(*, store: JobStore, job_id: str) -> dict[str, Any]:
@@ -538,6 +697,128 @@ def write_finalize_receipt(
     }
     _atomic_json(job_dir / "finalize-receipt.json", receipt)
     return receipt
+
+
+def _completion_event_id(state: Mapping[str, Any]) -> str:
+    payload = {
+        "job_id": state["job_id"],
+        "phase": state.get("phase"),
+        "result": state.get("result"),
+        "schema_version": SCHEMA_VERSION,
+    }
+    material = json.dumps(
+        payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    return "completion_" + hashlib.sha256(material).hexdigest()[:24]
+
+
+def sweep_jobs(*, store: JobStore, now: float | None = None) -> list[str]:
+    """Return jobs whose runner process is proven gone.
+
+    The timestamp lease is advisory.  A long DS4 request may outlive it, so an
+    active phase is changed only while this sweeper owns that job's nonblocking
+    runner lock.  A live runner keeps the lock for inference, retry sleep, and
+    finalization, closing the sweep-versus-inference race.
+    """
+
+    now = time.time() if now is None else now
+    resumable: list[str] = []
+    for snapshot in store.all_states() or ():
+        if snapshot.get("phase") not in ACTIVE_PHASES:
+            continue
+        try:
+            with store.runner_lock(snapshot["job_id"]):
+                state = store.load(snapshot["job_id"])
+                phase = state.get("phase")
+                if phase not in ACTIVE_PHASES:
+                    continue
+                if phase == "collecting":
+                    job_dir = store.job_dir(state["job_id"])
+                    candidates_path = job_dir / "candidates.json"
+                    receipt_path = job_dir / "collect-receipt.json"
+                    if not candidates_path.exists() or not receipt_path.exists():
+                        continue
+                    candidate_data = _read_json(candidates_path)
+                    candidate_ids, selected = _collected_candidate_metadata(candidate_data)
+                    candidate_bytes = _canonical_json_bytes(candidate_data)
+                    _atomic_write_bytes(candidates_path, candidate_bytes)
+                    candidates_sha256 = (
+                        "sha256:" + hashlib.sha256(candidate_bytes).hexdigest()
+                    )
+                    _validated_collect_receipt(
+                        job_dir=job_dir,
+                        state=state,
+                        candidates_sha256=candidates_sha256,
+                    )
+                    recovered = store.update(
+                        state["job_id"],
+                        phase="waiting_for_inference",
+                        candidates_sha256=candidates_sha256,
+                        candidate_ids=candidate_ids,
+                        selected_candidate_ids=selected,
+                        runner_pid=None,
+                        runner_lease=None,
+                        retry_at_epoch=now,
+                        error=None,
+                    )
+                    resumable.append(recovered["job_id"])
+                    continue
+                if phase == "waiting_for_inference":
+                    # Owning runner.lock proves that no process is waiting for
+                    # retry_at_epoch. Start a replacement now; run_job sleeps
+                    # until the recorded retry boundary when necessary.
+                    resumable.append(state["job_id"])
+                    continue
+                # runner.lock is the authoritative liveness proof. Timestamp
+                # leases are diagnostics only and may survive a hard crash.
+                store.update(
+                    state["job_id"], phase="waiting_for_inference", runner_pid=None,
+                    runner_lease=None, retry_at_epoch=now, error=None,
+                )
+                resumable.append(state["job_id"])
+        except JobAlreadyRunning:
+            continue
+        except JobError:
+            # One corrupt/partial job must not prevent recovery of every other
+            # durable job. The original state remains fail-closed for an
+            # idempotent start or bounded manual diagnosis.
+            continue
+    return resumable
+
+
+@contextmanager
+def _runner_lease_heartbeat(
+    *, store: JobStore, job_id: str, interval: float, now: Callable[[], float],
+) -> Iterator[None]:
+    """Refresh the durable lease independently while the DS4 call blocks."""
+
+    stopped = threading.Event()
+
+    def heartbeat() -> None:
+        while not stopped.wait(interval):
+            try:
+                state = store.load(job_id)
+                if state.get("phase") != "summarizing":
+                    return
+                store.update(
+                    job_id,
+                    runner_lease={
+                        "owner_pid": os.getpid(),
+                        "expires_at": now() + RUNNER_LEASE_SECONDS,
+                    },
+                )
+            except JobError:
+                return
+
+    thread = threading.Thread(
+        target=heartbeat, name=f"knowledge-lease-{job_id}", daemon=True,
+    )
+    thread.start()
+    try:
+        yield
+    finally:
+        stopped.set()
+        thread.join(timeout=max(interval * 2, 1))
 
 
 def read_finalize_receipt(
@@ -565,10 +846,12 @@ def _validate_ready_for_publish_result(
     """Recompute every READY manifest digest before trusting a receipt."""
 
     expected = {
+        "job_id": state.get("job_id"),
         "starting_head": state.get("starting_head"),
         "candidates_sha256": _sha256_file(job_dir / "final-candidates.json"),
         "summaries_sha256": _sha256_file(job_dir / "summaries.json"),
         "merged_sha256": _sha256_file(job_dir / "merged.json"),
+        "checkpoint_output_sha256": _sha256_file(job_dir / "checkpoint.json"),
     }
     for field, value in expected.items():
         if not isinstance(result.get(field), str) or result.get(field) != value:
@@ -581,6 +864,11 @@ def run_job(
     job_id: str,
     summarize_one: Callable[[models.Candidate], SummaryOutput],
     finalize: Callable[[Path], Mapping[str, Any]],
+    sleep: Callable[[float], None] = time.sleep,
+    now: Callable[[], float] = time.time,
+    max_inference_retries: int = MAX_INFERENCE_RETRIES,
+    max_retry_elapsed_seconds: float = MAX_INFERENCE_RETRY_ELAPSED_SECONDS,
+    heartbeat_interval: float = LEASE_HEARTBEAT_SECONDS,
 ) -> dict[str, Any]:
     """Resume one job from durable receipts and finalize it transactionally."""
 
@@ -589,11 +877,18 @@ def run_job(
         state = store.load(job_id)
         if state.get("phase") in {"completed", "cancelled", "ready_for_publish"}:
             return state
+        current_time = now()
+        retry_at = float(state.get("retry_at_epoch", 0))
+        if state.get("phase") == "waiting_for_inference" and retry_at > current_time:
+            sleep(retry_at - current_time)
+            current_time = now()
         state = store.update(
             job_id,
             phase="summarizing",
             attempts=int(state.get("attempts", 0)) + 1,
             runner_pid=os.getpid(),
+            retry_at_epoch=0,
+            runner_lease={"owner_pid": os.getpid(), "expires_at": current_time + RUNNER_LEASE_SECONDS},
             error=None,
         )
         job_dir = store.job_dir(job_id)
@@ -633,13 +928,69 @@ def run_job(
             for candidate_id in selected:
                 state = store.load(job_id)
                 if state.get("cancel_requested"):
-                    return store.update(job_id, phase="cancelled", runner_pid=None)
+                    return store.update(
+                        job_id, phase="cancelled", runner_pid=None,
+                        runner_lease=None, retry_at_epoch=0, error=None,
+                    )
                 if candidate_id in completed:
                     continue
                 candidate = candidates.get(candidate_id)
                 if candidate is None:
                     raise JobError("selected candidate is missing")
-                summary = summarize_one(candidate)
+                while True:
+                    try:
+                        with _runner_lease_heartbeat(
+                            store=store, job_id=job_id,
+                            interval=heartbeat_interval, now=now,
+                        ):
+                            summary = summarize_one(candidate)
+                        break
+                    except Exception as error:
+                        if not is_retryable_inference_failure(error):
+                            raise
+                        current = store.load(job_id)
+                        retries = int(current.get("inference_retry_count", 0)) + 1
+                        retry_started = current.get("inference_retry_started_at_epoch")
+                        if retry_started is None:
+                            retry_started = now()
+                        elapsed = now() - float(retry_started)
+                        delay = _retry_delay(retries)
+                        if (
+                            retries > max_inference_retries
+                            or elapsed + delay > max_retry_elapsed_seconds
+                        ):
+                            raise JobError("inference retry limit exceeded") from error
+                        retry_at = now() + delay
+                        store.update(
+                            job_id,
+                            phase="waiting_for_inference",
+                            runner_pid=os.getpid(),
+                            runner_lease={
+                                "owner_pid": os.getpid(),
+                                "expires_at": retry_at + RUNNER_LEASE_SECONDS,
+                            },
+                            inference_retry_count=retries,
+                            inference_retry_started_at_epoch=retry_started,
+                            retry_at_epoch=retry_at,
+                            error=_error_record(error),
+                        )
+                        sleep(delay)
+                        current = store.load(job_id)
+                        if current.get("cancel_requested"):
+                            return store.update(
+                                job_id, phase="cancelled", runner_pid=None,
+                                runner_lease=None, retry_at_epoch=0, error=None,
+                            )
+                        store.update(
+                            job_id,
+                            phase="summarizing",
+                            retry_at_epoch=0,
+                            runner_lease={
+                                "owner_pid": os.getpid(),
+                                "expires_at": now() + RUNNER_LEASE_SECONDS,
+                            },
+                            error=None,
+                        )
                 if summary.candidate_id != candidate_id:
                     raise JobError("summary candidate id mismatch")
                 _atomic_json(
@@ -655,7 +1006,10 @@ def run_job(
 
             state = store.load(job_id)
             if state.get("cancel_requested"):
-                return store.update(job_id, phase="cancelled", runner_pid=None)
+                return store.update(
+                    job_id, phase="cancelled", runner_pid=None,
+                    runner_lease=None, retry_at_epoch=0, error=None,
+                )
 
             summaries = [
                 _read_json(receipts_dir / _receipt_name(candidate_id))
@@ -723,7 +1077,9 @@ def run_job(
                 job_id,
                 phase=terminal_phase,
                 runner_pid=None,
+                runner_lease=None,
                 result=result,
+                completion_event_id=_completion_event_id({**state, "phase": terminal_phase, "result": result}),
                 error=None,
             )
         except JobCancelled:
@@ -731,6 +1087,7 @@ def run_job(
                 job_id,
                 phase="cancelled",
                 runner_pid=None,
+                runner_lease=None,
                 error=None,
             )
         except Exception as error:
@@ -738,6 +1095,7 @@ def run_job(
                 job_id,
                 phase="failed",
                 runner_pid=None,
+                runner_lease=None,
                 error=_error_record(error),
             )
             raise
@@ -749,14 +1107,23 @@ __all__ = [
     "JobCancelled",
     "JobError",
     "JobStore",
+    "RUNNER_LEASE_SECONDS",
+    "MAX_INFERENCE_RETRIES",
+    "MAX_INFERENCE_RETRY_ELAPSED_SECONDS",
+    "RetryableInferenceError",
     "TERMINAL_PHASES",
     "cancel_job",
     "file_sha256",
+    "read_regular_bytes",
+    "write_json_file",
+    "write_bytes_file",
     "prepare_job",
+    "is_retryable_inference_failure",
+    "validate_publication_manifest",
     "read_finalize_receipt",
     "run_job",
     "safe_error_message",
-    "spawn_job_runner",
+    "sweep_jobs",
     "utcnow",
     "write_finalize_receipt",
 ]

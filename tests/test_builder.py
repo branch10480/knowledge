@@ -2,7 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 
-from knowledge import builder, models
+from knowledge import builder, cli, models
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEMPLATES = REPO_ROOT / "templates"
@@ -110,3 +110,12 @@ def test_embedded_index_data_is_parseable_json(tmp_path):
     )
     assert match is not None
     assert len(json.loads(match.group(1))) == 3
+
+
+def test_check_build_rejects_artifact_changed_after_manifest(tmp_path):
+    doc = models.EntriesDocument(2, _entries(3))
+    out = tmp_path / "out"
+    _build(doc, out, "2026-08-03T00:00:00Z")
+    (out / "index.html").write_text("tampered", encoding="utf-8")
+
+    assert cli._check_document(doc, dist_dir=out) == 1

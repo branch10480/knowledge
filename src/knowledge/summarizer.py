@@ -35,6 +35,13 @@ class SummaryError(Exception):
         self.retryable = retryable
 
 
+class TransientInferenceError(SummaryError):
+    """Typed local inference transport/availability failure."""
+
+    def __init__(self, message: str):
+        super().__init__(message, retryable=True)
+
+
 @dataclass(frozen=True)
 class SummaryOutput:
     candidate_id: str
@@ -317,9 +324,11 @@ class RestrictedLlmClient:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 body_bytes = resp.read()
         except urllib.error.HTTPError as e:
+            if e.code in {408, 429, 500, 502, 503, 504}:
+                raise TransientInferenceError(f"llm http {e.code}") from e
             raise SummaryError(f"llm http {e.code}") from e
         except (urllib.error.URLError, socket.timeout, TimeoutError) as e:
-            raise SummaryError("llm timeout/connect", retryable=True) from e
+            raise TransientInferenceError("llm timeout/connect") from e
         return _parse_chat_response(body_bytes)
 
 
@@ -355,5 +364,9 @@ def summarize_candidates(
                 if not e.retryable:
                     break
         if last_err is not None:
+            if isinstance(last_err, TransientInferenceError):
+                raise TransientInferenceError(
+                    f"summary failed for {c.candidate_id}: {last_err}"
+                ) from last_err
             raise SummaryError(f"summary failed for {c.candidate_id}: {last_err}")
     return out

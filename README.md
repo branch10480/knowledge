@@ -15,8 +15,8 @@ main ブランチ（ソース正本）
 ├── config/sources.yml    ← source allowlist（公式 RSS/Atom + GitHub API、LLM 不使用）
 ├── config/summary.yml    ← 要約 LLM の固定 provider/model
 ├── schemas/              ← entry / entries / checkpoint / summary-output の JSON Schema
-├── scripts/cron-collect.sh ← cron entrypoint（exit 75だけ最大4回・10分間隔で再試行）
-├── scripts/collect.sh    ← 1 attempt 分の収集パイプライン本体
+├── scripts/cron-collect.sh ← 旧shell cronをexit 64で拒否する互換stub
+├── scripts/collect.sh    ← 親turnからの直接実行をexit 64で拒否する互換stub
 ├── scripts/scan-secrets.sh ← 公開前 secret scan（必須ゲート）
 ├── templates/ static/    ← Jinja2 テンプレートと静的アセット
 ├── tests/                ← pytest
@@ -31,18 +31,20 @@ gh-pages ブランチ（生成物のみ・編集不要）
 
 ### cron ジョブ（自動収集）
 
-Hermes Agent の cron ジョブ **Knowledge v2 収集** が毎日 9:00 JST に `./scripts/cron-collect.sh` を実行する。完全なプロンプトは [`docs/cron-prompt.md`](docs/cron-prompt.md) に反映済み。
+Hermes Agent の cron ジョブ **Knowledge v2 収集** が毎日 9:00 JST に
+`knowledge_start({})` を1回だけ呼ぶ。完全なプロンプトは
+[`docs/cron-prompt.md`](docs/cron-prompt.md) に反映済み。
 
 ```text
-1. process lock を取得し、DS4 が busy ならデータと checkpoint を変えず終了コード 75。lock を解放して10分後に再試行（最大4回・最大30分待機）
-2. allowlist済み公式RSS/Atom + GitHub REST APIから(previous, T0]の候補を決定的に収集
-3. 排他 lock 中は専用 alias だけを共有 proxy へ通し、固定 LLM で Schema 準拠要約
+1. `knowledge_start` がLLMを使わず、allowlist済み公式RSS/Atom + GitHub REST APIから候補を収集してdurable jobへ保存
+2. 親turnは固定acknowledgementで終了し、managed runnerだけが共有1-slot queueを待つ
+3. 固定LLMで候補を1件ずつSchema準拠要約し、各receiptを永続化
 4. HTTPS / Schema / HTML禁止 / factual gateを検証
 5. temp directoryでentriesとcheckpointを準備 → atomic replace
 6. clean build、Atom、内部リンク、件数、重複、pytest、git diff --checkを検証
 7. scripts/scan-secrets.shを実行（必須ゲート）
-8. 成功時だけdata/entries.jsonとdata/checkpoint.jsonを同一commitでgit push origin HEAD:main
-9. Signal + Telegramに短い結果を通知
+8. Hermes coreがcron turnへ発行したjob/開始HEAD束縛のone-shot capabilityで、成功時だけ2ファイルを同一commitにしてmainへpush
+9. Gateway再起動でwatcherを失ったREADY jobは、次回cronが新規収集より先に回収・公開
 ```
 
 ### Hermes の会話から収集する場合
@@ -58,17 +60,44 @@ Hermes の `knowledge_start` 専用ツールから永続ジョブを作る。col
 PYTHONPATH=src .venv/bin/python -m knowledge.cli job-start \
   --idempotency-key hermes:<session-turn-digest> \
   --origin-session-id <session-id> \
-  --origin-turn-id <turn-id>
+  --origin-turn-id <turn-id> \
+  --origin-authority-kind direct_user
 
-PYTHONPATH=src .venv/bin/python -m knowledge.cli job-status --job-id <job-id>
-PYTHONPATH=src .venv/bin/python -m knowledge.cli job-cancel --job-id <job-id>
+PYTHONPATH=src .venv/bin/python -m knowledge.cli job-status \
+  --job-id <job-id> --origin-session-id <session-id>
+PYTHONPATH=src .venv/bin/python -m knowledge.cli job-cancel \
+  --job-id <job-id> --origin-session-id <session-id>
 ```
 
 状態、候補、候補ごとの要約 receipt は `.work/jobs/<job-id>/` に原子的に保存する。
 同じ idempotency key の再送は同じ job を返し、runner crash 後は保存済み receipt を
 再利用する。会話起点の vertical slice は検証後に `READY_FOR_PUBLISH` で止まり、
-background から commit/push しない。job 固有の publication authority を使う公開経路は
-本番切替前の P0 である。詳細は
+background から commit/push しない。`knowledge.cli` の `merge --commit` と旧
+`knowledge.host_publish` は廃止した。会話公開はHermes coreが次のdirect user turnへ、
+cron公開はscheduler-proven turnへ発行したopaque one-shot capabilityを使う。
+tokenそのものは保存せず、coreはcanonical manifestの完全一致だけを1回消費する。
+
+```python
+knowledge.cli.publish_ready_job(
+    job_id=job_id,
+    capability=core_owned_capability,
+    authority_binding=plugin_validated_exact_binding,
+)
+```
+
+この API は READY job の開始 HEAD・生成物 digest・`origin` URL・`main`・開始時 upstream
+OID・開始時点で空の通常indexを再検証する。隔離Gitはhooksと任意config/helperを無効化し、
+root所有Nix store内の`gh` credential helperだけを固定してexact commit OIDをpushする。
+remote OID検証後は、古い値が開始時OIDと一致する場合だけ`origin/main`もCAS同期する。
+repo-wide lock と `.work/finalize-journal.json` はcanonical replace、private commit/index、
+owned `.git/index.lock`、HEAD/index promotion、push OID 検証、job completion、journal closeを
+記録する。途中停止時はsame-inode ownershipを証明できるGit artifactだけを回復し、
+検証済みbackupへのrollbackまたは同一trailer/tree/outputの同一OID reconcileだけを行う。
+
+Knowledge・Hermes core・castle pluginの契約、root所有Nix store revision bundle、startup sweep、
+real-path E2Eは実装済み。runtime反映はcastle側のpin更新と`nrs`後に有効になる。
+background completion通知はbest-effortであり、Gateway停止をまたぐ配信保証はしない。
+durable job stateと`knowledge_status`を正本にする。詳細は
 [`docs/durable-job-orchestration.md`](docs/durable-job-orchestration.md)。
 
 **禁止操作**（cron オーケストレーターがしてはならないこと）:
@@ -121,5 +150,5 @@ git push origin HEAD:main
 - `data/entries.json` を直接編集しても OK。編集後は `validate-data` と `build` で検証する
 - summary / title は plain text（HTML タグ禁止）。URL は `https://` のみ、永続ID `kn_` を使用
 - タグは小文字推奨（`apple`, `ios`, `swift`, `ai`, `openai`, `anthropic`, `security` など）
-- cron は `cron-collect.sh`、1 attempt の収集は `collect.sh` が担当し、Web 検索や全 ghq 走査はしない
+- cronと会話は`knowledge_start`だけを使う。旧`cron-collect.sh` / `collect.sh`はexit 64でfail closedする
 - 会話起点は `knowledge_start` と永続ジョブを使い、親ターンから `collect.sh` を直接実行しない

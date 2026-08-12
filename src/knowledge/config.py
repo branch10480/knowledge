@@ -12,8 +12,8 @@ def _defaults(d: Mapping[str, Any]) -> Mapping[str, Any]:
     return d.get("defaults", {}) or {}
 
 
-def load_sources(path: Path) -> tuple[SourceConfig, ...]:
-    raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+def parse_sources(payload: str) -> tuple[SourceConfig, ...]:
+    raw = yaml.safe_load(payload) or {}
     de = _defaults(raw)
     out: list[SourceConfig] = []
     for s in raw.get("sources", []) or []:
@@ -52,8 +52,12 @@ def load_sources(path: Path) -> tuple[SourceConfig, ...]:
     return tuple(out)
 
 
-def load_summary(path: Path) -> SummaryConfig:
-    d = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+def load_sources(path: Path) -> tuple[SourceConfig, ...]:
+    return parse_sources(path.read_text(encoding="utf-8"))
+
+
+def parse_summary(payload: str) -> SummaryConfig:
+    d = yaml.safe_load(payload) or {}
     return SummaryConfig(
         provider=d.get("provider", "local-openai-compatible"),
         base_url=d.get("base_url", "http://127.0.0.1:18082/v1"),
@@ -69,3 +73,7 @@ def load_summary(path: Path) -> SummaryConfig:
         request_timeout_seconds=d.get("request_timeout_seconds", 120),
         max_retries=d.get("max_retries", 2),
     )
+
+
+def load_summary(path: Path) -> SummaryConfig:
+    return parse_summary(path.read_text(encoding="utf-8"))
